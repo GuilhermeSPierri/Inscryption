@@ -1,0 +1,1 @@
+LARGE_FONT = ("VERDANA", 12)
