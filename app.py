@@ -13,6 +13,9 @@ class ControllerApp(tk.Tk):
 
         container.pack(side="top", fill="both", expand=True)
 
+        self.title('Inscryption')
+        self.geometry('1920x1080')
+
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
 
