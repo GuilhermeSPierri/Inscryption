@@ -1,9 +1,10 @@
 import tkinter as tk
 from fonts.font import *
+from button import Button
 
 class DeckPage(tk.Frame):
 
-    def __init__(self, parent, controller, show_startPage):
+    def __init__(self, parent, controller):
         super().__init__(parent)
         label = tk.Label(self, text="Criador de Deck", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
@@ -13,25 +14,15 @@ class DeckPage(tk.Frame):
         entry = tk.Entry(master = self, textvariable=cardName)
         entry.pack()
 
-        searchCardButton = tk.Button(
-            self,
-            text="Procurar carta", 
-            command = lambda: print(entry.get())
-            )
+        searchCardButton = Button(self, "Procurar carta", "searchCard", controller, (entry, ))
         
         searchCardButton.pack()
 
-        addCardButton = tk.Button(
-            self,
-            text="Adicionar carta ao Deck", 
-            )
+        addCardButton = Button(self, "Adicionar carta ao Deck", "addCardToDeck", controller)
         
         addCardButton.pack()
 
-        startPageButton = tk.Button(
-            self,
-            text="Voltar ao Menu", 
-            command=show_startPage)
+        startPageButton = Button(self, "Voltar ao Menu", "show_frame", controller, ("StartPage", ))
         
         startPageButton.pack()
 
@@ -43,13 +34,8 @@ class DeckPage(tk.Frame):
                 self, 
                 text=card, 
                 variable=checkVar, 
-                command=lambda card=card, var=checkVar: self.on_check(var, card) # card = card and var = checkVar freezes the variable with the value of each iteration, without this on_check function would use only the value of the last iteration(card5) to test
+                command=lambda card=card, var=checkVar: controller.on_check(var, card) # card = card and var = checkVar freezes the variable with the value of each iteration, without this on_check function would use only the value of the last iteration(card5) to test
             )
             check.pack()
 
-    def buttonSearch(self, entry):
-        print(entry.get())
-
-    def on_check(self, var, card):
-        state = var.get()
-        print(f"{card} is {'selected' if state else 'deselected'}")
+    

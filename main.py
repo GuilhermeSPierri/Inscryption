@@ -1,5 +1,5 @@
 import tkinter as tk
-from app import ControllerApp
+from controller import Controller
 
-app = ControllerApp()
+app = Controller()
 app.mainloop()

@@ -4,7 +4,7 @@ from frames.gamePage import GamePage
 from frames.deckPage import DeckPage
 from fonts.font import *
 
-class ControllerApp(tk.Tk):
+class Controller(tk.Tk):
 
     def __init__(self, *args, **kwargs):
 
@@ -24,18 +24,20 @@ class ControllerApp(tk.Tk):
         pages = [StartPage, GamePage, DeckPage] # Add a new page here
 
         for page in pages:
-            if page == StartPage:
-                frame = page(container, self, lambda: self.show_frame(GamePage), lambda: self.show_frame(DeckPage)) 
-            elif page == GamePage or page == DeckPage:
-                frame = page(container, self, lambda: self.show_frame(StartPage))
-            
-            self.frames[page] = frame  
+            frame = page(container, self)
+            self.frames[page.__name__] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
+        self.show_frame("StartPage")
 
+    def show_frame(self, page_name):
+        frame = self.frames.get(page_name)
+        if frame:
+            frame.tkraise()
 
-        self.show_frame(StartPage)
+    def searchCard(self, entry):
+        print(entry.get())
 
-    def show_frame(self, cont):
-        frame = self.frames[cont]
-        frame.tkraise()
+    def on_check(self, var, card):
+        state = var.get()
+        print(f"{card} is {'selected' if state else 'deselected'}")
