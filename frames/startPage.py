@@ -15,7 +15,7 @@ class StartPage(tk.Frame):
         label.pack(pady=10) #possivel substituir por grid
         
         
-        gameButton = Button(self, "Jogar", "show_frame", controller, ("GamePage", ))
+        gameButton = Button(self, "Iniciar Partida", "show_frame", controller, ("GamePage", ))
 
         gameButton.pack(pady=5)
 
