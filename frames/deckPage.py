@@ -14,11 +14,11 @@ class DeckPage(tk.Frame):
         entry = tk.Entry(master = self, textvariable=cardName)
         entry.pack()
 
-        searchCardButton = Button(self, "Procurar carta", "searchCard", controller, (entry, ))
+        searchCardButton = Button(self, "Procurar carta", "search_card", controller, (entry, ))
         
         searchCardButton.pack()
 
-        addCardButton = Button(self, "Adicionar carta ao Deck", "addCardToDeck", controller)
+        addCardButton = Button(self, "Adicionar carta ao Deck", "add_card_to_deck", controller)
         
         addCardButton.pack()
 
