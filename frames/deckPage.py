@@ -9,32 +9,32 @@ class DeckPage(tk.Frame):
         label = tk.Label(self, text="Criador de Deck", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
 
-        cardName = tk.StringVar()
+        card_name = tk.StringVar()
 
-        entry = tk.Entry(master = self, textvariable=cardName)
+        entry = tk.Entry(master = self, textvariable=card_name)
         entry.pack()
 
-        searchCardButton = Button(self, "Procurar carta", "search_card", controller, (entry, ))
+        search_card_button = Button(self, "Procurar carta", "search_card", controller, (entry, ))
         
-        searchCardButton.pack()
+        search_card_button.pack()
 
-        addCardButton = Button(self, "Adicionar carta ao Deck", "add_card_to_deck", controller)
+        add_card_button = Button(self, "Adicionar carta ao Deck", "add_card_to_deck", controller)
         
-        addCardButton.pack()
+        add_card_button.pack()
 
-        startPageButton = Button(self, "Voltar ao Menu", "show_frame", controller, ("StartPage", ))
+        start_page_button = Button(self, "Voltar ao Menu", "show_frame", controller, ("StartPage", ))
         
-        startPageButton.pack()
+        start_page_button.pack()
 
-        namesOfCards = ['card1', 'card2', 'card3', 'card4', 'card5']
+        names_of_cards = ['card1', 'card2', 'card3', 'card4', 'card5']
 
-        for card in namesOfCards:
-            checkVar = tk.IntVar()
+        for card in names_of_cards:
+            check_var = tk.IntVar()
             check = tk.Checkbutton(
                 self, 
                 text=card, 
-                variable=checkVar, 
-                command=lambda card=card, var=checkVar: controller.on_check(var, card) # card = card and var = checkVar freezes the variable with the value of each iteration, without this on_check function would use only the value of the last iteration(card5) to test
+                variable=check_var, 
+                command=lambda card=card, var=check_var: controller.on_check(var, card) # card = card and var = check_var freezes the variable with the value of each iteration, without this on_check function would use only the value of the last iteration(card5) to test
             )
             check.pack()
 

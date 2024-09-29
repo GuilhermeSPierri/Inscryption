@@ -10,9 +10,13 @@ class GamePage(tk.Frame):
 
         self.selected_card = None
         self.occupied_slots = [[False for _ in range(4)] for _ in range(3)]
+        self.occupied_slots_hand = [[False for _ in range(3)] for _ in range(3)]
 
         start_page_button = Button(self, "Voltar ao Menu", "show_frame", controller, ("StartPage", ))
         start_page_button.place(relx=0.90, rely=0.05, relwidth=0.05, relheight=0.05)
+
+        buy_card_button = Button(self, "Comprar Carta", "buy_card_interface", controller)
+        buy_card_button.place(relx=0.90, rely=0.95, relwidth=0.05, relheight=0.05)
 
         container_hand = tk.Frame(self, bg="lightgrey", relief=tk.RAISED, borderwidth=2)
         container_hand.place(relx=0.05, rely=0.05, relwidth=0.30, relheight=0.90)
@@ -30,67 +34,9 @@ class GamePage(tk.Frame):
 
         self.cards_hand_containers = [[]]
         self.cards_field_containers = [[]]
-        self.create_hand_UI(container_hand)
-        self.create_field_UI(container_field)
+        controller.create_hand_UI(self, container_hand)
+        controller.create_field_UI(self, container_field)
 
-    def create_hand_UI(self, container):
-        for row in range(3):
-            for col in range(3):
-                container_card = tk.LabelFrame(container, text=f"Container {row} {col}", padx=10, pady=10)
-                container_card.grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
-                
-                label = tk.Label(container_card, text=f"Item {row * 3 + col + 1}")
-                label.pack(padx=5, pady=5)
+    
 
-                container_card.bind("<Button-1>", lambda e, r=row, c=col: self.select_card(r, c))
-
-                if len(self.cards_hand_containers) <= row:
-                    self.cards_hand_containers.append([])
-                self.cards_hand_containers[row].append(container_card)
-
-    def create_field_UI(self, container):
-        for row in range(3):
-            if row == 1:
-                self.cards_field_containers.append([])
-                continue
-            for col in range(4):
-
-                container_card = tk.LabelFrame(container, text=f"Container {row} {col}", padx=10, pady=10)
-                container_card.grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
-
-                label = tk.Label(container_card, text=f"Item {row * 3 + col + 1}")
-                label.pack(padx=5, pady=5)
-
-                if len(self.cards_field_containers) <= row:
-                    self.cards_field_containers.append([])
-                self.cards_field_containers[row].append(container_card)
-
-                container_card.bind("<Button-1>", lambda e, r=row, c=col: self.transfer_card(r, c))
-
-    def select_card(self, row, col):
-        if self.selected_card:
-            prev_row, prev_col = self.selected_card
-            self.cards_hand_containers[prev_row][prev_col].config(bg="SystemButtonFace")
-
-        self.cards_hand_containers[row][col].config(bg="yellow")
-        self.selected_card = (row, col)
-
-    def transfer_card(self, row, col):
-        if self.selected_card:
-            if self.occupied_slots[row][col]:
-                return
-
-            hand_row, hand_col = self.selected_card
-
-            card = self.cards_hand_containers[hand_row][hand_col]
-
-            field_card = tk.LabelFrame(self.cards_field_containers[row][col], text=card.cget("text"), padx=10, pady=10)
-            field_card.pack(fill="both", expand=True)
-
-            card.grid_forget()
-            self.cards_hand_containers[hand_row][hand_col].config(bg="SystemButtonFace")
-            self.selected_card = None
-
-            self.occupied_slots[row][col] = True
-
-            field_card.bind("<Button-1>", lambda e: None)
+    

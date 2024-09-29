@@ -14,17 +14,17 @@ class StartPage(tk.Frame):
         label = tk.Label(self, text="Inscryption", font=LARGE_FONT)
         label.place(relx=0.5, rely=0.4, anchor="center")
         
-        gameButton = Button(self, "Iniciar Partida", "show_frame", controller, ("GamePage", ))
+        game_button = Button(self, "Iniciar Partida", "show_frame", controller, ("GamePage", ))
 
-        gameButton.place(relx=0.5, rely=0.6, anchor="center")
+        game_button.place(relx=0.5, rely=0.6, anchor="center")
 
-        deckButton = Button(self, "Criar Deck", "show_frame", controller, ("DeckPage", ))
+        deck_button = Button(self, "Criar Deck", "show_frame", controller, ("DeckPage", ))
 
-        deckButton.place(relx=0.5, rely=0.7, anchor="center")
+        deck_button.place(relx=0.5, rely=0.7, anchor="center")
 
-        exitButton = Button(self, "Sair do Jogo", "exit_game", controller)
+        exit_button = Button(self, "Sair do Jogo", "exit_game", controller)
 
-        exitButton.place(relx=0.5, rely=0.8, anchor="center")
+        exit_button.place(relx=0.5, rely=0.8, anchor="center")
 
     def set_background(self, image_path):
         image = Image.open(image_path)
