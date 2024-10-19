@@ -1,6 +1,6 @@
 import tkinter as tk
 from fonts.font import *
-from button import Button
+from widgets.button import Button
 from frames.page import Page
 
 class DeckPage(Page):

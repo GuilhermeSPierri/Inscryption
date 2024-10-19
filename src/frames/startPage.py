@@ -1,7 +1,7 @@
 import tkinter as tk
 from fonts.font import *
-from button import Button
-from config import *
+from widgets.button import Button
+from config.config import *
 from frames.page import Page
 
 class StartPage(Page):
