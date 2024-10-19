@@ -2,34 +2,20 @@ import tkinter as tk
 from fonts.font import *
 from button import Button
 from config import *
-from PIL import Image, ImageTk
+from frames.page import Page
 
-class StartPage(tk.Frame):
+class StartPage(Page):
 
-    def __init__(self, parent, controller):
-        super().__init__(parent)
-        
-        #self.set_background("images/backgroundMenu.jpg")
-
+    def create_widgets(self):
         label = tk.Label(self, text="Inscryption", font=LARGE_FONT)
         label.place(relx=0.5, rely=0.4, anchor="center")
-        
-        game_button = Button(self, "Iniciar Partida", "show_frame", controller, ("GamePage", ))
 
+        game_button = Button(self, "Iniciar Partida", "show_frame", self.controller, ("GamePage", ))
         game_button.place(relx=0.5, rely=0.6, anchor="center")
 
-        deck_button = Button(self, "Criar Deck", "show_frame", controller, ("DeckPage", ))
-
+        deck_button = Button(self, "Criar Deck", "show_frame", self.controller, ("DeckPage", ))
         deck_button.place(relx=0.5, rely=0.7, anchor="center")
 
-        exit_button = Button(self, "Sair do Jogo", "exit_game", controller)
-
+        exit_button = Button(self, "Sair do Jogo", "exit_game", self.controller)
         exit_button.place(relx=0.5, rely=0.8, anchor="center")
 
-    def set_background(self, image_path):
-        image = Image.open(image_path)
-        image = image.resize((self.winfo_screenwidth(), self.winfo_screenheight()), Image.LANCZOS)
-        self.background_image = ImageTk.PhotoImage(image)
-
-        background_label = tk.Label(self, image=self.background_image)
-        background_label.place(relwidth=1, relheight=1)
