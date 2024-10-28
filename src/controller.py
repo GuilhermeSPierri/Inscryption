@@ -154,8 +154,19 @@ class Controller(tk.Tk, DogPlayerInterface):
         # colocar a carta no campo
         pass
 
+
     def buy_card_interface(self):
         messagebox.showinfo("Inscryption", "Voce comprou uma carta")
+
+    def skip_turn(self):
+        match_status = self.dog_server_interface.proxy.get_status()
+        if match_status == 2:
+            self.receive_withdrawal_notification()
+            self.show_frame("StartPage")
+        else:
+            pass
+
+        
 
     
     ######### Logic for the deck page #########
@@ -178,6 +189,10 @@ class Controller(tk.Tk, DogPlayerInterface):
 
     ######### Logic for the player #########
 
+    def invoke_card(self, card):
+        # invocar a carta
+        pass
+
     ######### Logic for the dog #########
 
     def start_match(self): 
@@ -194,7 +209,12 @@ class Controller(tk.Tk, DogPlayerInterface):
             self.show_frame("GamePage")
 
     def receive_withdrawal_notification(self):
+        self.dog_server_interface.proxy.get_status()
         messagebox.showinfo(message="O oponente desistiu da partida")
+        self.show_frame("StartPage")
+
+    def make_withdrawal(self):
+        self.dog_server_interface.make_withdrawal()
         self.show_frame("StartPage")
         
 

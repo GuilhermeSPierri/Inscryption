@@ -20,10 +20,13 @@ class GamePage(Page):
         start_page_button.place(relx=0.90, rely=0.05, relwidth=0.05, relheight=0.05)
 
         buy_card_button = Button(self, "Comprar Carta", "buy_card_interface", self.controller)
-        buy_card_button.place(relx=0.90, rely=0.95, relwidth=0.05, relheight=0.05)
+        buy_card_button.place(relx=0.90, rely=0.70, relwidth=0.05, relheight=0.05)
 
         buy_squirrel_button = Button(self, "Comprar Esquilo", "buy_card_interface", self.controller)
-        buy_squirrel_button.place(relx=0.90, rely=0.95, relwidth=0.05, relheight=0.05)
+        buy_squirrel_button.place(relx=0.90, rely=0.80, relwidth=0.05, relheight=0.05)
+
+        skip_turn_button = Button(self, "Pular Turno", "skip_turn", self.controller)
+        skip_turn_button.place(relx=0.90, rely=0.50, relwidth=0.05, relheight=0.05)
 
         container_hand = tk.Frame(self, bg="lightgrey", relief=tk.RAISED, borderwidth=2)
         container_hand.place(relx=0.05, rely=0.05, relwidth=0.30, relheight=0.90)
