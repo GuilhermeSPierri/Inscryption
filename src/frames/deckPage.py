@@ -2,8 +2,13 @@ import tkinter as tk
 from fonts.font import *
 from widgets.button import Button
 from frames.page import Page
+from library.library import Library  # Import the Library class
 
 class DeckPage(Page):
+
+    def __init__(self, *args, **kwargs):
+        self.library = Library()  # Instantiate the Library class
+        super().__init__(*args, **kwargs)
 
     def create_widgets(self):
         label = tk.Label(self, text="Criador de Deck", font=LARGE_FONT)
@@ -13,24 +18,14 @@ class DeckPage(Page):
         entry = tk.Entry(master=self, textvariable=card_name)
         entry.pack()
 
-        search_card_button = Button(self, "Procurar carta", "search_card", self.controller, (entry,))
-        search_card_button.pack()
-
-        add_card_button = Button(self, "Adicionar carta ao Deck", "add_card_to_deck", self.controller)
-        add_card_button.pack()
-
         start_page_button = Button(self, "Voltar ao Menu", "show_frame", self.controller, ("StartPage", ))
         start_page_button.pack()
 
-        names_of_cards = ['card1', 'card2', 'card3', 'card4', 'card5']
-        for card in names_of_cards:
-            check_var = tk.IntVar()
-            check = tk.Checkbutton(
-                self,
-                text=card,
-                variable=check_var,
-                command=lambda card=card, var=check_var: self.controller.on_check(var, card)
-            )
-            check.pack()
-
+        # Retrieve cards from the library
     
+        cards = self.library.cards_model
+
+        # Create a button for each card in the cards_model dictionary
+        for card_id, card in cards.items():
+            add_card_button = Button(self, card.name, "card_action", self.controller, (card_id,))
+            add_card_button.pack()

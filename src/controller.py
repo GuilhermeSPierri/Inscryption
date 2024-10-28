@@ -1,77 +1,35 @@
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import simpledialog
 from frames.startPage import StartPage  
 from frames.gamePage import GamePage  
 from frames.deckPage import DeckPage
 from fonts.font import *
+from dog.dog_interface import DogPlayerInterface
+from dog.dog_actor import DogActor
 
-class Controller(tk.Tk):
+class Controller(tk.Tk, DogPlayerInterface):
 
     def __init__(self, *args, **kwargs):
 
         super().__init__(*args, **kwargs)
-        container = tk.Frame(self)
-
-        container.pack(side="top", fill="both", expand=True)
-
+        
         self.title('Inscryption')
         self.geometry('1920x1080')
         self.fullscreen = True
         self.bind("<F11>", self.toggle_fullscreen)
-        
-        #self.bind("<Escape>", self.end_fullscreen)
-
-        #self.overrideredirect(True)
-    
-        container.grid_rowconfigure(0, weight=1)
-        container.grid_columnconfigure(0, weight=1)
-
         self.frames = {}
-
-        pages = [StartPage, GamePage, DeckPage] # Add a new page here
-
-        for page in pages:
-            frame = page(container, self)
-            self.frames[page.__name__] = frame
-            frame.grid(row=0, column=0, sticky="nsew")
-
+        self.pages = [StartPage, GamePage, DeckPage] # Add a new page here
+        self.fill_page()
         self.show_frame("StartPage")
+        player_name = simpledialog.askstring(title="Player identification", prompt="Qual o seu nome")
+        self.dog_server_interface = DogActor()
+        message = self.dog_server_interface.initialize(player_name, self)
+        messagebox.showinfo(message=message)
+        
 
-    def show_frame(self, page_name):
-        frame = self.frames.get(page_name)
-        if frame:
-            frame.tkraise()
 
-    def search_card(self, entry):
-        print(entry.get())
-
-    def on_check(self, var, card):
-        state = var.get()
-        print(f"{card} is {'selected' if state else 'deselected'}")
-
-    def toggle_fullscreen(self, event=None):
-        self.fullscreen = not self.fullscreen
-        if self.fullscreen:
-           #self.overrideredirect(True)
-            self.attributes("-fullscreen", True)
-        else:
-            #self.overrideredirect(False)
-            self.attributes("-fullscreen", False)
-        return "break"
-    
-    def end_fullscreen(self, event=None):
-        self.fullscreen = False
-        self.attributes("-fullscreen", False)
-        return "break"
-    
-    def exit_game(self):
-        self.quit()
-
-    #def create_container_place(self):
-    #    pass
-
-    def buy_card_interface(self):
-        messagebox.showinfo("Inscryption", "Voce comprou uma carta")
+    ######### Create UI #########
 
     def create_container_grid(self, parent, text, padx, pady, row, col, textLabel):
         container = tk.LabelFrame(parent, text=text, padx=padx, pady=pady)
@@ -81,7 +39,7 @@ class Controller(tk.Tk):
         label.pack(padx=5, pady=5)
 
         return container
-
+    
     def create_hand_UI(self, page, container):
         for row in range(3):
             for col in range(3):
@@ -106,7 +64,46 @@ class Controller(tk.Tk):
                     page.cards_field_containers.append([])
                 page.cards_field_containers[row].append(container_card)
 
-                
+    ######### Logic for all the pages #########
+
+    def fill_page(self):
+        container = tk.Frame(self)
+        container.pack(side="top", fill="both", expand=True)
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+        for page in self.pages:
+            frame = page(container, self)
+            self.frames[page.__name__] = frame
+            frame.grid(row=0, column=0, sticky="nsew")
+
+    def toggle_fullscreen(self, event=None):
+        self.fullscreen = not self.fullscreen
+        if self.fullscreen:
+           #self.overrideredirect(True)
+            self.attributes("-fullscreen", True)
+        else:
+            #self.overrideredirect(False)
+            self.attributes("-fullscreen", False)
+        return "break"
+    
+    def end_fullscreen(self, event=None):
+        self.fullscreen = False
+        self.attributes("-fullscreen", False)
+        return "break"
+    
+    
+
+    ######### Logic for the start page #########
+
+    def show_frame(self, page_name):
+        frame = self.frames.get(page_name)
+        if frame:
+            frame.tkraise()
+
+    def exit_game(self):
+        self.quit()
+
+    ######### Logic for the game page #########
 
     def select_card(self, page, row, col):
         if page.selected_card:
@@ -115,6 +112,7 @@ class Controller(tk.Tk):
 
         page.cards_hand_containers[row][col].config(bg="yellow")
         page.selected_card = (row, col)
+
 
     def transfer_card(self, page, row, col):
         if page.selected_card:
@@ -135,3 +133,70 @@ class Controller(tk.Tk):
             page.occupied_slots[row][col] = True
 
             field_card.bind("<Button-1>", lambda e: None)
+
+    def buy_deck_card(self):
+        # comprar uma carta
+        pass
+
+    def buy_squirrel_card(self):
+        # comprar um esquilo
+        pass
+
+    def update_gui(self):
+        # atualizar a interface grafica
+        pass
+
+    def verify_card_cost(self):
+        # verificar o custo da carta
+        pass
+
+    def place_card(self, card, pos):
+        # colocar a carta no campo
+        pass
+
+    def buy_card_interface(self):
+        messagebox.showinfo("Inscryption", "Voce comprou uma carta")
+
+    
+    ######### Logic for the deck page #########
+
+    def add_card_to_deck(self, id):
+        # checar se o deck ja nao esta cheio
+        pass
+
+    def remove_card_from_deck(self, id):
+        # checar se o deck ja nao esta vazio
+        pass
+
+    def show_deck(self):
+        # mostrar o deck
+        pass
+
+    def get_number_cards_local_deck(self):
+        # retornar o numero de cartas no deck local
+        pass
+
+    ######### Logic for the player #########
+
+    ######### Logic for the dog #########
+
+    def start_match(self): 
+        start_status = self.dog_server_interface.start_match(2)
+        message = start_status.get_message()
+        messagebox.showinfo(message=message)
+        if message == "Partida iniciada":
+            self.show_frame("GamePage")
+
+    def receive_start(self, start_status):
+        message = start_status.get_message()
+        messagebox.showinfo(message=message)
+        if message == "Partida iniciada":
+            self.show_frame("GamePage")
+
+    def receive_withdrawal_notification(self):
+        messagebox.showinfo(message="O oponente desistiu da partida")
+        self.show_frame("StartPage")
+        
+
+    
+
