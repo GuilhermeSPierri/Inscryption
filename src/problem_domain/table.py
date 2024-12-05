@@ -15,7 +15,7 @@ class Table:
         self._scale = Scale()
         self._squirrel_deck = None # TODO: Define the type of this attribute
         self._buy_tokens = 0  # int
-        self.game_status = "waiting"  # string
+        self._game_status = "waiting"  # string
 
     # Methods
     def get_match_status(self) -> int:
