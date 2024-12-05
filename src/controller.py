@@ -7,22 +7,18 @@ from frames.deckPage import DeckPage
 from fonts.font import *
 from dog.dog_interface import DogPlayerInterface
 from dog.dog_actor import DogActor
+from problem_domain.library.library import Library
+from problem_domain.table import Table
 
-class Controller(tk.Tk, DogPlayerInterface):
+class Controller(DogPlayerInterface):
 
     def __init__(self, *args, **kwargs):
-
         super().__init__(*args, **kwargs)
-        
-        self.title('Inscryption')
-        self.geometry('1920x1080')
-        self.fullscreen = True
-        self.bind("<F11>", self.toggle_fullscreen)
+        self.library = Library()
         self.frames = {}
+        self.table = Table()
         self.pages = [StartPage, GamePage, DeckPage] # Add a new page here
-        self.fill_page()
-        self.show_frame("StartPage")
-        player_name = simpledialog.askstring(title="Player identification", prompt="Qual o seu nome")
+        player_name = simpledialog.askstring(title="Player identification", prompt="Qual o seu nome?")
         self.dog_server_interface = DogActor()
         message = self.dog_server_interface.initialize(player_name, self)
         messagebox.showinfo(message=message)
@@ -56,7 +52,6 @@ class Controller(tk.Tk, DogPlayerInterface):
                 page.cards_field_containers.append([])
                 continue
             for col in range(4):
-
                 container_card = self.create_container_grid(container, f"Container {row} {col}", 10, 10, row, col, f"Item {row * 3 + col + 1}")
                 container_card.bind("<Button-1>", lambda e, r=row, c=col: self.transfer_card(page, r, c))
 
@@ -64,10 +59,118 @@ class Controller(tk.Tk, DogPlayerInterface):
                     page.cards_field_containers.append([])
                 page.cards_field_containers[row].append(container_card)
 
+    def create_deck_page_UI(self, page):
+        # Get all cards and deck information
+        all_cards_dict = self.get_all_cards()
+        print(all_cards_dict)
+        deck_info = self.get_deck_info()
+        print(deck_info)
+
+        # Convert dictionaries to lists for iteration
+        all_cards_list = list(all_cards_dict.items())
+        deck_cards_list = list(deck_info.items())
+
+        left_container = tk.Frame(page, bg="lightgrey", relief=tk.RAISED, borderwidth=2)
+        left_container.place(relx=0.05, rely=0.05, relwidth=0.30, relheight=0.90)
+
+        for i in range(3):
+            left_container.grid_columnconfigure(i, weight=1)
+            left_container.grid_rowconfigure(i, weight=1)
+
+        # Create the label for all cards on the left
+        for row in range(3):
+            for col in range(3):
+                index = row * 3 + col
+                
+                if index < len(all_cards_list):
+                    card_id, card_object = all_cards_list[index]
+                    card_name = card_object.name  # Assuming the CardObject has a `name` attribute
+                    
+                    # Create container with card name
+                    left_container_card = self.create_container_grid(
+                        left_container, 
+                        f"Card: {card_name}", 
+                        10, 
+                        10, 
+                        row, 
+                        col, 
+                        f"Card: {card_name}"
+                    )
+                    left_container_card.bind("<Button-1>", lambda e, r=row, c=col: self.select_card(page, r, c))
+
+                    if len(page.all_cards_containers) <= row:
+                        page.all_cards_containers.append([])
+                    page.all_cards_containers[row].append(left_container_card)
+                else:
+                    # Empty placeholder
+                    placeholder = self.create_container_grid(left_container, "Empty", 10, 10, row, col, "Empty")
+                    if len(page.all_cards_containers) <= row:
+                        page.all_cards_containers.append([])
+                    page.all_cards_containers[row].append(placeholder)
+
+        right_container = tk.Frame(page, bg="lightgrey", relief=tk.RAISED, borderwidth=2)
+        right_container.place(relx=0.65, rely=0.05, relwidth=0.30, relheight=0.90)
+
+        for i in range(3):
+            right_container.grid_columnconfigure(i, weight=1)
+            right_container.grid_rowconfigure(i, weight=1)
+
+        # Create the label for deck cards on the right
+        for row in range(3):
+            for col in range(3):
+                index = row * 3 + col
+                
+                if index < len(deck_cards_list):
+                    card_id, card_object = deck_cards_list[index]
+                    card_name = card_object.name  # Assuming the CardObject has a `name` attribute
+                    
+                    # Create container with card name
+                    right_container_card = self.create_container_grid(
+                        right_container, 
+                        f"Deck Card: {card_name}", 
+                        10, 
+                        10, 
+                        row, 
+                        col,  # Offset the column to the right side
+                        f"Deck Card: {card_name}"
+                    )
+                    right_container_card.bind("<Button-1>", lambda e, r=row, c=col: self.select_card(page, r, c))
+
+                    if len(page.my_deck_containers) <= row:
+                        page.my_deck_containers.append([])
+                    page.my_deck_containers[row].append(right_container_card)
+                else:
+                    # Empty placeholder
+                    placeholder = self.create_container_grid(right_container, "Empty", 10, 10, row, col + 4, "Empty")
+                    if len(page.my_deck_containers) <= row:
+                        page.my_deck_containers.append([])
+                    page.my_deck_containers[row].append(placeholder)
+
+
+
+    
+    def get_all_cards(self):
+        return self.library.get_all_cards()
+    
+    def get_deck_info(self):
+        """
+        Return a dictionary containing the deck information.
+
+        :return: Dictionary with structure {id: CardObject}
+        """
+        deck = self.table._local_player.get_deck()
+        return {idx: card for idx, card in enumerate(deck.get_card_list())}
+
+                
     ######### Logic for all the pages #########
 
-    def fill_page(self):
-        container = tk.Frame(self)
+    def end_fullscreen(self, event=None):
+        self.fullscreen = False
+        self.attributes("-fullscreen", False)
+        return "break"
+    
+    def fill_pages(self, main_window):
+        container = tk.Frame(main_window)
         container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
@@ -75,30 +178,18 @@ class Controller(tk.Tk, DogPlayerInterface):
             frame = page(container, self)
             self.frames[page.__name__] = frame
             frame.grid(row=0, column=0, sticky="nsew")
-
-    def toggle_fullscreen(self, event=None):
-        self.fullscreen = not self.fullscreen
-        if self.fullscreen:
-           #self.overrideredirect(True)
-            self.attributes("-fullscreen", True)
-        else:
-            #self.overrideredirect(False)
-            self.attributes("-fullscreen", False)
-        return "break"
     
-    def end_fullscreen(self, event=None):
-        self.fullscreen = False
-        self.attributes("-fullscreen", False)
-        return "break"
-    
-    
-
     ######### Logic for the start page #########
 
     def show_frame(self, page_name):
-        frame = self.frames.get(page_name)
+        frame = self.get_frame(page_name)
         if frame:
             frame.tkraise()
+        else:
+            messagebox.showerror("Error", f"Page {page_name} not found")
+
+    def get_frame(self, page_name):
+        return self.frames.get(page_name)
 
     def exit_game(self):
         self.quit()
@@ -171,11 +262,11 @@ class Controller(tk.Tk, DogPlayerInterface):
     
     ######### Logic for the deck page #########
 
-    def add_card_to_deck(self, id):
+    def add_card_to_interface(self, id):
         # checar se o deck ja nao esta cheio
         pass
 
-    def remove_card_from_deck(self, id):
+    def remove_card_from_interface(self, id):
         # checar se o deck ja nao esta vazio
         pass
 
@@ -192,6 +283,9 @@ class Controller(tk.Tk, DogPlayerInterface):
     def invoke_card(self, card):
         # invocar a carta
         pass
+
+    def get_card_by_id(self, id):
+        return self.library.get_card(id)
 
     ######### Logic for the dog #########
 

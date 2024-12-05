@@ -1,4 +1,4 @@
-from cards.card import Card
+from problem_domain.cards.card import Card
 
 class SacrificeCard(Card):
 

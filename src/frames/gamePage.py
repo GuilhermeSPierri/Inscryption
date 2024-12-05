@@ -39,8 +39,10 @@ class GamePage(Page):
             container_hand.grid_rowconfigure(i, weight=1)
 
             container_field.grid_rowconfigure(i, weight=1)
+
         for j in range(4):
             container_field.grid_columnconfigure(j, weight=1)
+            
 
         self.cards_hand_containers = [[]]
         self.cards_field_containers = [[]]

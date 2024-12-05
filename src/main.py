@@ -1,4 +1,3 @@
-from controller import Controller
+from playerInterface import PlayerInterface
 
-app = Controller()
-app.mainloop()
+PlayerInterface()

@@ -1,7 +1,7 @@
-from cards.card import *
-from cards.boneCard import *
-from cards.sacrificeCard import *
-from cards.squirrelCard import *
+from problem_domain.cards.card import Card
+from problem_domain.cards.boneCard import BoneCard
+from problem_domain.cards.sacrificeCard import SacrificeCard
+from problem_domain.cards.squirrelCard import SquirrelCard
 
 class Library():
 
@@ -25,6 +25,12 @@ class Library():
         try:
             del self.cards_model[id]
             self.pointer_id -= 1
+        except Exception as e:
+            print(f"Error: {e}")
+
+    def get_all_cards(self):
+        try:
+            return self.cards_model
         except Exception as e:
             print(f"Error: {e}")
 
