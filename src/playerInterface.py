@@ -30,5 +30,70 @@ class PlayerInterface(DogPlayerInterface):
         else:
             self.main_window.attributes("-fullscreen", False)
         return "break"
-    
-    
+
+    # Métodos adicionados
+    def receive_withdraw(self): 
+        pass
+
+    def update_gui(self, game_state: dict): 
+        pass
+
+    def start_match(self): 
+        pass
+
+    def receive_move(self, a_move: dict): 
+        pass
+
+    def receive_det_start(self, start_status): 
+        pass
+
+    def invoke_card(self, carta): 
+        pass
+
+    def show_frame(self, page_name: str): 
+        pass
+
+    def add_card_to_interface(self, id: int): 
+        pass
+
+    def remove_card_from_interface(self, id: int): 
+        pass
+
+    def verify_deck(self): 
+        pass
+
+    def update_list_of_cards(self, list_of_cards): 
+        pass
+
+    def pass_turn(self): 
+        pass
+
+    def get_page(self, page_name: str): 
+        pass
+
+    def fill_pages(self): 
+        pass
+
+    def get_list_of_cards(self): 
+        pass
+
+    def buy_card(self, type: str): 
+        pass
+
+    def update_hand(self, hand): 
+        pass
+
+    def exit_game(self): 
+        pass
+
+    def select_card(self): 
+        pass
+
+    def select_position(self): 
+        pass
+
+    def reset_game(self): 
+        pass
+
+    def save_deck(self): 
+        pass

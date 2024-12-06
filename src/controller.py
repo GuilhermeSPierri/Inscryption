@@ -257,7 +257,7 @@ class Controller(DogPlayerInterface):
         return self.frames.get(page_name)
 
     def exit_game(self):
-        self.quit()
+        quit()
 
     ######### Logic for the game page #########
 
