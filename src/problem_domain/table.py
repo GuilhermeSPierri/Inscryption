@@ -64,8 +64,7 @@ class Table:
         # Logic to place a card on the field
         pass
 
-    def buy_deck_card(self) -> None:
-        # Logic to buy a card from the deck
+    def buy_deck_card(self):
         pass
 
     def get_local_hand(self) -> object:
@@ -94,9 +93,21 @@ class Table:
         # Logic to pass the turn
         return "Turn passed"
 
-    def check_for_winner(self) -> str:
-        # Logic to check for a winner
-        return "No winner yet"
+    def check_for_winner(self):
+        points_difference = self._scale.calcule_points_difference()
+        
+        if (points_difference <= -7):
+            winner ="local"
+        
+        elif (points_difference >= 7):
+            winner = "remote"
+
+        else:
+            winner = ""
+        
+        return winner
+            
+
 
     # Novos métodos adicionados na ordem da imagem
     def select_position(self): 
