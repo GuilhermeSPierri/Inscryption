@@ -92,7 +92,7 @@ class Controller(DogPlayerInterface):
                         10, 
                         row, 
                         col,  # Offset the column to the right side
-                        f"{card_name} \n Damage: {card_object.get_damage()} \n Life: {card_object.get_life()}"
+                        f"{card_name} \n Damage: {card_object.get_damage()} \n HP: {card_object.get_hp()}"
                     )
                     left_container_card.bind("<Button-1>", lambda e, object = card_object: self.add_card_to_deck_UI(object, page))
 
@@ -130,7 +130,7 @@ class Controller(DogPlayerInterface):
                         10, 
                         row, 
                         col,  # Offset the column to the right side
-                        f"{card_name} \n Damage: {card_object.get_damage()} \n Life: {card_object.get_life()}"
+                        f"{card_name} \n Damage: {card_object.get_damage()} \n HP: {card_object.get_hp()}"
                     )
                     right_container_card.bind("<Button-1>", lambda e, card_index = index: self.remove_card_from_deck_UI(card_index,page))
 
@@ -159,7 +159,7 @@ class Controller(DogPlayerInterface):
                         10,
                         row,
                         col,
-                        f"{card_object.get_name()} \n Damage: {card_object.get_damage()} \n Life: {card_object.get_life()}"
+                        f"{card_object.get_name()} \n Damage: {card_object.get_damage()} \n HP: {card_object.get_hp()}"
                     )
 
                     # Bind the removal function to the newly added card

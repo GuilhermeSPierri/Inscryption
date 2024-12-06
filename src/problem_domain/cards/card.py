@@ -2,9 +2,9 @@ from abc import ABC, abstractmethod
 
 class Card(ABC):
 
-    def __init__(self, type: str, name: str, life: int, damage: int, glyph: None, cost: None):
+    def __init__(self, type: str, name: str, hp: int, damage: int, glyph: None, cost: None):
         self._damage = damage
-        self._life = life
+        self._hp = hp
         self._cost = cost
         self._glyph = glyph
         self._name = name
@@ -26,8 +26,8 @@ class Card(ABC):
     def get_cost(self):
         pass
 
-    def get_life(self):
-        return self._life
+    def get_hp(self):
+        return self._hp
     
     def get_name(self):
         return self._name
