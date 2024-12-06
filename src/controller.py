@@ -137,6 +137,9 @@ class Controller(DogPlayerInterface):
                     if len(page.my_deck_containers) <= row:
                         page.my_deck_containers.append([])
                     page.my_deck_containers[row].append(right_container_card)
+
+                    self.append_card_to_deck(page, card_object)
+
                 else:
                     # Empty placeholder
                     placeholder = self.create_container_grid(right_container, "Empty", 10, 10, row, col, "Empty")
@@ -145,12 +148,6 @@ class Controller(DogPlayerInterface):
                     page.my_deck_containers[row].append(placeholder)
 
     def add_card_to_deck_UI(self, card_object, page):
-        """
-        Adds the selected card from the left container to the right container.
-
-        :param card_name: The name of the card to add.
-        :param page: The current page containing the UI components.
-        """
         for row in range(5):
             for col in range(4):
                 if page.my_deck_containers[row][col].cget("text") == "Empty":
@@ -176,55 +173,116 @@ class Controller(DogPlayerInterface):
                     page.my_deck_containers[row][col].destroy()
                     page.my_deck_containers[row][col] = card_container
 
+                    self.append_card_to_deck(page,card_object)
+
                     print(f"Added card '{card_object.get_name()}' to the right container at position ({row}, {col})")
                     return
 
         print("No empty slots available in the deck.")
 
+    def append_card_to_deck(self, page, card_object):
+        page._list_of_cards.append(card_object)
+        print(f"Card '{card_object.get_name()}' added to the deck.")
+        print(len(page._list_of_cards))
+        print(page.names()) ##REMOVER ESSA FUNCAO 
+
 
     def remove_card_from_deck_UI(self, card_index, page):
-        """
-        Removes the card from the right container (deck) based on the index and updates the UI.
-
-        :param card_index: The index of the card to be removed.
-        :param page: The current page containing the UI components.
-        """
+        # Calculate the row and column of the card to be removed
         row = card_index // 4  # Adjusted for correct row calculation
         col = card_index % 4   # Adjusted for correct column calculation
 
+        # Remove the card visually
         if row < len(page.my_deck_containers) and col < len(page.my_deck_containers[row]):
-            # Remove the card visually
             card_container = page.my_deck_containers[row][col]
             card_container.destroy()
 
-            # Replace the removed card with an empty placeholder
+        # Update the deck list by removing the corresponding card
+        if 0 <= card_index < len(page._list_of_cards):
+            removed_card = self.remove_card_from_deck(card_index, page)
+            print(f"Removed card: {removed_card.get_name()} at index {card_index}")
+
+        # Reorganize the UI to fill gaps
+        deck_size = len(page._list_of_cards)
+        for i in range(deck_size):
+            current_row = i // 4
+            current_col = i % 4
+
+            card_object = page._list_of_cards[i]
+            card_name = card_object.get_name()
+            card_damage = card_object.get_damage()
+            card_life = card_object.get_life()
+
+            # Create or update the card container
+            if len(page.my_deck_containers) > current_row and len(page.my_deck_containers[current_row]) > current_col:
+                page.my_deck_containers[current_row][current_col].destroy()  # Remove placeholder if present
+
+            container = self.create_container_grid(
+                page.my_deck_containers[current_row][current_col].master,  # Parent container
+                "",
+                10,
+                10,
+                current_row,
+                current_col,
+                f"{card_name} \n Damage: {card_damage} \n Life: {card_life}"
+            )
+            container.bind(
+                "<Button-1>",
+                lambda e, idx=i: self.remove_card_from_deck_UI(idx, page)
+            )
+
+            # Update the reference
+            page.my_deck_containers[current_row][current_col] = container
+
+        # Fill the remaining slots with placeholders
+        for i in range(deck_size, 20):  # Assuming max deck size is 20
+            current_row = i // 4
+            current_col = i % 4
+
+            if len(page.my_deck_containers) > current_row and len(page.my_deck_containers[current_row]) > current_col:
+                page.my_deck_containers[current_row][current_col].destroy()
+
             placeholder = self.create_container_grid(
-                card_container.master,  # Parent container (right container)
+                page.my_deck_containers[current_row][current_col].master,  # Parent container
                 "Empty",
                 10,
                 10,
-                row,
-                col,
-                ""
+                current_row,
+                current_col,
+                "Empty"
             )
-            page.my_deck_containers[row][col] = placeholder
+            page.my_deck_containers[current_row][current_col] = placeholder
 
-            print(f"Removed card at index {card_index}")
+    def remove_card_from_deck(self, card_index, page):
+        return page._list_of_cards.pop(card_index)
 
-            #self.update_deck_page(page)
-
+    def verify_deck(self, page):
+        print("tamanho do deck")
+        print(self.table._local_deck.get_deck_size())
+        for _ in range(len(page._list_of_cards)):
+            self.remove_card_from_deck_UI(0, page)
+        print("Deck reset")
+        print(self.table._local_deck.get_deck_size())
+        for i in range(self.table._local_deck.get_deck_size()):
+            card = self.table._local_deck.get_card_list()[i]
+            self.add_card_to_deck_UI(card, page)
     
     def get_all_cards(self):
         return self.library.get_all_cards()
     
     def get_deck_info(self):
-        """
-        Return a dictionary containing the deck information.
-
-        :return: Dictionary with structure {id: CardObject}
-        """
         deck = self.table._local_player.get_deck()
         return {idx: card for idx, card in enumerate(deck.get_card_list())}
+
+    def save_deck(self, list_of_cards):
+        # salvar o deck
+        if len(list_of_cards) == 20:
+            self.table.update_local_deck(list_of_cards)
+            messagebox.showinfo("Deck salvo", "Deck salvo com sucesso")
+        else:
+            messagebox.showerror("Erro", "Deck precisa ter 20 cartas")
+        
+
 
                 
     ######### Logic for all the pages #########
@@ -246,9 +304,11 @@ class Controller(DogPlayerInterface):
     
     ######### Logic for the start page #########
 
-    def show_frame(self, page_name):
+    def show_frame(self, page_name, reset):
         frame = self.get_frame(page_name)
         if frame:
+            if reset:
+                frame.reset_page()
             frame.tkraise()
         else:
             messagebox.showerror("Error", f"Page {page_name} not found")

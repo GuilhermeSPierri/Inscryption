@@ -182,3 +182,7 @@ class Table:
 
     def activate_glyph(self, card): 
         pass
+
+    def update_local_deck(self, list_of_cards):
+        self._local_deck.set_card_list(list_of_cards)
+        self._local_player.set_deck(self._local_deck)

@@ -49,6 +49,11 @@ class GamePage(Page):
         self.controller.create_hand_UI(self, container_hand)
         self.controller.create_field_UI(self, container_field)
 
+    def reset_page(self):
+        self.occupied_slots = [[False for _ in range(4)] for _ in range(3)]
+        self.occupied_slots_hand = [[False for _ in range(3)] for _ in range(3)]
+        self.create_widgets()
+
         
     
 

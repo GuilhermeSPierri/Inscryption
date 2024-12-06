@@ -13,9 +13,12 @@ class StartPage(Page):
         game_button = Button(self, "Iniciar Partida", "start_match", self.controller)
         game_button.place(relx=0.5, rely=0.6, anchor="center")
 
-        deck_button = Button(self, "Criar Deck", "show_frame", self.controller, ("DeckPage", ))
+        deck_button = Button(self, "Criar Deck", "show_frame", self.controller, ("DeckPage", False))
         deck_button.place(relx=0.5, rely=0.7, anchor="center")
 
         exit_button = Button(self, "Sair do Jogo", "exit_game", self.controller)
         exit_button.place(relx=0.5, rely=0.8, anchor="center")
+
+    def reset_page(self):
+        pass
 

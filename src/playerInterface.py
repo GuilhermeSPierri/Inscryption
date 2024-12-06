@@ -14,7 +14,7 @@ class PlayerInterface(DogPlayerInterface):
         self.main_window = tk.Tk()
         self.config_main_window()
         self.controller.fill_pages(self.main_window)
-        self.controller.show_frame("StartPage")
+        self.controller.show_frame("StartPage", False)
         self.main_window.mainloop()
 
     def config_main_window(self):
