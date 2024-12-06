@@ -13,3 +13,12 @@ class Card(ABC):
     @abstractmethod
     def attack(self, target):
         pass
+
+    def get_name(self):
+        return self._name
+    
+    def get_damage(self):
+        return self._damage
+    
+    def get_life(self):
+        return self._life

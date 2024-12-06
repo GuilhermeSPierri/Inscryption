@@ -62,9 +62,7 @@ class Controller(DogPlayerInterface):
     def create_deck_page_UI(self, page):
         # Get all cards and deck information
         all_cards_dict = self.get_all_cards()
-        print(all_cards_dict)
         deck_info = self.get_deck_info()
-        print(deck_info)
 
         # Convert dictionaries to lists for iteration
         all_cards_list = list(all_cards_dict.items())
@@ -73,30 +71,30 @@ class Controller(DogPlayerInterface):
         left_container = tk.Frame(page, bg="lightgrey", relief=tk.RAISED, borderwidth=2)
         left_container.place(relx=0.05, rely=0.05, relwidth=0.30, relheight=0.90)
 
-        for i in range(3):
+        for i in range(4):
             left_container.grid_columnconfigure(i, weight=1)
             left_container.grid_rowconfigure(i, weight=1)
 
         # Create the label for all cards on the left
-        for row in range(3):
-            for col in range(3):
-                index = row * 3 + col
+        for row in range(5):
+            for col in range(4):
+                index = row * 4 + col
                 
                 if index < len(all_cards_list):
-                    card_id, card_object = all_cards_list[index]
-                    card_name = card_object.name  # Assuming the CardObject has a `name` attribute
+                    _, card_object = all_cards_list[index]
+                    card_name = card_object.get_name() # Assuming the CardObject has a `name` attribute
                     
                     # Create container with card name
                     left_container_card = self.create_container_grid(
                         left_container, 
-                        f"Card: {card_name}", 
+                        "", 
                         10, 
                         10, 
                         row, 
-                        col, 
-                        f"Card: {card_name}"
+                        col,  # Offset the column to the right side
+                        f"{card_name} \n Damage: {card_object.get_damage()} \n Life: {card_object.get_life()}"
                     )
-                    left_container_card.bind("<Button-1>", lambda e, r=row, c=col: self.select_card(page, r, c))
+                    left_container_card.bind("<Button-1>", lambda e, object = card_object: self.add_card_to_deck_UI(object, page))
 
                     if len(page.all_cards_containers) <= row:
                         page.all_cards_containers.append([])
@@ -111,42 +109,109 @@ class Controller(DogPlayerInterface):
         right_container = tk.Frame(page, bg="lightgrey", relief=tk.RAISED, borderwidth=2)
         right_container.place(relx=0.65, rely=0.05, relwidth=0.30, relheight=0.90)
 
-        for i in range(3):
+        for i in range(4):
             right_container.grid_columnconfigure(i, weight=1)
             right_container.grid_rowconfigure(i, weight=1)
 
         # Create the label for deck cards on the right
-        for row in range(3):
-            for col in range(3):
-                index = row * 3 + col
+        for row in range(5):
+            for col in range(4):
+                index = row * 4 + col
                 
                 if index < len(deck_cards_list):
-                    card_id, card_object = deck_cards_list[index]
-                    card_name = card_object.name  # Assuming the CardObject has a `name` attribute
+                    _, card_object = deck_cards_list[index]
+                    card_name = card_object.get_name()  # Assuming the CardObject has a `name` attribute
                     
                     # Create container with card name
                     right_container_card = self.create_container_grid(
                         right_container, 
-                        f"Deck Card: {card_name}", 
+                        "", 
                         10, 
                         10, 
                         row, 
                         col,  # Offset the column to the right side
-                        f"Deck Card: {card_name}"
+                        f"{card_name} \n Damage: {card_object.get_damage()} \n Life: {card_object.get_life()}"
                     )
-                    right_container_card.bind("<Button-1>", lambda e, r=row, c=col: self.select_card(page, r, c))
+                    right_container_card.bind("<Button-1>", lambda e, card_index = index: self.remove_card_from_deck_UI(card_index,page))
 
                     if len(page.my_deck_containers) <= row:
                         page.my_deck_containers.append([])
                     page.my_deck_containers[row].append(right_container_card)
                 else:
                     # Empty placeholder
-                    placeholder = self.create_container_grid(right_container, "Empty", 10, 10, row, col + 4, "Empty")
+                    placeholder = self.create_container_grid(right_container, "Empty", 10, 10, row, col, "Empty")
                     if len(page.my_deck_containers) <= row:
                         page.my_deck_containers.append([])
                     page.my_deck_containers[row].append(placeholder)
 
+    def add_card_to_deck_UI(self, card_object, page):
+        """
+        Adds the selected card from the left container to the right container.
 
+        :param card_name: The name of the card to add.
+        :param page: The current page containing the UI components.
+        """
+        for row in range(5):
+            for col in range(4):
+                if page.my_deck_containers[row][col].cget("text") == "Empty":
+                    # Replace the placeholder with the selected card
+                    card_container = self.create_container_grid(
+                        page.my_deck_containers[row][col].master,  # Parent container
+                        "",
+                        10,
+                        10,
+                        row,
+                        col,
+                        f"{card_object.get_name()} \n Damage: {card_object.get_damage()} \n Life: {card_object.get_life()}"
+                    )
+
+                    # Bind the removal function to the newly added card
+                    card_index = row * 4 + col  # Adjusted for correct index calculation
+                    card_container.bind(
+                        "<Button-1>",
+                        lambda e, idx=card_index: self.remove_card_from_deck_UI(idx, page)
+                    )
+
+                    # Update the container reference
+                    page.my_deck_containers[row][col].destroy()
+                    page.my_deck_containers[row][col] = card_container
+
+                    print(f"Added card '{card_object.get_name()}' to the right container at position ({row}, {col})")
+                    return
+
+        print("No empty slots available in the deck.")
+
+
+    def remove_card_from_deck_UI(self, card_index, page):
+        """
+        Removes the card from the right container (deck) based on the index and updates the UI.
+
+        :param card_index: The index of the card to be removed.
+        :param page: The current page containing the UI components.
+        """
+        row = card_index // 4  # Adjusted for correct row calculation
+        col = card_index % 4   # Adjusted for correct column calculation
+
+        if row < len(page.my_deck_containers) and col < len(page.my_deck_containers[row]):
+            # Remove the card visually
+            card_container = page.my_deck_containers[row][col]
+            card_container.destroy()
+
+            # Replace the removed card with an empty placeholder
+            placeholder = self.create_container_grid(
+                card_container.master,  # Parent container (right container)
+                "Empty",
+                10,
+                10,
+                row,
+                col,
+                ""
+            )
+            page.my_deck_containers[row][col] = placeholder
+
+            print(f"Removed card at index {card_index}")
+
+            #self.update_deck_page(page)
 
     
     def get_all_cards(self):
