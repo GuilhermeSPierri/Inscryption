@@ -161,13 +161,13 @@ class Table:
     def get_field_card(self, position): 
         pass
 
-    def execute_attack(self, damage, life): 
+    def execute_attack(self, damage, hp): 
         pass
 
     def invoke_card_in_field(self, move): 
         pass
 
-    def set_life_card(self, card, life): 
+    def set_hp_card(self, card, hp): 
         pass
 
     def get_remote_field_card(self, position): 
@@ -188,7 +188,7 @@ class Table:
     def update_scale(self, a_move: dict): 
         pass
 
-    def deal_damage(self, remote_card_life: int, damage: int): 
+    def deal_damage(self, remote_card_hp: int, damage: int): 
         pass
 
     def activate_glyph(self, card): 

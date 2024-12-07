@@ -6,8 +6,8 @@ from problem_domain.cards.squirrelCard import SquirrelCard
 class Library():
 
     def __init__(self):
-        self.cards_model = dict()
-        self.pointer_id = 0
+        self._cards_model = dict()
+        self._pointer_id = 0
 
         self.add_card(BoneCard("deer", 1, 1, {"name": "Amplifier", "modifier": "life", "value": 1}, 1))
         self.add_card(SacrificeCard("Bear", 5, 3, {"name": "Amplifier", "modifier": "damage", "value": 2}, 3))
@@ -17,34 +17,34 @@ class Library():
 
     def add_card(self, card: Card):
         try:
-            self.cards_model[self.pointer_id] = card
-            self.pointer_id += 1
+            self._cards_model[self._pointer_id] = card
+            self._pointer_id += 1
         except Exception as e:
             print(f"Error: {e}")
 
     def remove_card(self, id: int):
         try:
-            del self.cards_model[id]
-            self.pointer_id -= 1
+            del self._cards_model[id]
+            self._pointer_id -= 1
         except Exception as e:
             print(f"Error: {e}")
 
     def get_all_cards(self):
         try:
-            return self.cards_model
+            return self._cards_model
         except Exception as e:
             print(f"Error: {e}")
 
     def show_cards(self):
         try:
-            for key, value in self.cards_model.items():
+            for key, value in self._cards_model.items():
                 print(f"ID: {key} - {value.name}")
         except Exception as e:
             print(f"Error: {e}")
 
     def get_card(self, id: int):
         try:
-            return self.cards_model[id]
+            return self._cards_model[id]
         except Exception as e:
             print(f"Error: {e}")
         
