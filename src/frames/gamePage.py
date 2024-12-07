@@ -16,16 +16,16 @@ class GamePage(Page):
         self.occupied_slots = [[False for _ in range(4)] for _ in range(3)]
         self.occupied_slots_hand = [[False for _ in range(3)] for _ in range(3)]
 
-        start_page_button = Button(self, "Desistir da partida", "receive_withdrawal_notification", self.controller)
+        start_page_button = Button(self, "Desistir da partida", 200, 100, "receive_withdrawal_notification", self.controller)
         start_page_button.place(relx=0.90, rely=0.05, relwidth=0.05, relheight=0.05)
 
-        buy_card_button = Button(self, "Comprar Carta", "buy_card_interface", self.controller)
+        buy_card_button = Button(self, "Comprar Carta", 200, 100, "buy_card_interface", self.controller)
         buy_card_button.place(relx=0.90, rely=0.70, relwidth=0.05, relheight=0.05)
 
-        buy_squirrel_button = Button(self, "Comprar Esquilo", "buy_card_interface", self.controller)
+        buy_squirrel_button = Button(self, "Comprar Esquilo", 200, 100, "buy_card_interface", self.controller)
         buy_squirrel_button.place(relx=0.90, rely=0.80, relwidth=0.05, relheight=0.05)
 
-        skip_turn_button = Button(self, "Pular Turno", "skip_turn", self.controller)
+        skip_turn_button = Button(self, "Pular Turno", 200, 100, "skip_turn", self.controller)
         skip_turn_button.place(relx=0.90, rely=0.50, relwidth=0.05, relheight=0.05)
 
         container_hand = tk.Frame(self, bg="lightgrey", relief=tk.RAISED, borderwidth=2)

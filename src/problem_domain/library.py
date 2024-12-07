@@ -17,7 +17,7 @@ class Library():
 
     def add_card(self, card: Card):
         try:
-            self.cards_model[self.pointer_id + 1] = card
+            self.cards_model[self.pointer_id] = card
             self.pointer_id += 1
         except Exception as e:
             print(f"Error: {e}")

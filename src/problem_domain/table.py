@@ -161,13 +161,13 @@ class Table:
     def get_field_card(self, position): 
         pass
 
-    def execute_attack(self, damage, hp): 
+    def execute_attack(self, damage, life): 
         pass
 
     def invoke_card_in_field(self, move): 
         pass
 
-    def set_hp_card(self, card, hp): 
+    def set_life_card(self, card, life): 
         pass
 
     def get_remote_field_card(self, position): 
@@ -188,12 +188,16 @@ class Table:
     def update_scale(self, a_move: dict): 
         pass
 
-    def deal_damage(self, remote_card_hp: int, damage: int): 
+    def deal_damage(self, remote_card_life: int, damage: int): 
         pass
 
     def activate_glyph(self, card): 
         pass
 
-    def update_local_deck(self, list_of_cards):
+    def update_local_deck(self, deck_data: dict):
+        for _, card_name in deck_data.item():
+            card_object = self.library.get_card(card_name)
+            self._local_deck.add_card_to_deck(card_object)
+        list_of_cards = []
         self._local_deck.set_card_list(list_of_cards)
         self._local_player.set_deck(self._local_deck)

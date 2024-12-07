@@ -3,9 +3,9 @@ import tkinter as tk
 
 class Button(tk.Button):
 
-    def __init__(self, parent, text, command, controller, args=()):
+    def __init__(self, parent, text, width, height, command, controller, args=()):
        
-        super().__init__(parent, text=text, command=lambda: self.execute_command(command, controller, *args))
+        super().__init__(parent, text=text, width=width, height=height, command=lambda: self.execute_command(command, controller, *args))
 
     def execute_command(self, command_name, controller, *args):
         
