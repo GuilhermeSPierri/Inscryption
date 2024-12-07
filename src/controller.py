@@ -22,7 +22,7 @@ class Controller(DogPlayerInterface):
         message = self.dog_server_interface.initialize(player_name, self)
         messagebox.showinfo(message=message)
         
-    ######### Create UI #########
+    ######### Logic for general purposes #########
 
     def create_container_grid(self, parent, text, padx, pady, row, col, textLabel):
         container = tk.LabelFrame(parent, text=text, padx=padx, pady=pady)
@@ -32,6 +32,8 @@ class Controller(DogPlayerInterface):
         label.pack(padx=5, pady=5)
 
         return container
+    
+    ######### Logic for the game page #########
     
     def create_hand_UI(self, page, container):
         for row in range(3):
@@ -55,6 +57,8 @@ class Controller(DogPlayerInterface):
                 if len(page.cards_field_containers) <= row:
                     page.cards_field_containers.append([])
                 page.cards_field_containers[row].append(container_card)
+
+    ################### Logic for the deck page ###################
 
     def create_deck_page_UI(self, page):
         # Get all cards and deck information
@@ -182,21 +186,10 @@ class Controller(DogPlayerInterface):
         )
         page.my_deck_containers[row][col] = placeholder
 
-
-    def remove_card_from_deck(self, card_index, page):
-        return page._list_of_cards.pop(card_index)
-
-    def get_all_cards(self):
-        return self.library.get_all_cards()
-    
-    def get_deck_info(self):
-        deck = self.table._local_player.get_deck()
-        return {idx: card for idx, card in enumerate(deck.get_card_list())}
-
     def save_deck(self, deck_data_func):
         # salvar o deck
         deck_data = deck_data_func()
-
+        
         if len(deck_data) == 20:
             for _, card_name in deck_data.items():
                 card_object = self.library.get_card(card_name)
@@ -205,10 +198,16 @@ class Controller(DogPlayerInterface):
             self.show_frame("StartPage")
         else:
             messagebox.showerror("Erro", "Deck precisa ter 20 cartas")
-        
 
+    ######### Logic for the library #########
 
-                
+    def get_all_cards(self):
+        return self.library.get_all_cards()
+    
+    def get_deck_info(self):
+        deck = self.table._local_player.get_deck()
+        return {idx: card for idx, card in enumerate(deck.get_card_list())}
+
     ######### Logic for all the pages #########
 
     def end_fullscreen(self, event=None):
@@ -292,7 +291,6 @@ class Controller(DogPlayerInterface):
         # colocar a carta no campo
         pass
 
-
     def buy_card_interface(self):
         messagebox.showinfo("Inscryption", "Voce comprou uma carta")
 
@@ -303,27 +301,6 @@ class Controller(DogPlayerInterface):
             self.show_frame("StartPage")
         else:
             pass
-
-        
-
-    
-    ######### Logic for the deck page #########
-
-    def add_card_to_interface(self, id):
-        # checar se o deck ja nao esta cheio
-        pass
-
-    def remove_card_from_interface(self, id):
-        # checar se o deck ja nao esta vazio
-        pass
-
-    def show_deck(self):
-        # mostrar o deck
-        pass
-
-    def get_number_cards_local_deck(self):
-        # retornar o numero de cartas no deck local
-        pass
 
     ######### Logic for the player #########
 
@@ -358,6 +335,3 @@ class Controller(DogPlayerInterface):
         self.dog_server_interface.make_withdrawal()
         self.show_frame("StartPage")
         
-
-    
-
