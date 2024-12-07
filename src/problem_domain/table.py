@@ -1,7 +1,8 @@
 from problem_domain.player import Player
 from problem_domain.field import Field
 from problem_domain.scale import Scale
-
+from problem_domain.deck import Deck
+import random
 class Table:
     def __init__(self):
         # Attributes
@@ -86,8 +87,22 @@ class Table:
         self._remote_deck = deck
 
     def shuffle_deck(self, deck: object) -> object:
-        # Logic to shuffle a deck
-        return deck 
+        positions = []
+
+        for i in range(20):
+            positions.append(i)
+        
+        positions = random.shuffle(positions)
+        shuffled_deck = Deck()
+
+        shuffled_deck_cards = []
+        deck_cards = deck.get_card_list()
+        for i in range(len(positions)):
+            shuffled_deck_cards.insert(positions[i], deck_cards[i])
+
+        shuffled_deck.set_card_list(shuffled_deck_cards)
+
+        return shuffled_deck
 
     def pass_turn(self):
         # Logic to pass the turn
@@ -192,7 +207,22 @@ class Table:
         pass
 
     def activate_glyph(self, card): 
-        pass
+        glyph = card.get_glyph()
+
+        if glyph != None:
+            modifier = glyph["modifier"]
+            value = glyph["value"]
+
+            if modifier == "life":
+                life = card.get_hp()
+                life = life + value
+                card.set_hp(life)
+
+            elif modifier == "damage":
+                damage = card.get_damage()
+                damage = damage + value
+                card.set_damage(damage)
+
 
     def update_local_deck(self, deck_data: dict):
         for _, card_name in deck_data.item():
