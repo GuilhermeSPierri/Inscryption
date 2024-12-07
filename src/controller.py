@@ -243,12 +243,38 @@ class Controller(DogPlayerInterface):
     ######### Logic for the game page #########
 
     def select_card(self, page, row, col):
+        turn_player = self.table._local_player.get_turn() #bool 
+        
+        if turn_player:
+            #selected_card = selected_position
+            pass
         if page.selected_card:
             prev_row, prev_col = page.selected_card
             page.cards_hand_containers[prev_row][prev_col].config(bg="SystemButtonFace")
+            page.cards_hand_containers[row][col].config(bg="SystemButtonFace")
+            page.selected_card = None
+        
+        else:
+            page.cards_hand_containers[row][col].config(bg="yellow")
+            page.selected_card = (row, col)
 
-        page.cards_hand_containers[row][col].config(bg="yellow")
-        page.selected_card = (row, col)
+    def select_position(self, where, position_in_field: None, position_in_hand: None):
+        turn_player = self.table._local_player.get_turn() #bool
+
+        if position_in_field != None:
+            if turn_player:
+                selected_position = self.table.get_position_in_field(position_in_field)
+        if position_in_hand != None:
+            if turn_player:
+                selected_position = self.table.get_position_in_hand(position_in_hand)
+        
+        if turn_player:
+            occupied = self.table.check_position(selected_position)
+
+            if occupied:
+                self.select_card(selected_position)
+            if not occupied and selected_position._field == True:
+                self.invoke_card(selected_position)
 
 
     def transfer_card(self, page, row, col):

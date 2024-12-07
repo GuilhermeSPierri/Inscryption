@@ -7,13 +7,8 @@ class Field:
         # Initialize a list to hold sacrificed cards
         self._sacrifice_cards = []
 
-    def get_position_in_field(self, position_in_field: int):
-        """
-        Get the Position object in the specified index of the field.
-
-        :param position_in_field: Index of the position in the field (0-3).
-        :return: Position object.
-        """
+    def get_position_in_field(self, position_in_field: int) -> Position:
+        
         if 0 <= position_in_field < len(self._positions):
             return self._positions[position_in_field]
         raise IndexError("Position index out of range")

@@ -33,7 +33,7 @@ class Table:
     
     def get_turn_player(self):
         # Assuming the turn player logic
-        return self._local_player if self.game_status == "local_turn" else self._remote_player
+        return self._local_player if self._game_status == "local_turn" else self._remote_player
 
     def clear_table(self):
         pass
@@ -193,11 +193,3 @@ class Table:
 
     def activate_glyph(self, card): 
         pass
-
-    def update_local_deck(self, deck_data: dict):
-        for _, card_name in deck_data.item():
-            card_object = self.library.get_card(card_name)
-            self._local_deck.add_card_to_deck(card_object)
-        list_of_cards = []
-        self._local_deck.set_card_list(list_of_cards)
-        self._local_player.set_deck(self._local_deck)
