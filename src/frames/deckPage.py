@@ -19,7 +19,16 @@ class DeckPage(Page):
         label.pack(pady=10, padx=10)
 
 
-        save_deck_button = Button(self, "Salvar Deck e Sair", 20, 10, "save_deck", self.controller, (partial(self.controller.save_deck, self.get_my_deck_data),))
+        save_deck_button = Button(
+            self, 
+            "Salvar Deck e Sair", 
+            20, 
+            10, 
+            "save_deck", 
+            self.controller, 
+            (lambda: self.get_my_deck_data(),)
+        )
+
         save_deck_button.pack()
 
         self.all_cards_containers = [[]]

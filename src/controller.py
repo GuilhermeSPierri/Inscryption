@@ -261,7 +261,6 @@ class Controller(DogPlayerInterface):
         # Remove from deck data
         if card_index in page.get_my_deck_data():
             removed_card = page.get_my_deck_data().pop(card_index)
-            print(f"Removed card '{removed_card['name']}' from deck.")
 
         # Fill the gap in the UI
         placeholder = self.create_container_grid(
@@ -277,22 +276,27 @@ class Controller(DogPlayerInterface):
 
     def save_deck(self, deck_data_func):
         # Salvar o deck
+        print("Salvando deck...")
         deck_data = deck_data_func()
-        print(deck_data)
-        
-        if len(deck_data) == 20:
-            for _, card_name in deck_data.items():
-                card_object = self.library.get_card(card_name)
-                self.table._local_deck.add_card_to_deck(card_object)
-            messagebox.showinfo("Deck salvo", "Deck salvo com sucesso")
+        try:
+            if len(deck_data) == 20:
+                for _, card_name in deck_data.items():
+                    card_object = self.library.get_card(card_name)
+                    self.table._local_deck.add_card_to_deck(card_object)
+                messagebox.showinfo("Deck salvo", "Deck salvo com sucesso")
 
-            # Atualiza a interface da GamePage
-            game_page = self.get_frame("GamePage")
-            game_page.reset_page()
+                # Atualiza a interface da GamePage
+                game_page = self.get_frame("GamePage")
+                game_page.reset_page()
 
-            self.show_frame("StartPage")
-        else:
-            messagebox.showerror("Erro", "Deck precisa ter 20 cartas")
+                self.show_frame("StartPage")
+                print(f"deck_data len: {len(deck_data)}")
+                print(len(self.table.get_local_deck().get_card_list()))
+                print(self.table.get_local_deck().get_card_list())
+            else:
+                messagebox.showerror("Erro", "Deck precisa ter 20 cartas")
+        except:
+            pass
 
 
 
@@ -430,7 +434,6 @@ class Controller(DogPlayerInterface):
         messagebox.showinfo(message=message)
         if message == "Partida iniciada":
             players = start_status.get_players()
-            print(players)
             game_page = self.get_frame("GamePage")
             game_page.reset_page()
             self.show_frame("GamePage")
