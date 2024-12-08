@@ -47,3 +47,6 @@ class Deck:
     def set_card_list(self, card_list: list) -> None:
         """Define a lista de cartas do deck."""
         self._card_list = card_list
+
+    def reset_deck(self) -> None:
+        self._card_list = []

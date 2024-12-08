@@ -280,8 +280,9 @@ class Controller(DogPlayerInterface):
         deck_data = deck_data_func()
         try:
             if len(deck_data) == 20:
-                for _, card_name in deck_data.items():
-                    card_object = self.library.get_card(card_name)
+                self.table._local_deck.reset_deck()
+                for _, card_dict in deck_data.items():
+                    card_object = self.library.get_card(card_dict["name"])
                     self.table._local_deck.add_card_to_deck(card_object)
                 messagebox.showinfo("Deck salvo", "Deck salvo com sucesso")
 
@@ -290,9 +291,6 @@ class Controller(DogPlayerInterface):
                 game_page.reset_page()
 
                 self.show_frame("StartPage")
-                print(f"deck_data len: {len(deck_data)}")
-                print(len(self.table.get_local_deck().get_card_list()))
-                print(self.table.get_local_deck().get_card_list())
             else:
                 messagebox.showerror("Erro", "Deck precisa ter 20 cartas")
         except:
