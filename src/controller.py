@@ -393,8 +393,8 @@ class Controller(DogPlayerInterface):
     def buy_card_interface(self):
         messagebox.showinfo("Inscryption", "Voce comprou uma carta")
 
-    def skip_turn(self):
-        winner = self.table.skip_turn()
+    def pass_turn(self):
+        winner = self.table.pass_turn()
 
         # PRA BAIXO, ESTARIA EM PLAYERINTERFACE, MAS DO JEITO QUE A IMPLEMENTAÇÃO ESTÁ, NÃO DÁ PRA FAZER ISSO
         if winner != "":

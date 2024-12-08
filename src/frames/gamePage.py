@@ -28,8 +28,8 @@ class GamePage(Page):
         buy_squirrel_button = Button(self, "Comprar Esquilo", 200, 100, "buy_card_interface", self.controller)
         buy_squirrel_button.place(relx=0.90, rely=0.80, relwidth=0.05, relheight=0.05)
 
-        skip_turn_button = Button(self, "Pular Turno", 200, 100, "skip_turn", self.controller)
-        skip_turn_button.place(relx=0.90, rely=0.50, relwidth=0.05, relheight=0.05)
+        pass_turn_button = Button(self, "Pular Turno", 200, 100, "pass_turn", self.controller)
+        pass_turn_button.place(relx=0.90, rely=0.50, relwidth=0.05, relheight=0.05)
 
         container_hand = tk.Frame(self, bg="lightgrey", relief=tk.RAISED, borderwidth=2)
         container_hand.place(relx=0.05, rely=0.05, relwidth=0.30, relheight=0.90)

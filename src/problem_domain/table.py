@@ -280,7 +280,7 @@ class Table:
     def get_hp(self, card):
         return card.get_hp()
     
-    def skip_turn(self):
+    def pass_turn(self):
         for i in range(4):
             local_card = self.get_field_card_in_position(i)
 
