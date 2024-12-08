@@ -53,9 +53,19 @@ class GamePage(Page):
         self.controller.create_field_UI(self, container_field)
 
     def reset_page(self):
+        # Limpa os widgets existentes
+        for widget in self.winfo_children():
+            widget.destroy()
+
+        # Reseta os estados
         self.occupied_slots = [[False for _ in range(4)] for _ in range(3)]
         self.occupied_slots_hand = [[False for _ in range(3)] for _ in range(3)]
+        self.cards_hand_containers = [[]]
+        self.cards_field_containers = [[]]
+
+        # Recria a UI
         self.create_widgets()
+
 
         
     

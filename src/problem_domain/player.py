@@ -7,7 +7,7 @@ class Player:
         self._bone = 0  # int
         self._hand = Hand()
         self._my_turn = False  # boolean
-        self._identifier = ""  # string
+        self._id = ""  # string
         self._symbol = 0  # int
         self._my_deck = Deck()  # Deck
         self._my_deck.generate_deck()
@@ -17,17 +17,17 @@ class Player:
     def reset(self) -> None:
         """Reseta o jogador para o estado inicial."""
         self._bone = 0
-        self._hand = None
+        self._hand = Hand()
         self._my_turn = False
-        self._identifier = ""
+        self._id = ""
         self._symbol = 0
         self._name = ""
 
-    def initialize(self, symbol: int, identifier: str, name: str) -> None:
+    def initialize(self, id: str = "") -> None:
         """Inicializa o jogador com os valores fornecidos."""
-        self._symbol = symbol
-        self._identifier = identifier
-        self._name = name
+        #self._symbol = symbol
+        self._id = id
+        #self._name = name
 
     def toggle_turn(self) -> None:
         """Alterna o turno do jogador."""
@@ -60,9 +60,8 @@ class Player:
         return self._my_turn
 
     def add_card_to_hand(self, card: object) -> None:
-        """Adiciona uma carta à mão do jogador."""
         if self._hand is not None:
-            self._hand.add(card)
+            self._hand.add_card_to_hand(card)
 
     def add_buy_token(self, amount: int) -> None:
         """Adiciona fichas de compra ao jogador."""
@@ -74,3 +73,6 @@ class Player:
     def initial_hand(self, deck):
         for _ in range(3):
             self.add_card_to_hand(deck.get_top_card())
+
+    def pass_turn(self):
+        self._my_turn = not self._my_turn

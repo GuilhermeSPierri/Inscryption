@@ -2,6 +2,7 @@ from problem_domain.player import Player
 from problem_domain.field import Field
 from problem_domain.scale import Scale
 from problem_domain.deck import Deck
+from problem_domain.cards.sacrificeCard import SacrificeCard
 import random
 
 class Table:
@@ -40,18 +41,25 @@ class Table:
     def clear_table(self):
         pass
 
-    def start_match(self, players: str, local_player_id: str):
+    def start_match(self, players: str):
         # Logic to initialize the match
         self._local_player.reset()
         self._remote_player.reset()
-        self._local_player.initialize(1, local_player_id, "Local Player")
-        self._remote_player.initialize(2, "remote", "Remote Player")
+        self._local_player.initialize(players[0][1])
+        self._remote_player.initialize(players[1][1])
         self._local_deck = self._local_player.get_deck()
-        self._remote_deck = self._remote_player.get_deck()
+        deck = Deck()
+        for i in range(20):
+            deck.add_card_to_deck(SacrificeCard("Sacrifice", 1, 1, None, 1))
+        self._remote_deck = deck
         self._local_deck = self.shuffle_deck(self._local_deck)
         self._remote_deck = self.shuffle_deck(self._remote_deck)
         self._local_player.initial_hand(self._local_deck)
         self._remote_player.initial_hand(self._remote_deck)
+        if int(players[0][2]) == 1:
+            self._local_player.pass_turn()
+        else:
+            self._remote_player.pass_turn()
         return players
 
     def get_number_cards_local_deck(self):
@@ -81,6 +89,12 @@ class Table:
 
     def get_local_hand(self) -> object:
         return self._local_player.get_hand()
+    
+    def get_remote_hand(self) -> object:
+        return self._remote_player.get_hand()
+    
+    def get_local_deck(self) -> object:
+        return self._local_deck
 
     def check_deck_size(self):
         return len(self._local_deck) if self._local_deck else 0

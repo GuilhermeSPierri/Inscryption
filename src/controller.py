@@ -37,9 +37,25 @@ class Controller(DogPlayerInterface):
     ######### Logic for the game page #########
     
     def create_hand_UI(self, page, container):
+        hand_dict = {idx: {
+            "name": card.get_name(),
+            "damage": card.get_damage(),
+            "life": card.get_hp()
+        } for idx, card in self.get_local_hand().items()}
+
         for row in range(3):
             for col in range(3):
                 index = row * 3 + col
+                
+                # Check if the index exists in hand_data
+                if index in hand_dict:
+                    card_data = hand_dict[index]
+                    card_label = f"{card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
+                else:
+                    # Empty slot for unavailable indices
+                    card_label = "Empty"
+                
+                # Create the card container
                 container_card = self.create_container_grid(
                     container,
                     f"Container {row} {col}",
@@ -47,18 +63,21 @@ class Controller(DogPlayerInterface):
                     10,
                     row,
                     col,
-                    f"Item {row * 3 + col + 1}"
+                    card_label
                 )
-                # Bind using partial to ensure correct row and col are passed
+                
+                # Bind the click event for card selection
                 container_card.bind(
                     "<Button-1>",
                     lambda event, page=page, position_in_field=None, position_in_hand=index: 
                     self.select_position(page, position_in_field, position_in_hand, event)
                 )
 
+                # Ensure the cards_hand_containers list structure is maintained
                 if len(page.cards_hand_containers) <= row:
                     page.cards_hand_containers.append([])
                 page.cards_hand_containers[row].append(container_card)
+
 
 
     def create_field_UI(self, page, container):
@@ -107,18 +126,19 @@ class Controller(DogPlayerInterface):
             page.selected_card = (row, col)
 
     def select_position(self, page, position_in_field = None, position_in_hand = None, event = None):
-        print(f"Page: {page}, Position in Field: {position_in_field}, Position in Hand: {position_in_hand}")
+        
         turn_player = self.table._local_player.get_turn() #bool
-        turn_player = True #teste
 
         if position_in_field != None:
             if turn_player:
                 selected_position = self.table.get_position_in_field(position_in_field)
                 selected_position._field = True
+                print(f"Page: {page}, Position in Field: {position_in_field}, Position in Hand: {position_in_hand}")
         if position_in_hand != None:
             if turn_player:
                 selected_position = self.table.get_position_in_hand(position_in_hand)
                 selected_position._hand = True
+                print(f"Page: {page}, Position in Field: {position_in_field}, Position in Hand: {position_in_hand}")
         
         if turn_player:
             occupied = self.table.check_position(selected_position)
@@ -148,9 +168,6 @@ class Controller(DogPlayerInterface):
 
         page.set_all_cards_data(all_cards_dict)
         page.set_my_deck_data(deck_info_dict)
-
-        print("All Cards Dict:", all_cards_dict)
-        print("Deck Info Dict:", deck_info_dict)
 
         # Create UI for the left container (all cards)
         left_container = tk.Frame(page, bg="lightgrey", relief=tk.RAISED, borderwidth=2)
@@ -259,17 +276,26 @@ class Controller(DogPlayerInterface):
         page.my_deck_containers[row][col] = placeholder
 
     def save_deck(self, deck_data_func):
-        # salvar o deck
+        # Salvar o deck
         deck_data = deck_data_func()
+        print(deck_data)
         
         if len(deck_data) == 20:
             for _, card_name in deck_data.items():
                 card_object = self.library.get_card(card_name)
                 self.table._local_deck.add_card_to_deck(card_object)
             messagebox.showinfo("Deck salvo", "Deck salvo com sucesso")
+
+            # Atualiza a interface da GamePage
+            game_page = self.get_frame("GamePage")
+            game_page.reset_page()
+
             self.show_frame("StartPage")
         else:
             messagebox.showerror("Erro", "Deck precisa ter 20 cartas")
+
+
+
 
     ######### Logic for the library #########
 
@@ -277,8 +303,16 @@ class Controller(DogPlayerInterface):
         return self.library.get_all_cards()
     
     def get_deck_info(self):
-        deck = self.table._local_player.get_deck()
+        deck = self.table.get_local_deck()
         return {idx: card for idx, card in enumerate(deck.get_card_list())}
+    
+    def get_local_hand(self):
+        hand = self.table.get_local_hand()
+        return {idx: card for idx, card in enumerate(hand.get_card_list())}
+    
+    def get_remote_hand(self):
+        hand = self.table.get_remote_hand()
+        return {idx: card for idx, card in enumerate(hand.get_card_list())}
 
     ######### Logic for all the pages #########
 
@@ -378,18 +412,27 @@ class Controller(DogPlayerInterface):
 
     def start_match(self): 
         start_status = self.dog_server_interface.start_match(2)
+
+        code = start_status.get_code()
         message = start_status.get_message()
-        messagebox.showinfo(message=message)
-        if message == "Partida iniciada":
-            self.table.start_match(2, 1)
+        if code == "0" or code == "1":
+            messagebox.showinfo(message=message)
+        elif code == "2":
+            players = start_status.get_players()
+            self.table.start_match(players)
             game_page = self.get_frame("GamePage")
             game_page.reset_page()
             self.show_frame("GamePage")
 
     def receive_start(self, start_status):
+        print(f'Remote Player Id: {start_status.get_local_id()}-------------')
         message = start_status.get_message()
         messagebox.showinfo(message=message)
         if message == "Partida iniciada":
+            players = start_status.get_players()
+            print(players)
+            game_page = self.get_frame("GamePage")
+            game_page.reset_page()
             self.show_frame("GamePage")
 
     def receive_withdrawal_notification(self):

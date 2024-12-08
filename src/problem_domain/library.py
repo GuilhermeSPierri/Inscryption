@@ -9,7 +9,7 @@ class Library():
         self._cards_model = dict()
         self._pointer_id = 0
 
-        self.add_card(BoneCard("deer", 1, 1, {"name": "Amplifier", "modifier": "life", "value": 1}, 1))
+        self.add_card(SacrificeCard("deer", 1, 1, {"name": "Amplifier", "modifier": "life", "value": 1}, 1))
         self.add_card(SacrificeCard("Bear", 5, 3, {"name": "Amplifier", "modifier": "damage", "value": 2}, 3))
         self.add_card(SquirrelCard("Squirrel", 1, 0, None, 0))
         self.add_card(SacrificeCard("Wolf", 3, 2, {"name": "Amplifier", "modifier": "life", "value": 1}, 2 ))
@@ -42,9 +42,11 @@ class Library():
         except Exception as e:
             print(f"Error: {e}")
 
-    def get_card(self, id: int):
+    def get_card(self, name: str):
         try:
-            return self._cards_model[id]
+            for key, value in self._cards_model.items():
+                if value.get_name() == name:
+                    return value
         except Exception as e:
             print(f"Error: {e}")
         
