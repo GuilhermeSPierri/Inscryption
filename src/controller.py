@@ -392,6 +392,23 @@ class Controller(DogPlayerInterface):
         messagebox.showinfo("Inscryption", "Voce comprou uma carta")
 
     def skip_turn(self):
+        winner = self.table.skip_turn()
+
+        # PRA BAIXO, ESTARIA EM PLAYERINTERFACE, MAS DO JEITO QUE A IMPLEMENTAÇÃO ESTÁ, NÃO DÁ PRA FAZER ISSO
+        if winner != "":
+            if winner == "local_player":
+                messagebox.showinfo("Jogo finalizado", "O jogador Local venceu")
+                self.show_frame("StartPage")
+            elif winner == "remote_player":
+                messagebox.showinfo("Jogo finalizado", "O jogador Remoto venceu")
+                self.show_frame("StartPage")
+        elif winner == "":
+            self.dog_server_interface.proxy.send_move("NÃO ESTOU INTEGRADO COM O DOG, PRECISO SER O DICT") #TEM QUE INTEGRAR COM O DOG_SERVER_INTERFACE
+            self.table.get_status()
+            self.update_gui("NÃO ESTOU INTEGRADO COM O DOG, PRECISO SER O DICT")
+
+
+
         match_status = self.dog_server_interface.proxy.get_status()
         if match_status == 2:
             self.receive_withdrawal_notification()
