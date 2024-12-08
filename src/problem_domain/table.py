@@ -3,6 +3,7 @@ from problem_domain.field import Field
 from problem_domain.scale import Scale
 from problem_domain.deck import Deck
 from problem_domain.cards.sacrificeCard import SacrificeCard
+from problem_domain.cards.squirrelCard import SquirrelCard
 import random
 
 class Table:
@@ -50,12 +51,10 @@ class Table:
         self._local_player.initialize(players[0][1])
         self._remote_player.initialize(players[1][1])
         self._local_deck = self._local_player.get_deck()
-        deck = Deck()
-        for i in range(20):
-            deck.add_card_to_deck(SacrificeCard("Sacrifice", 1, 1, None, 1))
-        self._remote_deck = deck
+        self._remote_deck = self._remote_player.get_deck()
+        self._squirrel_deck = SquirrelCard("Squirrel", 1, 1, None, 1)
         self._local_deck = self.shuffle_deck(self._local_deck)
-        self._remote_deck = self.shuffle_deck(self._remote_deck)
+        #self._remote_deck = self.shuffle_deck(self._remote_deck)
         self._local_player.initial_hand(self._local_deck)
         self._remote_player.initial_hand(self._remote_deck)
         if int(players[0][2]) == 1:
@@ -68,8 +67,9 @@ class Table:
         return len(self._local_deck) if self._local_deck else 0
 
     def buy_squirrel_card(self):
-        # Logic to buy a squirrel card
-        pass
+        squirrel = self._squirrel_deck
+        self._local_player.get_hand().add_card_to_hand(squirrel)
+        return squirrel
 
     def create_deck_buy_buttons(self):
         # Logic to create buttons for buying cards
@@ -87,7 +87,9 @@ class Table:
         pass
 
     def buy_deck_card(self):
-        pass
+        top_card = self.get_local_deck().get_top_card()
+        self.get_local_hand().add_card_to_hand(top_card)
+        return top_card
 
     def get_local_hand(self) -> object:
         return self._local_player.get_hand()

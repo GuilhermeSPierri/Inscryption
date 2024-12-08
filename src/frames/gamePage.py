@@ -28,8 +28,7 @@ class GamePage(Page):
             20, 
             10, 
             "buy_deck_card", 
-            self.controller, 
-            (lambda: self.get_hand_data,)
+            self.controller
         )
         buy_card_button.place(relx=0.90, rely=0.70, relwidth=0.05, relheight=0.05)
 

@@ -399,13 +399,50 @@ class Controller(DogPlayerInterface):
             field_card.bind("<Button-1>", lambda e: None)
 
     def buy_deck_card(self):
-        # comprar uma carta
-        pass
+        # Get the top card from the deck
+        top_card = self._table.buy_deck_card()
+        if top_card:
+            
+            # Update the UI
+            game_page = self.get_frame("GamePage")
+            if game_page:
+                self.update_hand_UI(game_page)
+                messagebox.showinfo("Inscryption", "Você comprou uma carta do deck")
+        else:
+            messagebox.showinfo("Inscryption", "O deck está vazio")
+
+    def update_hand_UI(self, game_page):
+        hand_dict = {idx: {
+            "name": card.get_name(),
+            "damage": card.get_damage(),
+            "life": card.get_hp()
+        } for idx, card in self.get_local_hand().items()}
+        
+        for row in range(3):
+            for col in range(3):
+                index = row * 3 + col
+                if index in hand_dict:
+                    card_data = hand_dict[index]
+                    card_label = f"{card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
+                else:
+                    card_label = "Empty"
+                
+                container_card = game_page.cards_hand_containers[row][col]
+                for widget in container_card.winfo_children():
+                    if isinstance(widget, tk.Label):
+                        widget.config(text=card_label)
 
     def buy_squirrel_card(self):
-        # comprar um esquilo
-        pass
-
+        # Get the top squirrel card from the deck
+        squirrel_card = self._table.buy_squirrel_card()
+        if squirrel_card:
+            # Update the UI
+            game_page = self.get_frame("GamePage")
+            if game_page:
+                self.update_hand_UI(game_page)
+                messagebox.showinfo("Inscryption", "Você comprou um Esquilo")
+        else:
+            messagebox.showinfo("Inscryption", "Não há Esquilos disponíveis")
     def update_gui(self):
         # atualizar a interface grafica
         pass
