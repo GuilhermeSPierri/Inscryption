@@ -10,6 +10,9 @@ class GamePage(Page):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._hand_data = {}
+        self._local_field_data = {}
+        self._remote_field_data = {}
 
     def create_widgets(self):
         self.selected_card = None

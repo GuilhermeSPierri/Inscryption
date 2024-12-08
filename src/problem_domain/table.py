@@ -1,6 +1,8 @@
 from problem_domain.player import Player
 from problem_domain.field import Field
 from problem_domain.scale import Scale
+from problem_domain.deck import Deck
+import random
 
 class Table:
     def __init__(self):
@@ -38,8 +40,18 @@ class Table:
     def clear_table(self):
         pass
 
-    def start_match(self, players: int, local_player_id: str):
+    def start_match(self, players: str, local_player_id: str):
         # Logic to initialize the match
+        self._local_player.reset()
+        self._remote_player.reset()
+        self._local_player.initialize(1, local_player_id, "Local Player")
+        self._remote_player.initialize(2, "remote", "Remote Player")
+        self._local_deck = self._local_player.get_deck()
+        self._remote_deck = self._remote_player.get_deck()
+        self._local_deck = self.shuffle_deck(self._local_deck)
+        self._remote_deck = self.shuffle_deck(self._remote_deck)
+        self._local_player.initial_hand(self._local_deck)
+        self._remote_player.initial_hand(self._remote_deck)
         return players
 
     def get_number_cards_local_deck(self):
@@ -86,8 +98,22 @@ class Table:
         self._remote_deck = deck
 
     def shuffle_deck(self, deck: object) -> object:
-        # Logic to shuffle a deck
-        return deck 
+        positions = []
+
+        for i in range(20):
+            positions.append(i)
+
+        random.shuffle(positions)
+        shuffled_deck = Deck()
+
+        shuffled_deck_cards = []
+        deck_cards = deck.get_card_list()
+        for j in range(len(positions)):
+            shuffled_deck_cards.insert(positions[j], deck_cards[j])
+
+        shuffled_deck.set_card_list(shuffled_deck_cards)
+
+        return shuffled_deck
 
     def pass_turn(self):
         # Logic to pass the turn
@@ -107,8 +133,6 @@ class Table:
         
         return winner
             
-
-
     # Novos métodos adicionados na ordem da imagem
     def select_position(self): 
         pass
@@ -135,10 +159,11 @@ class Table:
         pass
 
     def get_position_in_field(self, position_in_field: int): 
-        pass
+        return self._local_field.get_position_in_field(position_in_field)
+        
 
     def get_position_in_hand(self, position_in_hand: int): 
-        pass
+        return self._local_player.get_hand().get_position_in_hand(position_in_hand)
 
     def clear_selected_card(self): 
         pass
@@ -161,13 +186,13 @@ class Table:
     def get_field_card(self, position): 
         pass
 
-    def execute_attack(self, damage, hp): 
+    def execute_attack(self, damage, life): 
         pass
 
     def invoke_card_in_field(self, move): 
         pass
 
-    def set_hp_card(self, card, hp): 
+    def set_life_card(self, card, life): 
         pass
 
     def get_remote_field_card(self, position): 
@@ -188,8 +213,9 @@ class Table:
     def update_scale(self, a_move: dict): 
         pass
 
-    def deal_damage(self, remote_card_hp: int, damage: int): 
+    def deal_damage(self, remote_card_life: int, damage: int): 
         pass
 
     def activate_glyph(self, card): 
         pass
+

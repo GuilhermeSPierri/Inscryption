@@ -1,10 +1,11 @@
 from problem_domain.deck import Deck
+from problem_domain.hand import Hand
 
 class Player:
     def __init__(self):
         # Atributos privados
         self._bone = 0  # int
-        self._hand = None  # Hand (assume que Hand é uma classe)
+        self._hand = Hand()
         self._my_turn = False  # boolean
         self._identifier = ""  # string
         self._symbol = 0  # int
@@ -20,7 +21,6 @@ class Player:
         self._my_turn = False
         self._identifier = ""
         self._symbol = 0
-        self._my_deck = None
         self._name = ""
 
     def initialize(self, symbol: int, identifier: str, name: str) -> None:
@@ -67,3 +67,10 @@ class Player:
     def add_buy_token(self, amount: int) -> None:
         """Adiciona fichas de compra ao jogador."""
         self._bone += amount
+
+    def get_hand(self) -> object:
+        return self._hand
+    
+    def initial_hand(self, deck):
+        for _ in range(3):
+            self.add_card_to_hand(deck.get_top_card())

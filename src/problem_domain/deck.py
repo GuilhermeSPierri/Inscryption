@@ -16,7 +16,7 @@ class Deck:
     def generate_deck(self) -> 'Deck':
         """Gera um deck com base em uma lista de cartas."""
         list_of_cards = []
-        for _ in range(9):
+        for _ in range(20):
             list_of_cards.append(SquirrelCard("Squirrel", 1, 0,None, 1))
         self._card_list = list_of_cards
         return self
@@ -38,6 +38,11 @@ class Deck:
     def get_card_list(self) -> list:
         """Retorna a lista de cartas no deck."""
         return self._card_list
+    
+    def get_top_card(self) -> 'Card':
+        if self._card_list:
+            return self._card_list.pop(0)
+        return None
 
     def set_card_list(self, card_list: list) -> None:
         """Define a lista de cartas do deck."""

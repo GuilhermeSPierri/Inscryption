@@ -16,3 +16,9 @@ class Position:
         :return: Card object or None if the position is empty.
         """
         return self._card
+    
+    def set_hand(self):
+        self._hand = True
+
+    def set_field(self):
+        self._field = True

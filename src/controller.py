@@ -1,4 +1,5 @@
 import tkinter as tk
+from functools import partial
 from tkinter import messagebox
 from tkinter import simpledialog
 from frames.startPage import StartPage  
@@ -38,25 +39,96 @@ class Controller(DogPlayerInterface):
     def create_hand_UI(self, page, container):
         for row in range(3):
             for col in range(3):
-                container_card = self.create_container_grid(container, f"Container {row} {col}", 10, 10, row, col, f"Item {row * 3 + col + 1}")
-                container_card.bind("<Button-1>", lambda e, r=row, c=col: self.select_card(page, r, c))
+                index = row * 3 + col
+                container_card = self.create_container_grid(
+                    container,
+                    f"Container {row} {col}",
+                    10,
+                    10,
+                    row,
+                    col,
+                    f"Item {row * 3 + col + 1}"
+                )
+                # Bind using partial to ensure correct row and col are passed
+                container_card.bind(
+                    "<Button-1>",
+                    lambda event, page=page, position_in_field=None, position_in_hand=index: 
+                    self.select_position(page, position_in_field, position_in_hand, event)
+                )
 
                 if len(page.cards_hand_containers) <= row:
                     page.cards_hand_containers.append([])
                 page.cards_hand_containers[row].append(container_card)
 
+
     def create_field_UI(self, page, container):
         for row in range(3):
-            if row == 1:
+            if row == 1:  # Skip the middle row as per your logic
                 page.cards_field_containers.append([])
                 continue
+
             for col in range(4):
-                container_card = self.create_container_grid(container, f"Container {row} {col}", 10, 10, row, col, f"Item {row * 3 + col + 1}")
-                container_card.bind("<Button-1>", lambda e, r=row, c=col: self.transfer_card(page, r, c))
+                container_card = self.create_container_grid(
+                    container,
+                    f"Container {row} {col}",
+                    10,
+                    10,
+                    row,
+                    col,
+                    f"Item {row * 3 + col + 1}"
+                )
+                # Bind using partial to ensure correct row and col are passed
+                container_card.bind(
+                    "<Button-1>",
+                    lambda event, page=page, position_in_field=col, position_in_hand=None: 
+                    self.select_position(page, position_in_field, position_in_hand, event)
+                )
+
 
                 if len(page.cards_field_containers) <= row:
                     page.cards_field_containers.append([])
                 page.cards_field_containers[row].append(container_card)
+
+    def select_card(self, page, row, col):
+        turn_player = self.table._local_player.get_turn() #bool 
+        turn_player = True #teste
+
+        if turn_player:
+            #selected_card = selected_position
+            pass
+        if page.selected_card:
+            prev_row, prev_col = page.selected_card
+            page.cards_hand_containers[prev_row][prev_col].config(bg="SystemButtonFace")
+            page.cards_hand_containers[row][col].config(bg="SystemButtonFace")
+            page.selected_card = None
+        
+        else:
+            page.cards_hand_containers[row][col].config(bg="yellow")
+            page.selected_card = (row, col)
+
+    def select_position(self, page, position_in_field = None, position_in_hand = None, event = None):
+        print(f"Page: {page}, Position in Field: {position_in_field}, Position in Hand: {position_in_hand}")
+        turn_player = self.table._local_player.get_turn() #bool
+        turn_player = True #teste
+
+        if position_in_field != None:
+            if turn_player:
+                selected_position = self.table.get_position_in_field(position_in_field)
+                selected_position._field = True
+        if position_in_hand != None:
+            if turn_player:
+                selected_position = self.table.get_position_in_hand(position_in_hand)
+                selected_position._hand = True
+        
+        if turn_player:
+            occupied = self.table.check_position(selected_position)
+
+            if occupied:
+                #self.select_card(selected_position)
+                print("select card")
+            if not occupied and selected_position._field == True:
+                #self.invoke_card(selected_position)
+                print("invoke card")
 
     ################### Logic for the deck page ###################
 
@@ -242,41 +314,6 @@ class Controller(DogPlayerInterface):
 
     ######### Logic for the game page #########
 
-    def select_card(self, page, row, col):
-        turn_player = self.table._local_player.get_turn() #bool 
-        
-        if turn_player:
-            #selected_card = selected_position
-            pass
-        if page.selected_card:
-            prev_row, prev_col = page.selected_card
-            page.cards_hand_containers[prev_row][prev_col].config(bg="SystemButtonFace")
-            page.cards_hand_containers[row][col].config(bg="SystemButtonFace")
-            page.selected_card = None
-        
-        else:
-            page.cards_hand_containers[row][col].config(bg="yellow")
-            page.selected_card = (row, col)
-
-    def select_position(self, where, position_in_field: None, position_in_hand: None):
-        turn_player = self.table._local_player.get_turn() #bool
-
-        if position_in_field != None:
-            if turn_player:
-                selected_position = self.table.get_position_in_field(position_in_field)
-        if position_in_hand != None:
-            if turn_player:
-                selected_position = self.table.get_position_in_hand(position_in_hand)
-        
-        if turn_player:
-            occupied = self.table.check_position(selected_position)
-
-            if occupied:
-                self.select_card(selected_position)
-            if not occupied and selected_position._field == True:
-                self.invoke_card(selected_position)
-
-
     def transfer_card(self, page, row, col):
         if page.selected_card:
             if page.occupied_slots[row][col]:
@@ -344,6 +381,9 @@ class Controller(DogPlayerInterface):
         message = start_status.get_message()
         messagebox.showinfo(message=message)
         if message == "Partida iniciada":
+            self.table.start_match(2, 1)
+            game_page = self.get_frame("GamePage")
+            game_page.reset_page()
             self.show_frame("GamePage")
 
     def receive_start(self, start_status):
