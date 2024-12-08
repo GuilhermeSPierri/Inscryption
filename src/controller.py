@@ -137,13 +137,13 @@ class Controller(DogPlayerInterface):
         all_cards_dict = {idx: {
             "name": card.get_name(),
             "damage": card.get_damage(),
-            "life": card.get_life()
+            "life": card.get_hp()
         } for idx, card in self.get_all_cards().items()}
 
         deck_info_dict = {idx: {
             "name": card.get_name(),
             "damage": card.get_damage(),
-            "life": card.get_life()
+            "life": card.get_hp()
         } for idx, card in self.get_deck_info().items()}
 
         page.set_all_cards_data(all_cards_dict)
