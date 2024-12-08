@@ -22,13 +22,21 @@ class GamePage(Page):
         start_page_button = Button(self, "Desistir da partida", 200, 100, "receive_withdrawal_notification", self.controller)
         start_page_button.place(relx=0.90, rely=0.05, relwidth=0.05, relheight=0.05)
 
-        buy_card_button = Button(self, "Comprar Carta", 200, 100, "buy_card_interface", self.controller)
+        buy_card_button = Button(
+            self, 
+            "Comprar Carta do Deck", 
+            20, 
+            10, 
+            "buy_deck_card", 
+            self.controller, 
+            (lambda: self.get_hand_data,)
+        )
         buy_card_button.place(relx=0.90, rely=0.70, relwidth=0.05, relheight=0.05)
 
-        buy_squirrel_button = Button(self, "Comprar Esquilo", 200, 100, "buy_card_interface", self.controller)
+        buy_squirrel_button = Button(self, "Comprar Esquilo", 200, 100, "buy_squirrel_card", self.controller)
         buy_squirrel_button.place(relx=0.90, rely=0.80, relwidth=0.05, relheight=0.05)
 
-        pass_turn_button = Button(self, "Pular Turno", 200, 100, "pass_turn", self.controller)
+        pass_turn_button = Button(self, "Passar Turno", 200, 100, "pass_turn", self.controller)
         pass_turn_button.place(relx=0.90, rely=0.50, relwidth=0.05, relheight=0.05)
 
         container_hand = tk.Frame(self, bg="lightgrey", relief=tk.RAISED, borderwidth=2)
@@ -65,6 +73,9 @@ class GamePage(Page):
 
         # Recria a UI
         self.create_widgets()
+
+    def get_hand_data(self):
+        return self._hand_data
 
 
         

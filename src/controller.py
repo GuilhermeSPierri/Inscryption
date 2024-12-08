@@ -127,7 +127,6 @@ class Controller(DogPlayerInterface):
             return
 
         selected_card = self._table.select_card(selected_position)
-        print(f"Selected card: {selected_card}")
         
         row = position_in_hand // 3
         col = position_in_hand % 3
@@ -177,10 +176,8 @@ class Controller(DogPlayerInterface):
             if occupied:
                 #self.select_card(selected_position)
                 self.select_card(page, selected_position, position_in_hand)
-                print("select card")
             if not occupied and selected_position._field == True:
                 self.invoke_card(selected_position, position_in_field, turn_player)
-                print("invoke card")
         else :
             pass
 
@@ -281,7 +278,7 @@ class Controller(DogPlayerInterface):
                     print(f"Added card '{card_data['name']}' to the deck at ({row}, {col})")
                     return
 
-        print("No empty slots available in the deck.")
+        messagebox.showinfo("Deck cheio", "Seu deck já possui o tamanho máximo")
 
     def remove_card_from_deck_UI(self, card_index, page):
         # Calculate row and column
@@ -422,6 +419,7 @@ class Controller(DogPlayerInterface):
         pass
 
     def buy_card_interface(self):
+        self._table.b
         messagebox.showinfo("Inscryption", "Voce comprou uma carta")
 
     def pass_turn(self):
@@ -468,15 +466,29 @@ class Controller(DogPlayerInterface):
             card_label = f"{card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
 
             # Update the field container with the card data
-            game_page.cards_field_containers[row][col].config(text=card_label, bg="lightblue")
+            container = game_page.cards_field_containers[row][col]
+            container.config(bg="lightblue")
+
+            for widget in container.winfo_children():
+                if isinstance(widget, tk.Label):
+                    widget.config(text=card_label)
 
             # Ensure the card is no longer in the hand
+            print(f"Selected card: {game_page.selected_card}")
             if game_page.selected_card:
                 hand_row, hand_col = game_page.selected_card
-                game_page.cards_hand_containers[hand_row][hand_col].config(bg="SystemButtonFace", text="Empty")
+                # Reset the container in the hand to its original state
+                container = game_page.cards_hand_containers[hand_row][hand_col]
+                container.config(bg="SystemButtonFace")  # Reset the background
+                
+                # Update the tk.Label (textLabel) inside the container
+                for widget in container.winfo_children():
+                    if isinstance(widget, tk.Label):  # Check if the child is the textLabel
+                        widget.config(text="Empty")
+                
                 game_page.selected_card = None
 
-    def get_card_by_id(self, id):
+    def get_card_by_id(self, id):   
         return self.library.get_card(id)
 
     ######### Logic for the dog #########
