@@ -42,5 +42,4 @@ class Field:
 
     def get_card_in_position(self, position):
         if position in self._positions:
-            return position.card
-        raise ValueError("Invalid position")
+            return position.get_card()

@@ -200,8 +200,17 @@ class Table:
     def get_field_card(self, position): 
         pass
 
-    def execute_attack(self, damage, life): 
-        pass
+    def execute_attack(self, damage, life, local_card, remote_card): 
+        remaing_hp, is_alive = self.deal_damage(life, damage)
+
+        if is_alive:
+            remote_card.set_hp(remaing_hp)
+            self.activate_glyph(local_card)
+
+        else:
+            self._remote_field.remove_card_from_field(remote_card)
+            self.activate_glyph(local_card)
+
 
     def invoke_card_in_field(self, move): 
         pass
@@ -213,10 +222,8 @@ class Table:
         pass
 
     def get_remote_field_card_in_position(self, position): 
-        pass
+        self._remote_field.get_card_in_position(position)
 
-    def check_for_winner(self): 
-        pass
 
     def update_local_field(self, a_move: dict): 
         pass
@@ -228,7 +235,15 @@ class Table:
         pass
 
     def deal_damage(self, remote_card_life: int, damage: int): 
-        pass
+        remaining_hp = remote_card_life - damage
+        
+        if remaining_hp <= 0:
+            is_alive = False
+
+        else:
+            is_alive = True
+
+        return remaining_hp, is_alive
 
     def activate_glyph(self, card): 
         glyph = card.get_glyph()
@@ -255,3 +270,37 @@ class Table:
         list_of_cards = []
         self._local_deck.set_card_list(list_of_cards)
         self._local_player.set_deck(self._local_deck)
+
+    def get_field_card_in_position(self, position):
+        return self._local_field.get_card_in_position(position)
+    
+    def get_damage(self, card):
+        return card.get_damage()
+
+    def get_hp(self, card):
+        return card.get_hp()
+    
+    def skip_turn(self):
+        for i in range(4):
+            local_card = self.get_field_card_in_position(i)
+
+            if local_card != None:
+                remote_card = self.get_remote_field_card_in_position(i)
+
+                damage = self.get_damage(local_card)
+
+                if remote_card != None:
+                    remote_card_hp = self.get_hp(remote_card)
+                    self.execute_attack(damage, remote_card_hp, local_card, remote_card)
+                
+                else:
+                    player = "local_player" #NÃO ESTÁ IMPLEMENTADO AINDA COM O DOG, NÃO SEI COMO SERIA OBTIDO
+                    self._scale.add_points(damage, player) #NÃO ESTÁ IMPLEMENTADO AINDA COM O DOG, NÃO SEI COMO SERIA OBTIDO
+                    self.activate_glyph(local_card)
+        
+        self._local_player.pass_turn()
+        self._remote_player.pass_turn()
+        self._local_player.add_buy_token(1)
+        self._remote_player.add_buy_token(1)
+        winner = self.check_for_winner()
+        return winner
