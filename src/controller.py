@@ -16,7 +16,8 @@ class Controller(DogPlayerInterface):
         super().__init__(*args, **kwargs)
         self.library = Library()
         self.frames = {}
-        self.table = Table()
+        self._table = Table()
+        self._players = None
         self.pages = [StartPage, GamePage, DeckPage] # Add a new page here
         player_name = simpledialog.askstring(title="Player identification", prompt="Qual o seu nome?")
         self.dog_server_interface = DogActor()
@@ -37,46 +38,58 @@ class Controller(DogPlayerInterface):
     ######### Logic for the game page #########
     
     def create_hand_UI(self, page, container):
-        hand_dict = {idx: {
-            "name": card.get_name(),
-            "damage": card.get_damage(),
-            "life": card.get_hp()
-        } for idx, card in self.get_local_hand().items()}
 
-        for row in range(3):
-            for col in range(3):
-                index = row * 3 + col
-                
-                # Check if the index exists in hand_data
-                if index in hand_dict:
-                    card_data = hand_dict[index]
-                    card_label = f"{card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
-                else:
-                    # Empty slot for unavailable indices
-                    card_label = "Empty"
-                
-                # Create the card container
-                container_card = self.create_container_grid(
-                    container,
-                    f"Container {row} {col}",
-                    10,
-                    10,
-                    row,
-                    col,
-                    card_label
-                )
-                
-                # Bind the click event for card selection
-                container_card.bind(
-                    "<Button-1>",
-                    lambda event, page=page, position_in_field=None, position_in_hand=index: 
-                    self.select_position(page, position_in_field, position_in_hand, event)
-                )
+        if self._players:
+            print("self_players = ", self._players[0][1], "table_local_player: ", self._table._local_player.get_id())
+            print("self_players = ", self._players[1][1], "table_remote_player: ", self._table._remote_player.get_id())
+            if self._players[0][1] == self._table._local_player.get_id():
+                hand_dict = {idx: {
+                    "name": card.get_name(),
+                    "damage": card.get_damage(),
+                    "life": card.get_hp()
+                } for idx, card in self.get_local_hand().items()}
 
-                # Ensure the cards_hand_containers list structure is maintained
-                if len(page.cards_hand_containers) <= row:
-                    page.cards_hand_containers.append([])
-                page.cards_hand_containers[row].append(container_card)
+            elif self._players[1][1] == self._table._local_player.get_id():
+                hand_dict = {idx: {
+                    "name": card.get_name(),
+                    "damage": card.get_damage(),
+                    "life": card.get_hp()
+                } for idx, card in self.get_remote_hand().items()}
+
+            for row in range(3):
+                for col in range(3):
+                    index = row * 3 + col
+                    
+                    # Check if the index exists in hand_data
+                    if index in hand_dict:
+                        card_data = hand_dict[index]
+                        card_label = f"{card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
+                    else:
+                        # Empty slot for unavailable indices
+                        card_label = "Empty"
+                    
+                    # Create the card container
+                    container_card = self.create_container_grid(
+                        container,
+                        f"Container {row} {col}",
+                        10,
+                        10,
+                        row,
+                        col,
+                        card_label
+                    )
+                    
+                    # Bind the click event for card selection
+                    container_card.bind(
+                        "<Button-1>",
+                        lambda event, page=page, position_in_field=None, position_in_hand=index: 
+                        self.select_position(page, position_in_field, position_in_hand, event)
+                    )
+
+                    # Ensure the cards_hand_containers list structure is maintained
+                    if len(page.cards_hand_containers) <= row:
+                        page.cards_hand_containers.append([])
+                    page.cards_hand_containers[row].append(container_card)
 
 
 
@@ -109,7 +122,7 @@ class Controller(DogPlayerInterface):
                 page.cards_field_containers[row].append(container_card)
 
     def select_card(self, page, row, col):
-        turn_player = self.table._local_player.get_turn() #bool 
+        turn_player = self._table._local_player.get_turn() #bool 
         turn_player = True #teste
 
         if turn_player:
@@ -127,21 +140,21 @@ class Controller(DogPlayerInterface):
 
     def select_position(self, page, position_in_field = None, position_in_hand = None, event = None):
         
-        turn_player = self.table._local_player.get_turn() #bool
+        turn_player = self._table._local_player.get_turn() #bool
 
         if position_in_field != None:
             if turn_player:
-                selected_position = self.table.get_position_in_field(position_in_field)
+                selected_position = self._table.get_position_in_field(position_in_field)
                 selected_position._field = True
                 print(f"Page: {page}, Position in Field: {position_in_field}, Position in Hand: {position_in_hand}")
         if position_in_hand != None:
             if turn_player:
-                selected_position = self.table.get_position_in_hand(position_in_hand)
+                selected_position = self._table.get_position_in_hand(position_in_hand)
                 selected_position._hand = True
                 print(f"Page: {page}, Position in Field: {position_in_field}, Position in Hand: {position_in_hand}")
         
         if turn_player:
-            occupied = self.table.check_position(selected_position)
+            occupied = self._table.check_position(selected_position)
 
             if occupied:
                 #self.select_card(selected_position)
@@ -280,10 +293,10 @@ class Controller(DogPlayerInterface):
         deck_data = deck_data_func()
         try:
             if len(deck_data) == 20:
-                self.table._local_deck.reset_deck()
+                self._table._local_deck.reset_deck()
                 for _, card_dict in deck_data.items():
                     card_object = self.library.get_card(card_dict["name"])
-                    self.table._local_deck.add_card_to_deck(card_object)
+                    self._table._local_deck.add_card_to_deck(card_object)
                 messagebox.showinfo("Deck salvo", "Deck salvo com sucesso")
 
                 # Atualiza a interface da GamePage
@@ -296,24 +309,21 @@ class Controller(DogPlayerInterface):
         except:
             pass
 
-
-
-
     ######### Logic for the library #########
 
     def get_all_cards(self):
         return self.library.get_all_cards()
     
     def get_deck_info(self):
-        deck = self.table.get_local_deck()
+        deck = self._table.get_local_deck()
         return {idx: card for idx, card in enumerate(deck.get_card_list())}
     
     def get_local_hand(self):
-        hand = self.table.get_local_hand()
+        hand = self._table.get_local_hand()
         return {idx: card for idx, card in enumerate(hand.get_card_list())}
     
     def get_remote_hand(self):
-        hand = self.table.get_remote_hand()
+        hand = self._table.get_remote_hand()
         return {idx: card for idx, card in enumerate(hand.get_card_list())}
 
     ######### Logic for all the pages #########
@@ -394,7 +404,7 @@ class Controller(DogPlayerInterface):
         messagebox.showinfo("Inscryption", "Voce comprou uma carta")
 
     def skip_turn(self):
-        winner = self.table.skip_turn()
+        winner = self._table.skip_turn()
 
         # PRA BAIXO, ESTARIA EM PLAYERINTERFACE, MAS DO JEITO QUE A IMPLEMENTAÇÃO ESTÁ, NÃO DÁ PRA FAZER ISSO
         if winner != "":
@@ -406,7 +416,7 @@ class Controller(DogPlayerInterface):
                 self.show_frame("StartPage")
         elif winner == "":
             self.dog_server_interface.proxy.send_move("NÃO ESTOU INTEGRADO COM O DOG, PRECISO SER O DICT") #TEM QUE INTEGRAR COM O DOG_SERVER_INTERFACE
-            self.table.get_status()
+            self._table.get_status()
             self.update_gui("NÃO ESTOU INTEGRADO COM O DOG, PRECISO SER O DICT")
 
 
@@ -438,10 +448,12 @@ class Controller(DogPlayerInterface):
             messagebox.showinfo(message=message)
         elif code == "2":
             players = start_status.get_players()
-            self.table.start_match(players)
+            self._players = players
+            self._table.start_match(players)
             game_page = self.get_frame("GamePage")
             game_page.reset_page()
             self.show_frame("GamePage")
+            
 
     def receive_start(self, start_status):
         print(f'Remote Player Id: {start_status.get_local_id()}-------------')
@@ -449,6 +461,8 @@ class Controller(DogPlayerInterface):
         messagebox.showinfo(message=message)
         if message == "Partida iniciada":
             players = start_status.get_players()
+            self._players = players
+            self._table.start_match(players)
             game_page = self.get_frame("GamePage")
             game_page.reset_page()
             self.show_frame("GamePage")

@@ -76,3 +76,6 @@ class Player:
 
     def pass_turn(self):
         self._my_turn = not self._my_turn
+
+    def get_id(self) -> str:
+        return self._id
