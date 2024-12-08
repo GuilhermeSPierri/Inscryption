@@ -6,13 +6,11 @@ class Field:
         self._sacrifice_cards = []
         for _ in range(4):
             position = Position()
-            position.set_field()
+            position.set_field(True)
             self._positions.append(position)
 
     def get_position_in_field(self, position_in_field: int) -> Position:
-        if 0 <= position_in_field < len(self._positions):
-            return self._positions[position_in_field]
-        raise IndexError("Position index out of range")
+        return self._positions[position_in_field]
 
     def append_to_sacrifice_cards(self, selected_card):
         self._sacrifice_cards.append(selected_card)
@@ -36,7 +34,8 @@ class Field:
 
     def invoke_card_in_position(self, card, selected_position):
         if selected_position in self._positions:
-            selected_position.card = card
+            selected_position.set_card(card)
+            print("Card ", card,  " invoked in position ", selected_position)
         else:
             raise ValueError("Invalid position")
 

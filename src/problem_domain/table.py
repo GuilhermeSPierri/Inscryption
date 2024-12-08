@@ -35,8 +35,10 @@ class Table:
         }
     
     def get_turn_player(self):
-        # Assuming the turn player logic
-        return self._local_player if self._game_status == "local_turn" else self._remote_player
+        if self._remote_player.get_turn():
+            return self._remote_player
+        elif self._local_player.get_turn():
+            return self._local_player
 
     def clear_table(self):
         pass
@@ -167,15 +169,60 @@ class Table:
         pass
 
     def select_card(self, selected_position): 
-        pass
+        turn_player = self.get_turn_player()
+        print(f'Turn player: {turn_player}')
+        selected_card = None
+        if turn_player:
+            print('aaaaaaaaaaaaaa')
+            selected_card = selected_position.get_card()
+            already_selected = selected_card.get_already_selected()
+            hand = turn_player.get_hand()
+            invocation_card = hand.get_invocation_card()
+            if turn_player == self._local_player:
+                print('bbbbbbbbbbbb')
+                field = self._local_field
+            elif turn_player == self._remote_player:
+                print('cccccccccccc')
+                field = self._remote_field
+            if already_selected:
+                print('dddddddddddd')
+                origin = selected_position.get_origin()
+                if origin == "field":
+                    print('eeeeeeeeeeeee')
+                    self._local_field.remove_from_sacrifice_cards(selected_card)
+                    selected_card.clear_already_selected()
+                    selected_card = None
+                    #self.clear_selected_card()
+                elif origin == "hand":
+                    print('fffffffffffff')
+                    hand.clear_invocation_card()
+                    selected_card.clear_already_selected()
+                    selected_card = None
+                    #self.clear_selected_card()
+            else:
+                print('ggggggggggggggggg')
+                if selected_card in hand.get_card_list() and invocation_card == None:
+                    print('hhhhhhhhhhhhh')
+                    hand.set_invocation_card(selected_card)
+                    selected_card.set_already_selected()
+                
+                elif selected_card == field.get_card_in_position(selected_position):
+                    print('iiiiiiiiiiiiii')
+                    field.append_to_sacrifice_cards(selected_card)
+                    selected_card.set_already_selected()
+                
+                else:
+                    print('kkkkkkkkkkkkkkkkk')
+                    field.clear_sacrifice_cards()
+                    hand.clear_invocation_card()
+            return selected_card
 
     def check_position(self, selected_position): 
-        pass
+        return selected_position.get_occupied()
 
     def get_position_in_field(self, position_in_field: int): 
         return self._local_field.get_position_in_field(position_in_field)
         
-
     def get_position_in_hand(self, position_in_hand: int): 
         return self._local_player.get_hand().get_position_in_hand(position_in_hand)
 
@@ -185,7 +232,34 @@ class Table:
     def get_origin_of_card(self, selected_card): 
         pass
 
-    def invoke_card(self, selected_position): 
+    def invoke_card(self, selected_position, player): 
+        hand = player.get_hand()
+        if player.get_id() == self._local_player.get_id():
+            print(111111111111111111111111)
+            field = self._local_field
+        elif player.get_id() == self._remote_player.get_id():
+            print(222222222222222222222222)
+            field = self._remote_field
+        
+        invocation_card = hand.get_invocation_card()
+        if invocation_card != None:
+            print(333333333333333333333333)
+            cost_invocation = invocation_card.get_cost()
+            sacrifice_cards = field.get_sacrifice_cards()
+            print(len(sacrifice_cards))
+            if cost_invocation == len(sacrifice_cards):
+                print(4444444444444444444444444444)
+                for card in sacrifice_cards:
+                    field.remove_card_from_field(card)
+                field.clear_sacrifice_cards()
+                for card in hand.get_card_list():
+                    if card == invocation_card:
+                        print(555555555555555555555555555)
+                        hand.remove_from_hand(card)
+                        break
+                field.invoke_card_in_position(invocation_card, selected_position)
+                hand.clear_invocation_card()
+                self.clear_selected_position()
         pass
 
     def clear_selected_position(self): 

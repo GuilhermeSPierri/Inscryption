@@ -121,47 +121,68 @@ class Controller(DogPlayerInterface):
                     page.cards_field_containers.append([])
                 page.cards_field_containers[row].append(container_card)
 
-    def select_card(self, page, row, col):
-        turn_player = self._table._local_player.get_turn() #bool 
-        turn_player = True #teste
+    def select_card(self, page, selected_position, position_in_hand):
+        if position_in_hand is None:
+            print("Error: position_in_hand is None")
+            return
 
-        if turn_player:
-            #selected_card = selected_position
-            pass
-        if page.selected_card:
-            prev_row, prev_col = page.selected_card
-            page.cards_hand_containers[prev_row][prev_col].config(bg="SystemButtonFace")
-            page.cards_hand_containers[row][col].config(bg="SystemButtonFace")
-            page.selected_card = None
+        selected_card = self._table.select_card(selected_position)
+        print(f"Selected card: {selected_card}")
         
-        else:
+        row = position_in_hand // 3
+        col = position_in_hand % 3
+
+        if page.selected_card:  # Check if there is already a selected card
+            prevrow, prevcol = page.selected_card
+            # Deselect the previously selected card
+            page.cards_hand_containers[prevrow][prevcol].config(bg="SystemButtonFace")
+
+            # If clicking the same card again, just deselect it
+            if (row, col) == (prevrow, prevcol):
+                page.selected_card = None
+                return
+        
+        if selected_card is not None:
+            # Highlight the new selected card
             page.cards_hand_containers[row][col].config(bg="yellow")
             page.selected_card = (row, col)
+        else:
+            # If no card is selected, reset selection
+            page.selected_card = None
+
+        
+        
 
     def select_position(self, page, position_in_field = None, position_in_hand = None, event = None):
         
-        turn_player = self._table._local_player.get_turn() #bool
+        turn_player = self._table.get_turn_player()#bool
 
         if position_in_field != None:
-            if turn_player:
+            #if turn_player:
                 selected_position = self._table.get_position_in_field(position_in_field)
                 selected_position._field = True
                 print(f"Page: {page}, Position in Field: {position_in_field}, Position in Hand: {position_in_hand}")
         if position_in_hand != None:
-            if turn_player:
+            #if turn_player:
                 selected_position = self._table.get_position_in_hand(position_in_hand)
                 selected_position._hand = True
+                
                 print(f"Page: {page}, Position in Field: {position_in_field}, Position in Hand: {position_in_hand}")
         
-        if turn_player:
+        if turn_player.get_id() == self._players[0][1]:
             occupied = self._table.check_position(selected_position)
+            print(f"Occupied: {occupied}")
+            print(f'Turn player id: {turn_player.get_id()}')
 
             if occupied:
                 #self.select_card(selected_position)
+                self.select_card(page, selected_position, position_in_hand)
                 print("select card")
             if not occupied and selected_position._field == True:
-                #self.invoke_card(selected_position)
+                self.invoke_card(selected_position, position_in_field, turn_player)
                 print("invoke card")
+        else :
+            pass
 
     ################### Logic for the deck page ###################
 
@@ -404,7 +425,7 @@ class Controller(DogPlayerInterface):
         messagebox.showinfo("Inscryption", "Voce comprou uma carta")
 
     def pass_turn(self):
-        winner = self.table.pass_turn()
+        winner = self._table.pass_turn()
 
         # PRA BAIXO, ESTARIA EM PLAYERINTERFACE, MAS DO JEITO QUE A IMPLEMENTAÇÃO ESTÁ, NÃO DÁ PRA FAZER ISSO
         if winner != "":
@@ -430,9 +451,30 @@ class Controller(DogPlayerInterface):
 
     ######### Logic for the player #########
 
-    def invoke_card(self, card):
-        # invocar a carta
-        pass
+    def invoke_card(self, selected_position, position_in_field, player):
+        self._table.invoke_card(selected_position, player)
+
+        # Update the field UI to reflect the invoked card
+        game_page = self.get_frame("GamePage")
+        if game_page:
+            row = 0 if position_in_field < 4 else 2  # Determine the row based on position
+            col = position_in_field % 4
+
+            card_data = {
+                "name": selected_position.get_card().get_name(),
+                "damage": selected_position.get_card().get_damage(),
+                "life": selected_position.get_card().get_hp()
+            }
+            card_label = f"{card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
+
+            # Update the field container with the card data
+            game_page.cards_field_containers[row][col].config(text=card_label, bg="lightblue")
+
+            # Ensure the card is no longer in the hand
+            if game_page.selected_card:
+                hand_row, hand_col = game_page.selected_card
+                game_page.cards_hand_containers[hand_row][hand_col].config(bg="SystemButtonFace", text="Empty")
+                game_page.selected_card = None
 
     def get_card_by_id(self, id):
         return self.library.get_card(id)
@@ -475,4 +517,3 @@ class Controller(DogPlayerInterface):
     def make_withdrawal(self):
         self.dog_server_interface.make_withdrawal()
         self.show_frame("StartPage")
-        

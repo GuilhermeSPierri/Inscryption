@@ -9,6 +9,7 @@ class Card(ABC):
         self._glyph = glyph
         self._name = name
         self._type = type
+        self._already_selected = False
 
     @abstractmethod
     def attack(self, target):
@@ -18,13 +19,16 @@ class Card(ABC):
         return self._damage
     
     def get_already_selected(self):
-        pass
+        return self._already_selected
+    
+    def set_already_selected(self):
+        self._already_selected = True
 
     def clear_already_selected(self):
-        pass
+        self._already_selected = False
 
     def get_cost(self):
-        pass
+        return self._cost
 
     def get_hp(self):
         return self._hp
