@@ -40,8 +40,6 @@ class Controller(DogPlayerInterface):
     def create_hand_UI(self, page, container):
 
         if self._players:
-            print("self_players = ", self._players[0][1], "table_local_player: ", self._table._local_player.get_id())
-            print("self_players = ", self._players[1][1], "table_remote_player: ", self._table._remote_player.get_id())
             if self._players[0][1] == self._table._local_player.get_id():
                 hand_dict = {idx: {
                     "name": card.get_name(),
@@ -122,64 +120,77 @@ class Controller(DogPlayerInterface):
                 page.cards_field_containers[row].append(container_card)
 
     def select_card(self, page, selected_position, position_in_hand):
-        if position_in_hand is None:
-            print("Error: position_in_hand is None")
-            return
-
         selected_card = self._table.select_card(selected_position)
-        
-        row = position_in_hand // 3
-        col = position_in_hand % 3
+       
+        if not hasattr(page, 'selected_cards'):
+            page.selected_cards = []
 
-        if page.selected_card:  # Check if there is already a selected card
-            prevrow, prevcol = page.selected_card
-            # Deselect the previously selected card
-            page.cards_hand_containers[prevrow][prevcol].config(bg="SystemButtonFace")
+        if selected_position.get_origin() == "hand":
+            # Deselect the previously selected card in hand
+            row = position_in_hand // 3
+            col = position_in_hand % 3
+
+            print(f"DENTRO DE SELECT_CARD = Selected card: {selected_card}", f"Position: {row} {col}", f"from {selected_position.get_origin()}")
 
             # If clicking the same card again, just deselect it
-            if (row, col) == (prevrow, prevcol):
+            if (row, col) == page.selected_card:
+                page.cards_hand_containers[row][col].config(bg="SystemButtonFace")
                 page.selected_card = None
                 return
-        
-        if selected_card is not None:
-            # Highlight the new selected card
-            page.cards_hand_containers[row][col].config(bg="yellow")
-            page.selected_card = (row, col)
-        else:
-            # If no card is selected, reset selection
-            page.selected_card = None
 
-        
-        
+            if page.selected_card:
+                prevrow, prevcol = page.selected_card
+                page.cards_hand_containers[prevrow][prevcol].config(bg="SystemButtonFace")
+                page.selected_card = (row, col)
 
-    def select_position(self, page, position_in_field = None, position_in_hand = None, event = None):
-        
-        turn_player = self._table.get_turn_player()#bool
+            # Highlight the new selected card in hand
+            if selected_card is not None:
+                page.cards_hand_containers[row][col].config(bg="yellow")
+                page.selected_card = (row, col)
+            else:
+                page.selected_card = None
 
-        if position_in_field != None:
-            #if turn_player:
-                selected_position = self._table.get_position_in_field(position_in_field)
-                selected_position._field = True
-                print(f"Page: {page}, Position in Field: {position_in_field}, Position in Hand: {position_in_hand}")
-        if position_in_hand != None:
-            #if turn_player:
-                selected_position = self._table.get_position_in_hand(position_in_hand)
-                selected_position._hand = True
-                
-                print(f"Page: {page}, Position in Field: {position_in_field}, Position in Hand: {position_in_hand}")
-        
-        if turn_player.get_id() == self._players[0][1]:
+        elif selected_position.get_origin() == "field":
+            # Deselect previously selected cards in the field
+            row = position_in_hand // 4
+            col = position_in_hand % 4
+
+            print(f"DENTRO DE SELECT_CARD = Selected card: {selected_card}", f"Position: {row} {col}", f"from {selected_position.get_origin()}")
+            
+            # If clicking the same card again, just deselect it
+            if (row, col) in page.selected_cards:
+                page.selected_cards.remove((row, col))
+                page.cards_field_containers[row][col].config(bg="lightblue")
+                return
+
+            # Highlight the new selected card in the field
+            if selected_card is not None:
+                print(f"DENTRO DO IF LA: Selected card: {selected_card}", f"Position: {row} {col}", f"from {selected_position.get_origin()}")
+                page.cards_field_containers[row][col].config(bg="SystemButtonFace")
+                page.selected_cards.append((row, col))
+            else:
+                page.selected_cards = []
+
+    def select_position(self, page, position_in_field=None, position_in_hand=None, event=None):
+        turn_player = self._table.get_turn_player()
+
+        if position_in_field is not None:
+            selected_position = self._table.get_position_in_field(position_in_field)
+            selected_position.set_field(True)
+        if position_in_hand is not None:
+            selected_position = self._table.get_position_in_hand(position_in_hand)
+            selected_position.set_hand(True)
+
+        if turn_player.get_id() == self._players[0][1] and selected_position is not None:
             occupied = self._table.check_position(selected_position)
-            print(f"Occupied: {occupied}")
-            print(f'Turn player id: {turn_player.get_id()}')
 
             if occupied:
-                #self.select_card(selected_position)
-                self.select_card(page, selected_position, position_in_hand)
-            if not occupied and selected_position._field == True:
+                if position_in_field is not None:
+                    self.select_card(page, selected_position, position_in_field)
+                elif position_in_hand is not None:
+                    self.select_card(page, selected_position, position_in_hand)
+            if not occupied and selected_position._field:
                 self.invoke_card(selected_position, position_in_field, turn_player)
-        else :
-            pass
 
     ################### Logic for the deck page ###################
 
@@ -275,7 +286,6 @@ class Controller(DogPlayerInterface):
 
                     # Update deck data
                     page.get_my_deck_data()[row * 4 + col] = card_data
-                    print(f"Added card '{card_data['name']}' to the deck at ({row}, {col})")
                     return
 
         messagebox.showinfo("Deck cheio", "Seu deck já possui o tamanho máximo")
@@ -487,24 +497,24 @@ class Controller(DogPlayerInterface):
     ######### Logic for the player #########
 
     def invoke_card(self, selected_position, position_in_field, player):
-        self._table.invoke_card(selected_position, player)
+        invoked_card = self._table.invoke_card(selected_position, player)
 
         # Update the field UI to reflect the invoked card
         game_page = self.get_frame("GamePage")
-        if game_page:
+        if invoked_card:
             row = 0 if position_in_field < 4 else 2  # Determine the row based on position
             col = position_in_field % 4
 
             card_data = {
-                "name": selected_position.get_card().get_name(),
-                "damage": selected_position.get_card().get_damage(),
-                "life": selected_position.get_card().get_hp()
+                "name": invoked_card.get_name(),
+                "damage": invoked_card.get_damage(),
+                "life": invoked_card.get_hp()
             }
             card_label = f"{card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
 
             # Update the field container with the card data
             container = game_page.cards_field_containers[row][col]
-            container.config(bg="lightblue")
+            container.config(bg="SystemButtonFace")  # Reset the background
 
             for widget in container.winfo_children():
                 if isinstance(widget, tk.Label):
@@ -524,6 +534,20 @@ class Controller(DogPlayerInterface):
                         widget.config(text="Empty")
                 
                 game_page.selected_card = None
+
+            # Remove sacrifice cards from the field
+            sacrifice_cards = self._table.get_local_field().get_sacrifice_cards()
+            for sacrifice_card in sacrifice_cards:
+                for row in range(3):
+                    for col in range(4):
+                        container = game_page.cards_field_containers[row][col]
+                        for widget in container.winfo_children():
+                            if isinstance(widget, tk.Label) and widget.cget("text") == sacrifice_card.get_name():
+                                widget.config(text="Empty")
+                                container.config(bg="SystemButtonFace")
+                                break
+                self._table.get_local_field().remove_card_from_field(sacrifice_card)
+            self._table.get_local_field().clear_sacrifice_cards()
 
     def get_card_by_id(self, id):   
         return self.library.get_card(id)
@@ -547,7 +571,6 @@ class Controller(DogPlayerInterface):
             
 
     def receive_start(self, start_status):
-        print(f'Remote Player Id: {start_status.get_local_id()}-------------')
         message = start_status.get_message()
         messagebox.showinfo(message=message)
         if message == "Partida iniciada":

@@ -17,7 +17,7 @@ class Deck:
         """Gera um deck com base em uma lista de cartas."""
         list_of_cards = []
         for _ in range(20):
-            list_of_cards.append(SquirrelCard("Squirrel", 1, 0,None, 1))
+            list_of_cards.append(SquirrelCard("Squirrel", 1, 0,None, 0))
         self._card_list = list_of_cards
         return self
 

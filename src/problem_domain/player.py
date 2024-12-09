@@ -10,7 +10,7 @@ class Player:
         self._id = ""  # string
         self._symbol = 0  # int
         self._my_deck = Deck()  # Deck
-        #self._my_deck.generate_deck()
+        self._my_deck.generate_deck()
         self._name = ""  # string
 
     # Métodos

@@ -27,8 +27,8 @@ class Field:
 
     def remove_card_from_field(self, card):
         for position in self._positions:
-            if position.card == card:
-                position.card = None
+            if position.get_card() == card:
+                position.set_card(None)
                 return
         raise ValueError("Card not found in field")
 
