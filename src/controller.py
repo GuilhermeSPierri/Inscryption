@@ -160,14 +160,16 @@ class Controller(DogPlayerInterface):
             # If clicking the same card again, just deselect it
             if (row, col) in page.selected_cards:
                 page.selected_cards.remove((row, col))
-                page.cards_field_containers[row][col].config(bg="lightblue")
+                page.cards_field_containers[row][col].config(bg="SystemButtonFace")
+                self._table.get_local_field().remove_card_from_field(selected_card)
                 return
 
             # Highlight the new selected card in the field
             if selected_card is not None:
                 print(f"DENTRO DO IF LA: Selected card: {selected_card}", f"Position: {row} {col}", f"from {selected_position.get_origin()}")
-                page.cards_field_containers[row][col].config(bg="SystemButtonFace")
+                page.cards_field_containers[row][col].config(bg="lightblue")
                 page.selected_cards.append((row, col))
+                self._table.get_local_field().append_to_sacrifice_cards(selected_card)
             else:
                 page.selected_cards = []
 
@@ -512,6 +514,8 @@ class Controller(DogPlayerInterface):
             }
             card_label = f"{card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
 
+
+
             # Update the field container with the card data
             container = game_page.cards_field_containers[row][col]
             container.config(bg="SystemButtonFace")  # Reset the background
@@ -537,15 +541,35 @@ class Controller(DogPlayerInterface):
 
             # Remove sacrifice cards from the field
             sacrifice_cards = self._table.get_local_field().get_sacrifice_cards()
+            print(f"Sacrifice cards: {sacrifice_cards} AQUII")
+
             for sacrifice_card in sacrifice_cards:
+                is_deleted = False
                 for row in range(3):
+                    if is_deleted:
+                        break
                     for col in range(4):
+                        if is_deleted:
+                            break
                         container = game_page.cards_field_containers[row][col]
+                        print(f"Container: {container}")
+                        print(f"Container text: {container.cget('text')}")
+                        print(f"containerwinfochildren: {container.winfo_children()}")
+
                         for widget in container.winfo_children():
-                            if isinstance(widget, tk.Label) and widget.cget("text") == sacrifice_card.get_name():
+                            print(f"Widget: {widget}")
+                            print(f"Widget text: {widget.cget('text')}")
+                            my_widget = widget.cget("text")
+                            my_widget_name = my_widget.split()[0]
+                            print(f"My widget name: {my_widget_name}")
+                            if isinstance(widget, tk.Label) and my_widget_name == sacrifice_card.get_name():
+                                print("AAAAA entrou")
+                                is_deleted = True
                                 widget.config(text="Empty")
+                                self._table.get_position_in_field(position_in_field).set_field(False)
                                 container.config(bg="SystemButtonFace")
                                 break
+
                 self._table.get_local_field().remove_card_from_field(sacrifice_card)
             self._table.get_local_field().clear_sacrifice_cards()
 

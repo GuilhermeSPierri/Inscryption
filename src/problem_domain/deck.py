@@ -1,5 +1,6 @@
 from problem_domain.cards.card import Card
 from problem_domain.cards.squirrelCard import SquirrelCard
+from problem_domain.cards.sacrificeCard import SacrificeCard
 
 class Deck:
     def __init__(self):
@@ -17,7 +18,7 @@ class Deck:
         """Gera um deck com base em uma lista de cartas."""
         list_of_cards = []
         for _ in range(20):
-            list_of_cards.append(SquirrelCard("Squirrel", 1, 0,None, 0))
+            list_of_cards.append(SacrificeCard("Wolf", 3, 2, {"name": "Amplifier", "modifier": "life", "value": 1}, 1 ))
         self._card_list = list_of_cards
         return self
 

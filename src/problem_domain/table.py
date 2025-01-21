@@ -175,6 +175,7 @@ class Table:
         selected_card = None
         if turn_player:
             selected_card = selected_position.get_card()
+            print("A CARTA SELECIONADA É", selected_card)
             
             if selected_card == None:
                 print(12312316127983618723612873126)
@@ -191,13 +192,13 @@ class Table:
                     origin = selected_position.get_origin()
                     if origin == "field":
                         self._local_field.remove_from_sacrifice_cards(selected_card)
-                        print("Sacrifice card", self._local_field.get_sacrifice_cards())
+                        print("Sacrifice cardaaa", self._local_field.get_sacrifice_cards())
                         selected_card.clear_already_selected()
-                        #self.clear_selected_card()
+                        self.clear_selected_card()
                     elif origin == "hand":
                         hand.clear_invocation_card()
                         selected_card.clear_already_selected()
-                        #self.clear_selected_card()
+                        self.clear_selected_card()
                 else:
                     if selected_card in hand.get_card_list() and invocation_card == None:
                         hand.set_invocation_card(selected_card)
@@ -206,7 +207,7 @@ class Table:
                     elif selected_card == field.get_card_in_position(selected_position):
                         field.append_to_sacrifice_cards(selected_card)
                         selected_card.set_already_selected()
-                        print("Sacrifice card", field.get_sacrifice_cards())
+                        print("Sacrifice carda", self._local_field.get_sacrifice_cards())
                     
                     else:
                         field.clear_sacrifice_cards()
@@ -245,7 +246,7 @@ class Table:
             if cost_invocation == len(sacrifice_cards):
                 for card in sacrifice_cards:
                     field.remove_card_from_field(card)
-                field.clear_sacrifice_cards()
+                #field.clear_sacrifice_cards()
                 for card in hand.get_card_list():
                     if card == invocation_card:
                         hand.remove_from_hand(card)
