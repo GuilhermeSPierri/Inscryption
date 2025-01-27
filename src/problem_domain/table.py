@@ -18,15 +18,12 @@ class Table:
         self._remote_deck = self._remote_player.get_deck()  # Deck object
         self._scale = Scale()
         self._squirrel_deck = None # TODO: Define the type of this attribute
-        self._buy_tokens = 0  # int
+        self._buy_tokens = 1  # int
         self._game_status = "waiting"  # string
 
     # Métodos existentes
     def get_match_status(self):
         return self._match_status
-
-    def receive_move(self):
-        pass
 
     def get_status(self):
         return {
@@ -34,12 +31,75 @@ class Table:
             "remote_player": self._remote_player,
             "match_status": self._match_status,
         }
-    
+
     def get_turn_player(self):
         if self._remote_player.get_turn():
             return self._remote_player
         elif self._local_player.get_turn():
             return self._local_player
+
+    def get_number_cards_local_deck(self):
+        return len(self._local_deck) if self._local_deck else 0
+    
+    def get_local_hand(self) -> object:
+        return self._local_player.get_hand()
+    
+    def get_remote_hand(self) -> object:
+        return self._remote_player.get_hand()
+    
+    def get_local_deck(self) -> object:
+        return self._local_deck
+
+    def get_buy_tokens(self):
+        return self._buy_tokens
+
+    def get_position_in_field(self, position_in_field: int): 
+        return self._local_field.get_position_in_field(position_in_field)
+        
+    def get_position_in_hand(self, position_in_hand: int): 
+        return self._local_player.get_hand().get_position_in_hand(position_in_hand)
+    
+    def get_origin_of_card(self, selected_card): 
+        pass
+
+    def get_local_field(self):
+        return self._local_field
+
+    def get_field_in_field(self): 
+        pass
+
+    def get_remote_field(self): 
+        pass
+
+    def get_field_card(self, position): 
+        pass
+
+    def get_remote_field_card(self, position): 
+        pass
+
+    def get_remote_field_card_in_position(self, position): 
+        self._remote_field.get_card_in_position(position)
+
+    def get_field_card_in_position(self, position):
+        return self._local_field.get_card_in_position(position)
+    
+    def get_damage(self, card):
+        return card.get_damage()
+
+    def get_hp(self, card):
+        return card.get_hp()
+
+    def set_local_deck(self, deck: object) -> None:
+        self._local_deck = deck
+
+    def set_remote_deck(self, deck: object) -> None:
+        self._remote_deck = deck
+
+    def set_life_card(self, card, life): 
+        pass
+
+    def receive_move(self):
+        pass
 
     def clear_table(self):
         pass
@@ -63,13 +123,13 @@ class Table:
             self._remote_player.pass_turn()
         return players
 
-    def get_number_cards_local_deck(self):
-        return len(self._local_deck) if self._local_deck else 0
-
     def buy_squirrel_card(self):
-        squirrel = self._squirrel_deck
-        self._local_player.get_hand().add_card_to_hand(squirrel)
-        return squirrel
+        if (self._buy_tokens == 1):
+            squirrel = self._squirrel_deck
+            self._local_player.get_hand().add_card_to_hand(squirrel)
+            self.decrement_buy_tokens()
+            return squirrel
+
 
     def create_deck_buy_buttons(self):
         # Logic to create buttons for buying cards
@@ -87,33 +147,17 @@ class Table:
         pass
 
     def buy_deck_card(self):
-        top_card = self.get_local_deck().get_top_card()
-        self.get_local_hand().add_card_to_hand(top_card)
-        return top_card
-
-    def get_local_hand(self) -> object:
-        return self._local_player.get_hand()
-    
-    def get_remote_hand(self) -> object:
-        return self._remote_player.get_hand()
-    
-    def get_local_deck(self) -> object:
-        return self._local_deck
+        if (self._buy_tokens == 1):
+            top_card = self.get_local_deck().get_top_card()
+            self.get_local_hand().add_card_to_hand(top_card)
+            self.decrement_buy_tokens()
+            return top_card
 
     def check_deck_size(self):
         return len(self._local_deck) if self._local_deck else 0
 
     def decrement_buy_tokens(self):
         self._buy_tokens -= 1
-
-    def get_buy_tokens(self):
-        return self._buy_tokens
-    
-    def set_local_deck(self, deck: object) -> None:
-        self._local_deck = deck
-
-    def set_remote_deck(self, deck: object) -> None:
-        self._remote_deck = deck
 
     def shuffle_deck(self, deck: object) -> object:
         positions = []
@@ -217,20 +261,8 @@ class Table:
     def check_position(self, selected_position): 
         return selected_position.get_occupied()
 
-    def get_position_in_field(self, position_in_field: int): 
-        return self._local_field.get_position_in_field(position_in_field)
-        
-    def get_position_in_hand(self, position_in_hand: int): 
-        return self._local_player.get_hand().get_position_in_hand(position_in_hand)
-
     def clear_selected_card(self): 
         pass
-
-    def get_origin_of_card(self, selected_card): 
-        pass
-
-    def get_local_field(self):
-        return self._local_field
 
     def invoke_card(self, selected_position, player): 
         hand = player.get_hand()
@@ -259,15 +291,6 @@ class Table:
     def clear_selected_position(self): 
         pass
 
-    def get_field_in_field(self): 
-        pass
-
-    def get_remote_field(self): 
-        pass
-
-    def get_field_card(self, position): 
-        pass
-
     def execute_attack(self, damage, life, local_card, remote_card): 
         remaing_hp, is_alive = self.deal_damage(life, damage)
 
@@ -282,16 +305,6 @@ class Table:
 
     def invoke_card_in_field(self, move): 
         pass
-
-    def set_life_card(self, card, life): 
-        pass
-
-    def get_remote_field_card(self, position): 
-        pass
-
-    def get_remote_field_card_in_position(self, position): 
-        self._remote_field.get_card_in_position(position)
-
 
     def update_local_field(self, a_move: dict): 
         pass
@@ -339,14 +352,6 @@ class Table:
         self._local_deck.set_card_list(list_of_cards)
         self._local_player.set_deck(self._local_deck)
 
-    def get_field_card_in_position(self, position):
-        return self._local_field.get_card_in_position(position)
-    
-    def get_damage(self, card):
-        return card.get_damage()
-
-    def get_hp(self, card):
-        return card.get_hp()
     
     def pass_turn(self):
         for i in range(4):
