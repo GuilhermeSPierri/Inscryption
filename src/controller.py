@@ -454,7 +454,7 @@ class Controller(DogPlayerInterface):
                 self.update_hand_UI(game_page)
                 messagebox.showinfo("Inscryption", "Você comprou um Esquilo")
         else:
-            messagebox.showinfo("Inscryption", "Não há Esquilos disponíveis")
+            messagebox.showinfo("Inscryption", "Você já comprou uma carta!")
     def update_gui(self):
         # atualizar a interface grafica
         pass
