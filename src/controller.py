@@ -156,7 +156,6 @@ class Controller(DogPlayerInterface):
             col = position_in_hand % 4
 
             print(f"DENTRO DE SELECT_CARD = Selected card: {selected_card}", f"Position: {row} {col}", f"from {selected_position.get_origin()}")
-            
             # If clicking the same card again, just deselect it
             if (row, col) in page.selected_cards:
                 page.selected_cards.remove((row, col))
@@ -170,6 +169,7 @@ class Controller(DogPlayerInterface):
                 page.cards_field_containers[row][col].config(bg="lightblue")
                 page.selected_cards.append((row, col))
                 self._table.get_local_field().append_to_sacrifice_cards(selected_card)
+                print("tamanho da lista de sacrificio: ", len(self._table.get_local_field().get_sacrifice_cards()) )
             else:
                 page.selected_cards = []
 
@@ -179,6 +179,7 @@ class Controller(DogPlayerInterface):
         if position_in_field is not None:
             selected_position = self._table.get_position_in_field(position_in_field)
             selected_position.set_field(True)
+            
         if position_in_hand is not None:
             selected_position = self._table.get_position_in_hand(position_in_hand)
             selected_position.set_hand(True)

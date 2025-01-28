@@ -228,17 +228,22 @@ class Table:
                 already_selected = selected_card.get_already_selected()
                 hand = turn_player.get_hand()
                 invocation_card = hand.get_invocation_card()
+
                 if turn_player == self._local_player:
                     field = self._local_field
+
                 elif turn_player == self._remote_player:
                     field = self._remote_field
+
                 if already_selected:
                     origin = selected_position.get_origin()
+
                     if origin == "field":
                         self._local_field.remove_from_sacrifice_cards(selected_card)
                         print("Sacrifice cardaaa", self._local_field.get_sacrifice_cards())
                         selected_card.clear_already_selected()
                         self.clear_selected_card()
+
                     elif origin == "hand":
                         hand.clear_invocation_card()
                         selected_card.clear_already_selected()
@@ -256,6 +261,7 @@ class Table:
                     else:
                         field.clear_sacrifice_cards()
                         hand.clear_invocation_card()
+
                 return selected_card
 
     def check_position(self, selected_position): 

@@ -33,7 +33,7 @@ class Field:
         for position in self._positions:
             if position.get_card() == card:
                 print("ACHOU A CARTA SIM MEU DEUZI")
-                position.set_card(None)
+                #position.set_card(None) ESSA LINHA FAZ COM QUE NÃO SEJA POSSIVEL SELECIONAR E DESSELECIONAR UMA CARTA DO FIELD
                 return
 
     def invoke_card_in_position(self, card, selected_position):
