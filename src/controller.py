@@ -412,16 +412,18 @@ class Controller(DogPlayerInterface):
 
     def buy_deck_card(self):
         # Get the top card from the deck
-        top_card = self._table.buy_deck_card()
-        if top_card:
-            
-            # Update the UI
-            game_page = self.get_frame("GamePage")
-            if game_page:
-                self.update_hand_UI(game_page)
-                messagebox.showinfo("Inscryption", "Você comprou uma carta do deck")
-        else:
-            messagebox.showinfo("Inscryption", "O deck está vazio")
+        turn_player = self._table.get_turn_player()
+        if turn_player.get_id() == self._players[0][1]:
+            top_card = self._table.buy_deck_card()
+            if top_card:
+                
+                # Update the UI
+                game_page = self.get_frame("GamePage")
+                if game_page:
+                    self.update_hand_UI(game_page)
+                    messagebox.showinfo("Inscryption", "Você comprou uma carta do deck")
+            else:
+                messagebox.showinfo("Inscryption", "O deck está vazio")
 
     def update_hand_UI(self, game_page):
         hand_dict = {idx: {
@@ -445,16 +447,18 @@ class Controller(DogPlayerInterface):
                         widget.config(text=card_label)
 
     def buy_squirrel_card(self):
-        # Get the top squirrel card from the deck
-        squirrel_card = self._table.buy_squirrel_card()
-        if squirrel_card:
-            # Update the UI
-            game_page = self.get_frame("GamePage")
-            if game_page:
-                self.update_hand_UI(game_page)
-                messagebox.showinfo("Inscryption", "Você comprou um Esquilo")
-        else:
-            messagebox.showinfo("Inscryption", "Você já comprou uma carta!")
+        turn_player = self._table.get_turn_player()
+        if turn_player.get_id() == self._players[0][1]:
+            # Get the top squirrel card from the deck
+            squirrel_card = self._table.buy_squirrel_card()
+            if squirrel_card:
+                # Update the UI
+                game_page = self.get_frame("GamePage")
+                if game_page:
+                    self.update_hand_UI(game_page)
+                    messagebox.showinfo("Inscryption", "Você comprou um Esquilo")
+            else:
+                messagebox.showinfo("Inscryption", "Você já comprou uma carta!")
     def update_gui(self):
         # atualizar a interface grafica
         pass

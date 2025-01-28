@@ -124,7 +124,7 @@ class Table:
         return players
 
     def buy_squirrel_card(self):
-        if (self._buy_tokens == 1):
+        if (self._buy_tokens == 1): 
             squirrel = self._squirrel_deck
             self._local_player.get_hand().add_card_to_hand(squirrel)
             self.decrement_buy_tokens()
