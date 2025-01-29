@@ -161,10 +161,11 @@ class Controller(DogPlayerInterface):
                 page.selected_cards.remove((row, col))
                 page.cards_field_containers[row][col].config(bg="SystemButtonFace")
                 self._table.get_local_field().remove_card_from_field(selected_card)
+                self._table.get_local_field().remove_from_sacrifice_cards(selected_card)
                 return
 
             # Highlight the new selected card in the field
-            if selected_card is not None:
+            elif selected_card is not None and selected_card.get_name() != "Empty":
                 print(f"DENTRO DO IF LA: Selected card: {selected_card}", f"Position: {row} {col}", f"from {selected_position.get_origin()}")
                 page.cards_field_containers[row][col].config(bg="lightblue")
                 page.selected_cards.append((row, col))
@@ -556,7 +557,11 @@ class Controller(DogPlayerInterface):
                     for col in range(4):
                         if is_deleted:
                             break
-                        container = game_page.cards_field_containers[row][col]
+
+                        try:
+                            container = game_page.cards_field_containers[row][col]
+                        except:
+                            break
                         print(f"Container: {container}")
                         print(f"Container text: {container.cget('text')}")
                         print(f"containerwinfochildren: {container.winfo_children()}")
@@ -571,7 +576,8 @@ class Controller(DogPlayerInterface):
                                 print("AAAAA entrou")
                                 is_deleted = True
                                 widget.config(text="Empty")
-                                self._table.get_position_in_field(position_in_field).set_field(False)
+
+                                #self._table.get_position_in_field(position_in_field).set_field(False)
                                 container.config(bg="SystemButtonFace")
                                 break
 

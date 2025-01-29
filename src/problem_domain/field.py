@@ -22,6 +22,10 @@ class Field:
     def append_to_sacrifice_cards(self, selected_card):
         self._sacrifice_cards.append(selected_card)
 
+    def remove_from_sacrifice_cards(self, selected_card):
+        if selected_card in self._sacrifice_cards:
+            self._sacrifice_cards.remove(selected_card)
+
     def clear_sacrifice_cards(self):
         self._sacrifice_cards = []
 
