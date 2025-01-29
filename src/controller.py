@@ -160,7 +160,7 @@ class Controller(DogPlayerInterface):
             if (row, col) in page.selected_cards:
                 page.selected_cards.remove((row, col))
                 page.cards_field_containers[row][col].config(bg="SystemButtonFace")
-                self._table.get_local_field().remove_card_from_field(selected_card)
+                #self._table.get_local_field().remove_card_from_field(selected_card)
                 self._table.get_local_field().remove_from_sacrifice_cards(selected_card)
                 return
 
@@ -578,13 +578,15 @@ class Controller(DogPlayerInterface):
                             if isinstance(widget, tk.Label) and my_widget_name == sacrifice_card.get_name() and ((row_invoked_card, col_invoked_card) != (row, col)):
                                 print("AAAAA entrou")
                                 is_deleted = True
-                                widget.config(text="Empty")
+                                widget.config(text=f"Item {col + 1}")
 
-                                self._table.get_position_in_field(position_in_field).set_field(False)
+                                self._table.get_position_in_field(col).set_occupied(False)
+                                self._table.get_local_field().remove_card_from_field(sacrifice_card)
                                 container.config(bg="SystemButtonFace")
                                 continue
 
-                self._table.get_local_field().remove_card_from_field(sacrifice_card)
+
+
             self._table.get_local_field().clear_sacrifice_cards()
 
     def get_card_by_id(self, id):   

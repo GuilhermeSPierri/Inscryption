@@ -10,7 +10,7 @@ class Library():
         self._pointer_id = 0
 
         self.add_card(SacrificeCard("deer", 1, 1, {"name": "Amplifier", "modifier": "life", "value": 1}, 1))
-        self.add_card(SacrificeCard("Bear", 5, 3, {"name": "Amplifier", "modifier": "damage", "value": 2}, 3))
+        self.add_card(SacrificeCard("Bear", 5, 3, {"name": "Amplifier", "modifier": "damage", "value": 2}, 2))
         self.add_card(SquirrelCard("Squirrel", 1, 0, None, 0))
         self.add_card(SacrificeCard("Wolf", 3, 2, {"name": "Amplifier", "modifier": "life", "value": 1}, 1 ))
 

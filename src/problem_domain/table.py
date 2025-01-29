@@ -266,6 +266,9 @@ class Table:
 
     def check_position(self, selected_position): 
         return selected_position.get_occupied()
+    
+    def set_position(self, selected_position, boolean): 
+        selected_position.set_occupied(boolean)
 
     def clear_selected_card(self): 
         pass
