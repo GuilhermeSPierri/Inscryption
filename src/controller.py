@@ -572,14 +572,17 @@ class Controller(DogPlayerInterface):
                             my_widget = widget.cget("text")
                             my_widget_name = my_widget.split()[0]
                             print(f"My widget name: {my_widget_name}")
-                            if isinstance(widget, tk.Label) and my_widget_name == sacrifice_card.get_name():
+                            row_invoked_card = 0 if position_in_field < 4 else 2  # Determine the row based on position
+                            col_invoked_card = position_in_field % 4
+
+                            if isinstance(widget, tk.Label) and my_widget_name == sacrifice_card.get_name() and ((row_invoked_card, col_invoked_card) != (row, col)):
                                 print("AAAAA entrou")
                                 is_deleted = True
                                 widget.config(text="Empty")
 
                                 self._table.get_position_in_field(position_in_field).set_field(False)
                                 container.config(bg="SystemButtonFace")
-                                break
+                                continue
 
                 self._table.get_local_field().remove_card_from_field(sacrifice_card)
             self._table.get_local_field().clear_sacrifice_cards()
