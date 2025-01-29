@@ -577,7 +577,7 @@ class Controller(DogPlayerInterface):
                                 is_deleted = True
                                 widget.config(text="Empty")
 
-                                #self._table.get_position_in_field(position_in_field).set_field(False)
+                                self._table.get_position_in_field(position_in_field).set_field(False)
                                 container.config(bg="SystemButtonFace")
                                 break
 

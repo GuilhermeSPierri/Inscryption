@@ -254,7 +254,7 @@ class Table:
                         selected_card.set_already_selected()
                     
                     elif selected_card == field.get_card_in_position(selected_position):
-                        field.append_to_sacrifice_cards(selected_card)
+                        #field.append_to_sacrifice_cards(selected_card)
                         selected_card.set_already_selected()
                         print("Sacrifice carda", self._local_field.get_sacrifice_cards())
                     
