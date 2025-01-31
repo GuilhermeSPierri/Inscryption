@@ -14,5 +14,5 @@ class Scale:
     def check_for_winner(self):
         pass
         
-    def calcule_points_difference(local_player_points : int, remote_player_points : int):
-        return local_player_points - remote_player_points
+    def calcule_points_difference(self):
+        return self._local_player_points - self._remote_player_points

@@ -177,10 +177,6 @@ class Table:
 
         return shuffled_deck
 
-    def pass_turn(self):
-        # Logic to pass the turn
-        return "Turn passed"
-
     def check_for_winner(self):
         points_difference = self._scale.calcule_points_difference()
         
@@ -310,7 +306,7 @@ class Table:
         else:
             self._remote_field.remove_card_from_field(remote_card)
             self.activate_glyph(local_card)
-
+        
 
     def invoke_card_in_field(self, move): 
         pass
@@ -376,9 +372,8 @@ class Table:
                     self.execute_attack(damage, remote_card_hp, local_card, remote_card)
                 
                 else:
-                    player = "local_player" #NÃO ESTÁ IMPLEMENTADO AINDA COM O DOG, NÃO SEI COMO SERIA OBTIDO
-                    self._scale.add_points(damage, player) #NÃO ESTÁ IMPLEMENTADO AINDA COM O DOG, NÃO SEI COMO SERIA OBTIDO
-                    self.activate_glyph(local_card)
+                    player = "remote"
+                    self._scale.add_points(damage, player)
         
         self._local_player.pass_turn()
         self._remote_player.pass_turn()
