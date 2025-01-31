@@ -185,7 +185,8 @@ class Controller(DogPlayerInterface):
             selected_position = self._table.get_position_in_hand(position_in_hand)
             selected_position.set_hand(True)
 
-        if turn_player.get_id() == self._players[0][1] and selected_position is not None:
+        print("ID's:", turn_player.get_id(), "id local player da mesa :", self._table._local_player.get_id())
+        if turn_player.get_id() == self._table._local_player.get_id() and selected_position is not None:
             occupied = self._table.check_position(selected_position)
 
             if occupied:
@@ -448,6 +449,13 @@ class Controller(DogPlayerInterface):
                     if isinstance(widget, tk.Label):
                         widget.config(text=card_label)
 
+    #def update_scale_UI(self, game_page, move):
+        # Atualizar a balança com base na jogada
+        #local_points = self._table._scale._local_player_points
+        #remote_points = self._table._scale._remote_player_points
+        #game_page.scale_label.config(text=f"Local: {local_points} | Remote: {remote_points}")
+
+
     def buy_squirrel_card(self):
         turn_player = self._table.get_turn_player()
         if turn_player.get_id() == self._players[0][1]:
@@ -461,9 +469,41 @@ class Controller(DogPlayerInterface):
                     messagebox.showinfo("Inscryption", "Você comprou um Esquilo")
             else:
                 messagebox.showinfo("Inscryption", "Você já comprou uma carta!")
-    def update_gui(self):
-        # atualizar a interface grafica
-        pass
+
+
+    def update_gui(self, move):
+        # Atualiza a interface com base na jogada
+        game_page = self.get_frame("GamePage")
+        if game_page:
+            # Atualiza a mão do jogador
+            self.update_hand_UI(game_page)
+
+            # Atualiza o campo de batalha
+            self.update_field_UI(game_page, move)
+
+            # Atualiza a escala (se necessário)
+            #self.update_scale_UI(game_page, move)
+
+
+    def update_field_UI(self, game_page, move):
+        # Atualizar o campo de batalha com base na jogada
+        positions = move.get("position", [])  # Obter a lista de posições
+        for index, position_data in enumerate(positions):  # Iterar sobre a lista
+            row = index // 4  # Calcular a linha com base no índice
+            col = index % 4   # Calcular a coluna com base no índice
+
+            # Verificar se há uma carta na posição
+            if position_data and position_data.get("card"):
+                card_data = position_data["card"]
+                card_label = f"{card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['hp']}"
+            else:
+                card_label = "Empty"
+
+            # Atualizar o contêiner correspondente no campo de batalha
+            container = game_page.cards_field_containers[row][col]
+            for widget in container.winfo_children():
+                if isinstance(widget, tk.Label):
+                    widget.config(text=card_label)
 
     def verify_card_cost(self):
         # verificar o custo da carta
@@ -480,7 +520,6 @@ class Controller(DogPlayerInterface):
     def pass_turn(self):
         winner = self._table.pass_turn()
 
-        # PRA BAIXO, ESTARIA EM PLAYERINTERFACE, MAS DO JEITO QUE A IMPLEMENTAÇÃO ESTÁ, NÃO DÁ PRA FAZER ISSO
         if winner != "":
             if winner == "local_player":
                 messagebox.showinfo("Jogo finalizado", "O jogador Local venceu")
@@ -489,18 +528,24 @@ class Controller(DogPlayerInterface):
                 messagebox.showinfo("Jogo finalizado", "O jogador Remoto venceu")
                 self.show_frame("StartPage")
         elif winner == "":
-            self.dog_server_interface.proxy.send_move("NÃO ESTOU INTEGRADO COM O DOG, PRECISO SER O DICT") #TEM QUE INTEGRAR COM O DOG_SERVER_INTERFACE
-            self._table.get_status()
-            self.update_gui("NÃO ESTOU INTEGRADO COM O DOG, PRECISO SER O DICT")
+            # Criar um dicionário com a jogada atual
+            move = {
+                "card": [card.to_dict() for card in self._table.get_local_field().get_sacrifice_cards()],  # Convert cards to dict
+                "position": [position.to_dict() for position in self._table.get_local_field().get_positions()],  # Convert positions to dict
+                "action": "invoke_card",  # Exemplo: ação realizada
+                "match_status": self._table.get_match_status(),  # Adicionando o status da partida
+                "turn_player_id" : self._table.get_turn_player().get_id()
+            }
+
+            # Enviar a jogada para o DOG server
+            self.dog_server_interface.proxy.send_move(move)
+
+            # Atualizar a interface gráfica
+            self.update_gui(move)
 
 
 
-        match_status = self.dog_server_interface.proxy.get_status()
-        if match_status == 2:
-            self.receive_withdrawal_notification()
-            self.show_frame("StartPage")
-        else:
-            pass
+
 
     ######### Logic for the player #########
 
@@ -629,3 +674,11 @@ class Controller(DogPlayerInterface):
     def make_withdrawal(self):
         self.dog_server_interface.make_withdrawal()
         self.show_frame("StartPage")
+
+    def receive_move(self, move):
+        # Convertendo os dicionários de volta para objetos
+        sacrifice_cards = [self.library.get_card(card_dict["name"]) for card_dict in move.get("card", [])]
+        positions = [self._table.get_position_in_field(i) for i in range(4)]  # Exemplo: recuperar as posições
+
+        # Atualizar a interface com base na jogada recebida
+        self.update_gui(move)

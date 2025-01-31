@@ -51,10 +51,6 @@ class Player:
         self._id = id
         #self._name = name
 
-    def toggle_turn(self) -> None:
-        """Alterna o turno do jogador."""
-        self._my_turn = not self._my_turn
-
     def add_card_to_deck(self, card_to_add: int) -> None:
         """Adiciona uma carta ao deck do jogador."""
         if self._my_deck is not None:

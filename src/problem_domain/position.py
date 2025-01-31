@@ -33,3 +33,11 @@ class Position:
             return "hand"
         elif self._field:
             return "field"
+        
+    def to_dict(self):
+        return {
+            "occupied": self._occupied,
+            "card": self._card.to_dict() if self._card else None,  # Convert card to dict if it exists
+            "hand": self._hand,
+            "field": self._field
+        }

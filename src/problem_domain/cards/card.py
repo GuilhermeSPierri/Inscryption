@@ -45,3 +45,11 @@ class Card(ABC):
     def set_damage(self, damage: int):
         self._damage = damage
     
+    def to_dict(self):
+        return {
+            "name": self._name,
+            "damage": self._damage,
+            "hp": self._hp,
+            "glyph": self._glyph,
+            "cost": self._cost
+        }

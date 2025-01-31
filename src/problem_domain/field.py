@@ -12,6 +12,9 @@ class Field:
     def get_position_in_field(self, position_in_field: int) -> Position:
         return self._positions[position_in_field]
 
+    def get_positions(self):
+        return self._positions
+    
     def get_card_in_position(self, position):
         if position in self._positions:
             return position.get_card()

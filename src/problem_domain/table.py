@@ -375,8 +375,17 @@ class Table:
                     player = "remote"
                     self._scale.add_points(damage, player)
         
+
+        print("TURNO JOGADOR LOCAL: ", self._local_player.get_turn())
+        print("TURNO JOGADOR REMOTO: ", self._remote_player.get_turn())
+
         self._local_player.pass_turn()
         self._remote_player.pass_turn()
+
+        print("troquei de turno!!!!!!!!!!")
+
+        print("TURNO JOGADOR LOCAL: ", self._local_player.get_turn())
+        print("TURNO JOGADOR REMOTO: ", self._remote_player.get_turn())
         self._local_player.add_buy_token(1)
         self._remote_player.add_buy_token(1)
         winner = self.check_for_winner()
