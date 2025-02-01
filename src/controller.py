@@ -416,7 +416,7 @@ class Controller(DogPlayerInterface):
     def buy_deck_card(self):
         # Get the top card from the deck
         turn_player = self._table.get_turn_player()
-        if turn_player.get_id() == self._players[0][1]:
+        if turn_player.get_id() == self._table._local_player.get_id():
             top_card = self._table.buy_deck_card()
             if top_card:
                 
@@ -458,7 +458,7 @@ class Controller(DogPlayerInterface):
 
     def buy_squirrel_card(self):
         turn_player = self._table.get_turn_player()
-        if turn_player.get_id() == self._players[0][1]:
+        if turn_player.get_id() == self._table._local_player.get_id():
             # Get the top squirrel card from the deck
             squirrel_card = self._table.buy_squirrel_card()
             if squirrel_card:
@@ -486,7 +486,7 @@ class Controller(DogPlayerInterface):
 
 
     def update_field_UI(self, game_page, move):
-        # Atualizar o campo de batalha com base na jogada
+         # Atualiza o campo de batalha com base na jogada
         positions = move.get("position", [])  # Obter a lista de posições
         for index, position_data in enumerate(positions):  # Iterar sobre a lista
             row = index // 4  # Calcular a linha com base no índice
@@ -505,10 +505,6 @@ class Controller(DogPlayerInterface):
                 if isinstance(widget, tk.Label):
                     widget.config(text=card_label)
 
-    def verify_card_cost(self):
-        # verificar o custo da carta
-        pass
-
     def place_card(self, card, pos):
         # colocar a carta no campo
         pass
@@ -518,8 +514,9 @@ class Controller(DogPlayerInterface):
         messagebox.showinfo("Inscryption", "Voce comprou uma carta")
 
     def pass_turn(self):
+        print("jogador com o turno", self._table.get_turn_player().get_id())
         winner = self._table.pass_turn()
-
+        print("jogador com o turno", self._table.get_turn_player().get_id())
         if winner != "":
             if winner == "local_player":
                 messagebox.showinfo("Jogo finalizado", "O jogador Local venceu")
@@ -676,9 +673,20 @@ class Controller(DogPlayerInterface):
         self.show_frame("StartPage")
 
     def receive_move(self, move):
-        # Convertendo os dicionários de volta para objetos
-        sacrifice_cards = [self.library.get_card(card_dict["name"]) for card_dict in move.get("card", [])]
-        positions = [self._table.get_position_in_field(i) for i in range(4)]  # Exemplo: recuperar as posições
+        # Converte os dicionários de volta para objetos
+        positions = [self._table.get_position_in_field(i) for i in range(4)]  # Recupera as posições
 
-        # Atualizar a interface com base na jogada recebida
+        # Atualiza o campo de batalha com base na jogada recebida
+        for index, position_data in enumerate(move.get("position", [])):
+            row = index // 4
+            col = index % 4
+
+            if position_data and position_data.get("card"):
+                card_data = position_data["card"]
+                card = self.library.get_card(card_data["name"])
+                self._table.get_local_field().invoke_card_in_position(card, positions[index])
+
+        self._table._local_player.pass_turn()
+        self._table._remote_player.pass_turn()
+        # Atualiza a interface gráfica
         self.update_gui(move)

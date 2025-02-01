@@ -125,6 +125,7 @@ class Table:
 
     def buy_squirrel_card(self):
         if (self._buy_tokens == 1): 
+            print("meus tokens")
             squirrel = self._squirrel_deck
             self._local_player.get_hand().add_card_to_hand(squirrel)
             self.decrement_buy_tokens()
@@ -137,10 +138,6 @@ class Table:
 
     def create_deck_squirrel_button(self):
         pass
-
-    def verify_card_cost(self, card: object) -> bool:
-        # Logic to verify card cost
-        return True
 
     def place_card(self, position: object, card: object) -> None:
         # Logic to place a card on the field
@@ -190,8 +187,7 @@ class Table:
             winner = ""
         
         return winner
-            
-    # Novos métodos adicionados na ordem da imagem
+
     def select_position(self): 
         pass
 
