@@ -4,12 +4,13 @@ class Field:
     def __init__(self):
         self._positions = []
         self._sacrifice_cards = []
-        for _ in range(4):
+        for _ in range(8):
             position = Position()
             position.set_field(True)
             self._positions.append(position)
 
     def get_position_in_field(self, position_in_field: int) -> Position:
+        print("posicao: ",position_in_field)
         return self._positions[position_in_field]
 
     def get_positions(self):

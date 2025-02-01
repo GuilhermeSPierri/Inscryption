@@ -69,7 +69,7 @@ class Table:
         pass
 
     def get_remote_field(self): 
-        pass
+        return self._remote_field
 
     def get_field_card(self, position): 
         pass

@@ -110,7 +110,7 @@ class Controller(DogPlayerInterface):
                 # Bind using partial to ensure correct row and col are passed
                 container_card.bind(
                     "<Button-1>",
-                    lambda event, page=page, position_in_field=col, position_in_hand=None: 
+                    lambda event, page=page, position_in_field=row*2+col, position_in_hand=None: 
                     self.select_position(page, position_in_field, position_in_hand, event)
                 )
 
@@ -176,7 +176,7 @@ class Controller(DogPlayerInterface):
 
     def select_position(self, page, position_in_field=None, position_in_hand=None, event=None):
         turn_player = self._table.get_turn_player()
-
+        print(position_in_field)
         if position_in_field is not None:
             selected_position = self._table.get_position_in_field(position_in_field)
             selected_position.set_field(True)
@@ -486,9 +486,9 @@ class Controller(DogPlayerInterface):
 
 
     def update_field_UI(self, game_page, move):
-         # Atualiza o campo de batalha com base na jogada
-        positions = move.get("position", [])  # Obter a lista de posições
-        for index, position_data in enumerate(positions):  # Iterar sobre a lista
+        # Atualiza o campo de batalha com base na jogada
+        positions = move.get("position", [])
+        for index, position_data in enumerate(positions):
             row = index // 4  # Calcular a linha com base no índice
             col = index % 4   # Calcular a coluna com base no índice
 
@@ -561,8 +561,6 @@ class Controller(DogPlayerInterface):
                 "life": invoked_card.get_hp()
             }
             card_label = f"{card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
-
-
 
             # Update the field container with the card data
             container = game_page.cards_field_containers[row][col]
@@ -673,19 +671,24 @@ class Controller(DogPlayerInterface):
         self.show_frame("StartPage")
 
     def receive_move(self, move):
+        # Verifica de quem é a jogada
+        turn_player_id = move.get("turn_player_id")
+        if turn_player_id == self._table._local_player.get_id():
+            # Se foi o jogador local quem fez a jogada, aplicamos ao campo remoto
+            field = self._table.get_remote_field()
+        else:
+            # Se foi o jogador remoto quem fez a jogada, aplicamos ao campo local
+            field = self._table.get_local_field()
+
         # Converte os dicionários de volta para objetos
-        positions = [self._table.get_position_in_field(i) for i in range(4)]  # Recupera as posições
+        positions = [field.get_position_in_field(i) for i in range(4)]  # Recupera as posições
 
         # Atualiza o campo de batalha com base na jogada recebida
         for index, position_data in enumerate(move.get("position", [])):
-            row = index // 4
-            col = index % 4
-
             if position_data and position_data.get("card"):
                 card_data = position_data["card"]
                 card = self.library.get_card(card_data["name"])
-                self._table.get_local_field().invoke_card_in_position(card, positions[index])
-
+                field.invoke_card_in_position(card, positions[index])
         self._table._local_player.pass_turn()
         self._table._remote_player.pass_turn()
         # Atualiza a interface gráfica
