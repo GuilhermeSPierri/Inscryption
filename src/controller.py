@@ -151,9 +151,13 @@ class Controller(DogPlayerInterface):
                 page.selected_card = None
 
         elif selected_position.get_origin() == "field":
-            # Deselect previously selected cards in the field
             row = position_in_hand // 4
             col = position_in_hand % 4
+
+            if position_in_hand >= 4:
+            # Deselect previously selected cards in the field
+                row = 2
+                col = position_in_hand % 4
 
             print(f"DENTRO DE SELECT_CARD = Selected card: {selected_card}", f"Position: {row} {col}", f"from {selected_position.get_origin()}")
             # If clicking the same card again, just deselect it
