@@ -42,6 +42,7 @@ class Controller(DogPlayerInterface):
         if self._players:
             if self._players[0][1] == self._table._local_player.get_id():
                 hand_dict = {idx: {
+                    "id": card,
                     "name": card.get_name(),
                     "damage": card.get_damage(),
                     "life": card.get_hp()
@@ -49,6 +50,7 @@ class Controller(DogPlayerInterface):
 
             elif self._players[1][1] == self._table._local_player.get_id():
                 hand_dict = {idx: {
+                    "id": card,
                     "name": card.get_name(),
                     "damage": card.get_damage(),
                     "life": card.get_hp()
@@ -61,7 +63,7 @@ class Controller(DogPlayerInterface):
                     # Check if the index exists in hand_data
                     if index in hand_dict:
                         card_data = hand_dict[index]
-                        card_label = f"{card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
+                        card_label = f"{str(card_data['id'])[-8:]} \n {card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
                     else:
                         # Empty slot for unavailable indices
                         card_label = "Empty"
@@ -434,6 +436,7 @@ class Controller(DogPlayerInterface):
 
     def update_hand_UI(self, game_page):
         hand_dict = {idx: {
+            "id": card,
             "name": card.get_name(),
             "damage": card.get_damage(),
             "life": card.get_hp()
@@ -444,7 +447,7 @@ class Controller(DogPlayerInterface):
                 index = row * 3 + col
                 if index in hand_dict:
                     card_data = hand_dict[index]
-                    card_label = f"{card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
+                    card_label = f"{str(card_data['id'])[-8:]} \n{card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
                 else:
                     card_label = "Empty"
                 
@@ -499,7 +502,7 @@ class Controller(DogPlayerInterface):
             # Verificar se há uma carta na posição
             if position_data and position_data.get("card"):
                 card_data = position_data["card"]
-                card_label = f"{card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['hp']}"
+                card_label = f"{str(card_data['id'])[-8:]} \n {card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['hp']}"
             else:
                 card_label = "Empty"
 
@@ -560,11 +563,12 @@ class Controller(DogPlayerInterface):
             col = position_in_field % 4
 
             card_data = {
+                "id": invoked_card,
                 "name": invoked_card.get_name(),
                 "damage": invoked_card.get_damage(),
                 "life": invoked_card.get_hp()
             }
-            card_label = f"{card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
+            card_label = f"{str(card_data['id'])[-8:]} \n {card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
 
             # Update the field container with the card data
             container = game_page.cards_field_containers[row][col]
@@ -618,8 +622,8 @@ class Controller(DogPlayerInterface):
                             print(f"My widget name: {my_widget_name}")
                             row_invoked_card = 0 if position_in_field < 4 else 2  # Determine the row based on position
                             col_invoked_card = position_in_field % 4
-
-                            if isinstance(widget, tk.Label) and my_widget_name == sacrifice_card.get_name() and ((row_invoked_card, col_invoked_card) != (row, col)):
+                                    
+                            if my_widget_name == str(sacrifice_card)[-8:]:
                                 print("AAAAA entrou")
                                 is_deleted = True
                                 widget.config(text=f"Item {col + 1}")

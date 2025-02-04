@@ -154,7 +154,7 @@ class Table:
         return len(self._local_deck) if self._local_deck else 0
 
     def decrement_buy_tokens(self):
-        self._buy_tokens -= 1
+        self._buy_tokens = 1
 
     def shuffle_deck(self, deck: object) -> object:
         positions = []

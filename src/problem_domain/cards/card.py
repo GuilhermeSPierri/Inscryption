@@ -47,6 +47,7 @@ class Card(ABC):
     
     def to_dict(self):
         return {
+            "id": str(self),
             "name": self._name,
             "damage": self._damage,
             "hp": self._hp,
