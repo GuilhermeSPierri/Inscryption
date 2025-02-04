@@ -10,7 +10,8 @@ from dog.dog_interface import DogPlayerInterface
 from dog.dog_actor import DogActor
 from problem_domain.library import Library
 from problem_domain.table import Table
-
+from problem_domain.position import Position
+from problem_domain.cards.sacrificeCard import SacrificeCard
 class Controller(DogPlayerInterface):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -499,15 +500,31 @@ class Controller(DogPlayerInterface):
             row = index // 4  # Calcular a linha com base no índice
             col = index % 4   # Calcular a coluna com base no índice
 
+
+
             # Verificar se há uma carta na posição
-            if position_data and position_data.get("card"):
-                card_data = position_data["card"]
-                card_label = f"{str(card_data['id'])[-8:]} \n {card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['hp']}"
+           # if position_data and position_data.get("card"):
+           #     card_data = position_data["card"]
+           #     card_label = f"{str(card_data['id'])[-8:]} \n {card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['hp']}"
+           # else:
+          #      card_label = "Empty"
+
+        for i in range(3):
+            print(f'Posição {i}: {positions[i]}')
+            print('Posições:', positions)
+            posicao = Position.from_dict(positions[i])
+            self._table.get_local_field().set_position(i, posicao)
+            # Atualizar o contêiner correspondente no campo de batalha
+            print(f'index: {index}, row: {row}, col: {col}')
+            container = game_page.cards_field_containers[0][i]
+            # Verificar se há uma carta na posição
+            if self._table.get_local_field().get_position_in_field(i).get_card():
+                card_data = SacrificeCard.from_dict(positions[i]["card"])
+                print("AQUIIIIIIIIIIIIIIIIIIIIIIII", str(posicao.get_card)[-8:], "ZZZZZZZZZZZZZZZZZZZZZZZZZZZ", str(posicao.get_card))
+                card_label = f"{str(card_data)[-8:]} \n {card_data.get_name()} \n Damage: {card_data.get_damage()} \n Life: {card_data.get_hp()}"
             else:
                 card_label = "Empty"
 
-            # Atualizar o contêiner correspondente no campo de batalha
-            container = game_page.cards_field_containers[row][col]
             for widget in container.winfo_children():
                 if isinstance(widget, tk.Label):
                     widget.config(text=card_label)
@@ -622,7 +639,9 @@ class Controller(DogPlayerInterface):
                             print(f"My widget name: {my_widget_name}")
                             row_invoked_card = 0 if position_in_field < 4 else 2  # Determine the row based on position
                             col_invoked_card = position_in_field % 4
-                                    
+                            
+                            print(f"my_widget_name: {my_widget_name}")
+                            print(f"str(sacrifice_card)[-8:]: {str(sacrifice_card)[-8:]}")
                             if my_widget_name == str(sacrifice_card)[-8:]:
                                 print("AAAAA entrou")
                                 is_deleted = True

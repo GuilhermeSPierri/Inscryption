@@ -22,6 +22,12 @@ class Field:
 
     def get_sacrifice_cards(self):
         return self._sacrifice_cards
+    
+    def set_position(self, i, position):
+        self._positions[i].set_card(position.get_card())
+        self._positions[i].set_occupied(position.get_occupied())
+        self._positions[i].set_hand(position.get_hand())
+        self._positions[i].set_field(position.get_field())
 
     def append_to_sacrifice_cards(self, selected_card):
         self._sacrifice_cards.append(selected_card)

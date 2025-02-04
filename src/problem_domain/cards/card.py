@@ -48,9 +48,21 @@ class Card(ABC):
     def to_dict(self):
         return {
             "id": str(self),
+            "type": self._type,  # Adicionado
             "name": self._name,
             "damage": self._damage,
             "hp": self._hp,
             "glyph": self._glyph,
             "cost": self._cost
         }
+    
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls(
+            type=data.get("type", "Sacrifice"),  # Define um valor padrão se "type" não existir
+            name=data["name"],
+            hp=data["hp"],
+            damage=data["damage"],
+            glyph=data["glyph"],
+            cost=data["cost"]
+        )

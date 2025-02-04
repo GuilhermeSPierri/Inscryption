@@ -7,3 +7,17 @@ class SacrificeCard(Card):
 
     def attack(self, target):
         pass
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        """
+        Reconstrói um objeto SacrificeCard a partir de um dicionário.
+        Note que usamos 'life' para o parâmetro 'hp' (conforme o to_dict da classe Card)
+        """
+        return cls(
+            name=data["name"],
+            life=data["hp"],
+            damage=data["damage"],
+            glyph=data["glyph"],
+            cost=data["cost"]
+        )
