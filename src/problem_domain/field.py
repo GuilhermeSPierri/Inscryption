@@ -4,7 +4,7 @@ class Field:
     def __init__(self):
         self._positions = []
         self._sacrifice_cards = []
-        for _ in range(8):
+        for _ in range(4):
             position = Position()
             position.set_field(True)
             self._positions.append(position)
@@ -51,6 +51,8 @@ class Field:
                 return
 
     def invoke_card_in_position(self, card, selected_position):
+        print('selected_position dado: ', selected_position)
+        print('self._positions atual: ', self._positions)
         if selected_position in self._positions:
             selected_position.set_card(card)
             print("Card ", card,  " invoked in position ", selected_position)

@@ -94,6 +94,7 @@ class Controller(DogPlayerInterface):
 
 
 
+
     def create_field_UI(self, page, container):
         for row in range(3):
             if row == 1:  # Skip the middle row as per your logic
@@ -113,8 +114,8 @@ class Controller(DogPlayerInterface):
                 # Bind using partial to ensure correct row and col are passed
                 container_card.bind(
                     "<Button-1>",
-                    lambda event, page=page, position_in_field=row*2+col, position_in_hand=None: 
-                    self.select_position(page, position_in_field, position_in_hand, event)
+                    lambda event, page=page, position_in_field=col, position_in_hand=None, row=row: 
+                    self.select_position(page, position_in_field, position_in_hand, row, event)
                 )
 
 
@@ -181,13 +182,23 @@ class Controller(DogPlayerInterface):
             else:
                 page.selected_cards = []
 
-    def select_position(self, page, position_in_field=None, position_in_hand=None, event=None):
+    def select_position(self, page, position_in_field=None, position_in_hand=None, row=None,event=None,):
         turn_player = self._table.get_turn_player()
         print(position_in_field)
+
         if position_in_field is not None:
-            selected_position = self._table.get_position_in_field(position_in_field)
+            if row==2:
+                print("linha de origem do clique: ", row)
+                # Ajusta o índice para o campo remoto (0 a 3)
+                selected_position = self._table.get_remote_field().get_position_in_field(position_in_field)
+                print("selected_position para row = 2", selected_position)
+            else:
+                print("linha de origem do clique: ", row)
+                # Usa o índice diretamente para o campo local (0 a 3)
+                selected_position = self._table.get_local_field().get_position_in_field(position_in_field)
+                print("selected_position para row = 0: ", selected_position)
             selected_position.set_field(True)
-            
+
         if position_in_hand is not None:
             selected_position = self._table.get_position_in_hand(position_in_hand)
             selected_position.set_hand(True)
@@ -709,7 +720,6 @@ class Controller(DogPlayerInterface):
 
         # Converte os dicionários de volta para objetos
         positions = [field.get_position_in_field(i) for i in range(4)]  # Recupera as posições
-
         # Atualiza o campo de batalha com base na jogada recebida
         for index, position_data in enumerate(move.get("position", [])):
             if position_data and position_data.get("card"):
