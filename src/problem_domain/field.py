@@ -10,7 +10,6 @@ class Field:
             self._positions.append(position)
 
     def get_position_in_field(self, position_in_field: int) -> Position:
-        print("posicao: ",position_in_field)
         return self._positions[position_in_field]
 
     def get_positions(self):
@@ -39,22 +38,20 @@ class Field:
     def clear_sacrifice_cards(self):
         self._sacrifice_cards = []
 
-    def remove_from_sacrifice_cards(self, selected_card):
-        if selected_card in self._sacrifice_cards:
-            self._sacrifice_cards.remove(selected_card)
-
     def remove_card_from_field(self, card):
         for position in self._positions:
             if position.get_card() == card:
                 print("ACHOU A CARTA SIM MEU DEUZI")
                 position.set_card(None)
+                position.set_occupied(False)
                 return
 
     def invoke_card_in_position(self, card, selected_position):
         print('selected_position dado: ', selected_position)
         print('self._positions atual: ', self._positions)
-        if selected_position in self._positions:
+        if any(selected_position == pos for pos in self._positions):
             selected_position.set_card(card)
+            selected_position.set_occupied(True)
             print("Card ", card,  " invoked in position ", selected_position)
         else:
             raise ValueError("Invalid position")

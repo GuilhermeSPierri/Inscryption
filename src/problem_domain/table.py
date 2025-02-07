@@ -44,6 +44,12 @@ class Table:
     def get_local_hand(self) -> object:
         return self._local_player.get_hand()
     
+    def get_local_player(self):
+        return self._local_player
+
+    def get_remote_player(self):
+        return self._remote_player
+
     def get_remote_hand(self) -> object:
         return self._remote_player.get_hand()
     
@@ -221,11 +227,8 @@ class Table:
                 hand = turn_player.get_hand()
                 invocation_card = hand.get_invocation_card()
 
-                if turn_player == self._local_player:
+                if turn_player:
                     field = self._local_field
-
-                elif turn_player == self._remote_player:
-                    field = self._remote_field
 
                 if already_selected:
                     origin = selected_position.get_origin()
@@ -239,7 +242,6 @@ class Table:
                     elif origin == "hand":
                         hand.clear_invocation_card()
                         selected_card.clear_already_selected()
-                        self.clear_selected_card()
                 else:
                     if selected_card in hand.get_card_list() and invocation_card == None:
                         hand.set_invocation_card(selected_card)
@@ -265,25 +267,25 @@ class Table:
     def clear_selected_card(self): 
         pass
 
-    def invoke_card(self, selected_position, player): 
+    def invoke_card(self, selected_position, player, row=None): 
         hand = player.get_hand()
-        if player.get_id() == self._local_player.get_id():
-            field = self._local_field
-        elif player.get_id() == self._remote_player.get_id():
-            field = self._remote_field
-        
+        print("valor do rowwwwwwwwwwwwwwwwww: ", row)
+        field = self._local_field
+
         invocation_card = hand.get_invocation_card()
         if invocation_card != None:
             cost_invocation = invocation_card.get_cost()
             sacrifice_cards = field.get_sacrifice_cards()
+
             if cost_invocation == len(sacrifice_cards):
                 for card in sacrifice_cards:
                     field.remove_card_from_field(card)
-                #field.clear_sacrifice_cards()
+
                 for card in hand.get_card_list():
                     if card == invocation_card:
                         hand.remove_from_hand(card)
                         break
+
                 field.invoke_card_in_position(invocation_card, selected_position)
                 hand.clear_invocation_card()
                 self.clear_selected_position()

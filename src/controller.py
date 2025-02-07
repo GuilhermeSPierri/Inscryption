@@ -12,6 +12,7 @@ from problem_domain.library import Library
 from problem_domain.table import Table
 from problem_domain.position import Position
 from problem_domain.cards.sacrificeCard import SacrificeCard
+
 class Controller(DogPlayerInterface):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -97,7 +98,7 @@ class Controller(DogPlayerInterface):
 
     def create_field_UI(self, page, container):
         for row in range(3):
-            if row == 1:  # Skip the middle row as per your logic
+            if row == 1:  # Continua ignorando a linha do meio
                 page.cards_field_containers.append([])
                 continue
 
@@ -109,30 +110,30 @@ class Controller(DogPlayerInterface):
                     10,
                     row,
                     col,
-                    f"Item {row * 3 + col + 1}"
+                    f"Item {row * 2 + col}"
                 )
-                # Bind using partial to ensure correct row and col are passed
+
+                # Bind usando partial para garantir a passagem correta das coordenadas
                 container_card.bind(
                     "<Button-1>",
                     lambda event, page=page, position_in_field=col, position_in_hand=None, row=row: 
                     self.select_position(page, position_in_field, position_in_hand, row, event)
                 )
 
-
                 if len(page.cards_field_containers) <= row:
                     page.cards_field_containers.append([])
                 page.cards_field_containers[row].append(container_card)
-
-    def select_card(self, page, selected_position, position_in_hand):
+        
+    def select_card(self, page, selected_position, position_in_hand, row=None):
         selected_card = self._table.select_card(selected_position)
-       
+
         if not hasattr(page, 'selected_cards'):
             page.selected_cards = []
 
         if selected_position.get_origin() == "hand":
             # Deselect the previously selected card in hand
-            row = position_in_hand // 3
             col = position_in_hand % 3
+            row = position_in_hand // 3
 
             print(f"DENTRO DE SELECT_CARD = Selected card: {selected_card}", f"Position: {row} {col}", f"from {selected_position.get_origin()}")
 
@@ -155,13 +156,7 @@ class Controller(DogPlayerInterface):
                 page.selected_card = None
 
         elif selected_position.get_origin() == "field":
-            row = position_in_hand // 4
             col = position_in_hand % 4
-
-            if position_in_hand >= 4:
-            # Deselect previously selected cards in the field
-                row = 2
-                col = position_in_hand % 4
 
             print(f"DENTRO DE SELECT_CARD = Selected card: {selected_card}", f"Position: {row} {col}", f"from {selected_position.get_origin()}")
             # If clicking the same card again, just deselect it
@@ -182,21 +177,13 @@ class Controller(DogPlayerInterface):
             else:
                 page.selected_cards = []
 
-    def select_position(self, page, position_in_field=None, position_in_hand=None, row=None,event=None,):
+    def select_position(self, page, position_in_field=None, position_in_hand=None, row=None,event=None):
         turn_player = self._table.get_turn_player()
-        print(position_in_field)
 
         if position_in_field is not None:
-            if row==2:
-                print("linha de origem do clique: ", row)
-                # Ajusta o índice para o campo remoto (0 a 3)
-                selected_position = self._table.get_remote_field().get_position_in_field(position_in_field)
-                print("selected_position para row = 2", selected_position)
-            else:
-                print("linha de origem do clique: ", row)
-                # Usa o índice diretamente para o campo local (0 a 3)
+            if turn_player.get_id() == self._table.get_local_player().get_id():
                 selected_position = self._table.get_local_field().get_position_in_field(position_in_field)
-                print("selected_position para row = 0: ", selected_position)
+
             selected_position.set_field(True)
 
         if position_in_hand is not None:
@@ -209,11 +196,12 @@ class Controller(DogPlayerInterface):
 
             if occupied:
                 if position_in_field is not None:
-                    self.select_card(page, selected_position, position_in_field)
+                    print("valor de row::::")
+                    self.select_card(page, selected_position, position_in_field, row)
                 elif position_in_hand is not None:
                     self.select_card(page, selected_position, position_in_hand)
             if not occupied and selected_position._field:
-                self.invoke_card(selected_position, position_in_field, turn_player)
+                self.invoke_card(selected_position, position_in_field, turn_player, row)
 
     ################### Logic for the deck page ###################
 
@@ -477,6 +465,8 @@ class Controller(DogPlayerInterface):
 
     def buy_squirrel_card(self):
         turn_player = self._table.get_turn_player()
+        print("turno do jogador: ", turn_player.get_id())
+        print("este é o jogador local da mesa: ", self._table._local_player.get_id())
         if turn_player.get_id() == self._table._local_player.get_id():
             # Get the top squirrel card from the deck
             squirrel_card = self._table.buy_squirrel_card()
@@ -494,9 +484,6 @@ class Controller(DogPlayerInterface):
         # Atualiza a interface com base na jogada
         game_page = self.get_frame("GamePage")
         if game_page:
-            # Atualiza a mão do jogador
-            self.update_hand_UI(game_page)
-
             # Atualiza o campo de batalha
             self.update_field_UI(game_page, move)
 
@@ -507,38 +494,56 @@ class Controller(DogPlayerInterface):
     def update_field_UI(self, game_page, move):
         # Atualiza o campo de batalha com base na jogada
         positions = move.get("position", [])
-        for index, position_data in enumerate(positions):
-            row = index // 4  # Calcular a linha com base no índice
-            col = index % 4   # Calcular a coluna com base no índice
+        for row in range (2):
+            if row == 1:
+                continue
+            for col in range(4):
 
+            #Para atualizar o local_field
+                print(f'Posição {col}: {positions[col]}')
+                print('Posições:', positions)
+                posicao = Position.from_dict(positions[col])
+                self._table.get_local_field().set_position(col, posicao)
+                # Atualizar o contêiner correspondente no campo de batalha
+                print(f'row: {row}, col: {col}')
+                container = game_page.cards_field_containers[0][col]
+                # Verificar se há uma carta na posição
+                
+                if positions[col]["occupied"]:
+                    card_data = SacrificeCard.from_dict(positions[col]["card"])
+                    print("AQUIIIIIIIIIIIIIIIIIIIIIIII", str(posicao.get_card)[-8:], "ZZZZZZZZZZZZZZZZZZZZZZZZZZZ", str(posicao.get_card))
+                    card_label = f"{str(card_data)[-8:]} \n {card_data.get_name()} \n Damage: {card_data.get_damage()} \n Life: {card_data.get_hp()}"
+                else:
+                    card_label = "Empty"
 
+                for widget in container.winfo_children():
+                    if isinstance(widget, tk.Label):
+                        widget.config(text=card_label)
 
-            # Verificar se há uma carta na posição
-           # if position_data and position_data.get("card"):
-           #     card_data = position_data["card"]
-           #     card_label = f"{str(card_data['id'])[-8:]} \n {card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['hp']}"
-           # else:
-          #      card_label = "Empty"
+                # Para atualizar o remote field
+                for row in range(2,3):
+                    for col in range(4,8):
+                        print(f'Posição {col}: {positions[col-4]}')
+                        print('Posições:', positions)
+                        posicao = Position.from_dict(positions[col-4])
+                        self._table.get_remote_field().set_position(col-4, posicao)
+                        # Atualizar o contêiner correspondente no campo de batalha
+                        print(f'row: {row}, col: {col}')
+                        container = game_page.cards_field_containers[2][col-4]
+                        # Verificar se há uma carta na posição
+                        if positions[col]["occupied"]:
+                            print("TRUE OR FALSE: ", positions[col]["occupied"])
+                            print("tem uma carta: ", self._table.get_remote_field().get_position_in_field(col-4).get_card(),
+                            "na posicao: ", self._table.get_remote_field().get_position_in_field(col-4))
+                            card_data = Position.from_dict(positions[col-4]).get_card()
+                            print("AQUIIIIIIIIIIIIIIIIIIIIIIII", str(posicao.get_card)[-8:], "ZZZZZZZZZZZZZZZZZZZZZZZZZZZ", str(posicao.get_card))
+                            card_label = f"{str(card_data)[-8:]} \n {card_data.get_name()} \n Damage: {card_data.get_damage()} \n Life: {card_data.get_hp()}"
+                        else:
+                            card_label = "Empty"
 
-        for i in range(3):
-            print(f'Posição {i}: {positions[i]}')
-            print('Posições:', positions)
-            posicao = Position.from_dict(positions[i])
-            self._table.get_local_field().set_position(i, posicao)
-            # Atualizar o contêiner correspondente no campo de batalha
-            print(f'index: {index}, row: {row}, col: {col}')
-            container = game_page.cards_field_containers[0][i]
-            # Verificar se há uma carta na posição
-            if self._table.get_local_field().get_position_in_field(i).get_card():
-                card_data = SacrificeCard.from_dict(positions[i]["card"])
-                print("AQUIIIIIIIIIIIIIIIIIIIIIIII", str(posicao.get_card)[-8:], "ZZZZZZZZZZZZZZZZZZZZZZZZZZZ", str(posicao.get_card))
-                card_label = f"{str(card_data)[-8:]} \n {card_data.get_name()} \n Damage: {card_data.get_damage()} \n Life: {card_data.get_hp()}"
-            else:
-                card_label = "Empty"
-
-            for widget in container.winfo_children():
-                if isinstance(widget, tk.Label):
-                    widget.config(text=card_label)
+                        for widget in container.winfo_children():
+                            if isinstance(widget, tk.Label):
+                                widget.config(text=card_label)
 
     def place_card(self, card, pos):
         # colocar a carta no campo
@@ -552,6 +557,7 @@ class Controller(DogPlayerInterface):
         print("jogador com o turno", self._table.get_turn_player().get_id())
         winner = self._table.pass_turn()
         print("jogador com o turno", self._table.get_turn_player().get_id())
+
         if winner != "":
             if winner == "local_player":
                 messagebox.showinfo("Jogo finalizado", "O jogador Local venceu")
@@ -559,37 +565,41 @@ class Controller(DogPlayerInterface):
             elif winner == "remote_player":
                 messagebox.showinfo("Jogo finalizado", "O jogador Remoto venceu")
                 self.show_frame("StartPage")
+
         elif winner == "":
-            # Criar um dicionário com a jogada atual
+
+            if self._table._local_player.get_id() < self._table._remote_player.get_id():
+                # Criar um dicionário com a jogada atual
+                local_positions = self._table.get_local_field().get_positions()
+                remote_positions = self._table.get_remote_field().get_positions()
+            
+            else:
+                local_positions = self._table.get_remote_field().get_positions()
+                remote_positions = self._table.get_local_field().get_positions()
+
+            all_positions = local_positions + remote_positions
+
             move = {
                 "card": [card.to_dict() for card in self._table.get_local_field().get_sacrifice_cards()],  # Convert cards to dict
-                "position": [position.to_dict() for position in self._table.get_local_field().get_positions()],  # Convert positions to dict
+                "position": [position.to_dict() for position in all_positions],  # Convert positions to dict
                 "action": "invoke_card",  # Exemplo: ação realizada
                 "match_status": self._table.get_match_status(),  # Adicionando o status da partida
                 "turn_player_id" : self._table.get_turn_player().get_id()
             }
 
+            print(move["position"])
             # Enviar a jogada para o DOG server
             self.dog_server_interface.proxy.send_move(move)
 
-            # Atualizar a interface gráfica
-            self.update_gui(move)
-
-
-
-
-
     ######### Logic for the player #########
 
-    def invoke_card(self, selected_position, position_in_field, player):
-        invoked_card = self._table.invoke_card(selected_position, player)
+    def invoke_card(self, selected_position, position_in_field, player, row=None):
+        invoked_card = self._table.invoke_card(selected_position, player, row)
 
         # Update the field UI to reflect the invoked card
         game_page = self.get_frame("GamePage")
         if invoked_card:
-            row = 0 if position_in_field < 4 else 2  # Determine the row based on position
-            col = position_in_field % 4
-
+            col = position_in_field
             card_data = {
                 "id": invoked_card,
                 "name": invoked_card.get_name(),
@@ -638,34 +648,23 @@ class Controller(DogPlayerInterface):
                             container = game_page.cards_field_containers[row][col]
                         except:
                             break
-                        print(f"Container: {container}")
-                        print(f"Container text: {container.cget('text')}")
-                        print(f"containerwinfochildren: {container.winfo_children()}")
 
                         for widget in container.winfo_children():
-                            print(f"Widget: {widget}")
-                            print(f"Widget text: {widget.cget('text')}")
                             my_widget = widget.cget("text")
                             my_widget_name = my_widget.split()[0]
-                            print(f"My widget name: {my_widget_name}")
-                            row_invoked_card = 0 if position_in_field < 4 else 2  # Determine the row based on position
-                            col_invoked_card = position_in_field % 4
-                            
-                            print(f"my_widget_name: {my_widget_name}")
-                            print(f"str(sacrifice_card)[-8:]: {str(sacrifice_card)[-8:]}")
                             if my_widget_name == str(sacrifice_card)[-8:]:
                                 print("AAAAA entrou")
                                 is_deleted = True
                                 widget.config(text=f"Item {col + 1}")
 
                                 self._table.get_position_in_field(col).set_occupied(False)
+                                self._table.get_position_in_field(col).set_card(None)
                                 self._table.get_local_field().remove_card_from_field(sacrifice_card)
                                 container.config(bg="SystemButtonFace")
                                 continue
 
-
-
             self._table.get_local_field().clear_sacrifice_cards()
+
 
     def get_card_by_id(self, id):   
         return self.library.get_card(id)
@@ -709,24 +708,9 @@ class Controller(DogPlayerInterface):
         self.show_frame("StartPage")
 
     def receive_move(self, move):
-        # Verifica de quem é a jogada
-        turn_player_id = move.get("turn_player_id")
-        if turn_player_id == self._table._local_player.get_id():
-            # Se foi o jogador local quem fez a jogada, aplicamos ao campo remoto
-            field = self._table.get_remote_field()
-        else:
-            # Se foi o jogador remoto quem fez a jogada, aplicamos ao campo local
-            field = self._table.get_local_field()
-
-        # Converte os dicionários de volta para objetos
-        positions = [field.get_position_in_field(i) for i in range(4)]  # Recupera as posições
-        # Atualiza o campo de batalha com base na jogada recebida
-        for index, position_data in enumerate(move.get("position", [])):
-            if position_data and position_data.get("card"):
-                card_data = position_data["card"]
-                card = self.library.get_card(card_data["name"])
-                field.invoke_card_in_position(card, positions[index])
         self._table._local_player.pass_turn()
         self._table._remote_player.pass_turn()
+
         # Atualiza a interface gráfica
         self.update_gui(move)
+        print("EXECUTEI RECEIVE_MOVE")
