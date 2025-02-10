@@ -568,14 +568,11 @@ class Controller(DogPlayerInterface):
 
         elif winner == "":
 
-            if self._table._local_player.get_id() < self._table._remote_player.get_id():
-                # Criar um dicionário com a jogada atual
-                local_positions = self._table.get_local_field().get_positions()
-                remote_positions = self._table.get_remote_field().get_positions()
-            
-            else:
-                local_positions = self._table.get_remote_field().get_positions()
-                remote_positions = self._table.get_local_field().get_positions()
+
+            # Criar um dicionário com a jogada atual
+            local_positions = self._table.get_local_field().get_positions()
+            remote_positions = self._table.get_remote_field().get_positions()
+
 
             all_positions = local_positions + remote_positions
 
