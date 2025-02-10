@@ -531,7 +531,7 @@ class Controller(DogPlayerInterface):
                         print(f'row: {row}, col: {col}')
                         container = game_page.cards_field_containers[2][col-4]
                         # Verificar se há uma carta na posição
-                        if positions[col]["occupied"]:
+                        if positions[col-4]["occupied"]:
                             print("TRUE OR FALSE: ", positions[col]["occupied"])
                             print("tem uma carta: ", self._table.get_remote_field().get_position_in_field(col-4).get_card(),
                             "na posicao: ", self._table.get_remote_field().get_position_in_field(col-4))
