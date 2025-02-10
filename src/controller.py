@@ -521,7 +521,7 @@ class Controller(DogPlayerInterface):
                         widget.config(text=card_label)
 
                 # Para atualizar o remote field
-                for row in range(2,3):
+                for row in range(1,3):
                     for col in range(4,8):
                         print(f'Posição {col}: {positions[col-4]}')
                         print('Posições:', positions)
@@ -531,11 +531,11 @@ class Controller(DogPlayerInterface):
                         print(f'row: {row}, col: {col}')
                         container = game_page.cards_field_containers[2][col-4]
                         # Verificar se há uma carta na posição
-                        if positions[col-4]["occupied"]:
+                        if positions[col-4 + ((row - 1) * 4)]["occupied"]:
                             print("TRUE OR FALSE: ", positions[col]["occupied"])
                             print("tem uma carta: ", self._table.get_remote_field().get_position_in_field(col-4).get_card(),
                             "na posicao: ", self._table.get_remote_field().get_position_in_field(col-4))
-                            card_data = Position.from_dict(positions[col-4]).get_card()
+                            card_data = Position.from_dict(positions[col-4 + ((row - 1) * 4)]).get_card()
                             print("AQUIIIIIIIIIIIIIIIIIIIIIIII", str(posicao.get_card)[-8:], "ZZZZZZZZZZZZZZZZZZZZZZZZZZZ", str(posicao.get_card))
                             card_label = f"{str(card_data)[-8:]} \n {card_data.get_name()} \n Damage: {card_data.get_damage()} \n Life: {card_data.get_hp()}"
                         else:
