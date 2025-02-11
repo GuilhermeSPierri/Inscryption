@@ -180,28 +180,37 @@ class Controller(DogPlayerInterface):
     def select_position(self, page, position_in_field=None, position_in_hand=None, row=None,event=None):
         turn_player = self._table.get_turn_player()
 
-        if position_in_field is not None:
-            if turn_player.get_id() == self._table.get_local_player().get_id():
-                selected_position = self._table.get_local_field().get_position_in_field(position_in_field)
+        print("CAMPO LOCAL: ", self._table.get_local_field().get_positions())
+        print("CAMPO REMOTO: ", self._table.get_remote_field().get_positions())
+        if turn_player.get_id() == self._table.get_local_player().get_id():
+            if position_in_field is not None:
+                if self._table._local_player.get_id() < self._table._remote_player.get_id():
+                    if row == 0:
+                        selected_position = self._table.get_local_field().get_position_in_field(position_in_field)
+                    else:
+                        return
+                else:
+                    if row == 2:
+                        selected_position = self._table.get_remote_field().get_position_in_field(position_in_field)
+                    else:
+                        return
+                selected_position.set_field(True)
 
-            selected_position.set_field(True)
+            if position_in_hand is not None:
+                selected_position = self._table.get_position_in_hand(position_in_hand)
+                selected_position.set_hand(True)
 
-        if position_in_hand is not None:
-            selected_position = self._table.get_position_in_hand(position_in_hand)
-            selected_position.set_hand(True)
+            print("ID's:", turn_player.get_id(), "id local player da mesa :", self._table._local_player.get_id())
+            if turn_player.get_id() == self._table._local_player.get_id() and selected_position is not None:
+                occupied = self._table.check_position(selected_position)
 
-        print("ID's:", turn_player.get_id(), "id local player da mesa :", self._table._local_player.get_id())
-        if turn_player.get_id() == self._table._local_player.get_id() and selected_position is not None:
-            occupied = self._table.check_position(selected_position)
-
-            if occupied:
-                if position_in_field is not None:
-                    print("valor de row::::")
-                    self.select_card(page, selected_position, position_in_field, row)
-                elif position_in_hand is not None:
-                    self.select_card(page, selected_position, position_in_hand)
-            if not occupied and selected_position._field:
-                self.invoke_card(selected_position, position_in_field, turn_player, row)
+                if occupied:
+                    if position_in_field is not None:
+                        self.select_card(page, selected_position, position_in_field, row)
+                    elif position_in_hand is not None:
+                        self.select_card(page, selected_position, position_in_hand)
+                if not occupied and selected_position._field:
+                    self.invoke_card(selected_position, position_in_field, turn_player, row)
 
     ################### Logic for the deck page ###################
 
@@ -493,20 +502,29 @@ class Controller(DogPlayerInterface):
 
     def update_field_UI(self, game_page, move):
         # Atualiza o campo de batalha com base na jogada
-        positions = move.get("position", [])
-        for row in range (2):
-            if row == 1:
-                continue
+        local_positions = move.get("local_positions", [])
+        remote_positions = move.get("remote_positions", [])
+
+
+        self.update_field(game_page, self._table.get_local_field(), local_positions)
+        self.update_field(game_page, self._table.get_remote_field(), remote_positions)
+
+
+    def update_field(self, game_page, field, positions):
+        for row in range (1):
             for col in range(4):
 
             #Para atualizar o local_field
                 print(f'Posição {col}: {positions[col]}')
                 print('Posições:', positions)
                 posicao = Position.from_dict(positions[col])
-                self._table.get_local_field().set_position(col, posicao)
+                field.set_position(col, posicao)
                 # Atualizar o contêiner correspondente no campo de batalha
                 print(f'row: {row}, col: {col}')
-                container = game_page.cards_field_containers[0][col]
+                if field == self._table.get_local_field():
+                    container = game_page.cards_field_containers[0][col]
+                else:
+                    container = game_page.cards_field_containers[2][col]
                 # Verificar se há uma carta na posição
                 
                 if positions[col]["occupied"]:
@@ -520,30 +538,6 @@ class Controller(DogPlayerInterface):
                     if isinstance(widget, tk.Label):
                         widget.config(text=card_label)
 
-                # Para atualizar o remote field
-                for row in range(2,3):
-                    for col in range(4,8):
-                        print(f'Posição {col}: {positions[col]}')
-                        print('Posições:', positions)
-                        posicao = Position.from_dict(positions[col])
-                        self._table.get_remote_field().set_position(col-4, posicao)
-                        # Atualizar o contêiner correspondente no campo de batalha
-                        print(f'row: {row}, col: {col}')
-                        container = game_page.cards_field_containers[2][col-4]
-                        # Verificar se há uma carta na posição
-                        if positions[col]["occupied"]:
-                            print("TRUE OR FALSE: ", positions[col]["occupied"])
-                            print("tem uma carta: ", self._table.get_remote_field().get_position_in_field(col-4).get_card(),
-                            "na posicao: ", self._table.get_remote_field().get_position_in_field(col-4))
-                            card_data = Position.from_dict(positions[col]).get_card()
-                            print("AQUIIIIIIIIIIIIIIIIIIIIIIII", str(posicao.get_card)[-8:], "ZZZZZZZZZZZZZZZZZZZZZZZZZZZ", str(posicao.get_card))
-                            card_label = f"{str(card_data)[-8:]} \n {card_data.get_name()} \n Damage: {card_data.get_damage()} \n Life: {card_data.get_hp()}"
-                        else:
-                            card_label = "Empty"
-
-                        for widget in container.winfo_children():
-                            if isinstance(widget, tk.Label):
-                                widget.config(text=card_label)
 
     def place_card(self, card, pos):
         # colocar a carta no campo
@@ -554,9 +548,7 @@ class Controller(DogPlayerInterface):
         messagebox.showinfo("Inscryption", "Voce comprou uma carta")
 
     def pass_turn(self):
-        print("jogador com o turno", self._table.get_turn_player().get_id())
         winner = self._table.pass_turn()
-        print("jogador com o turno", self._table.get_turn_player().get_id())
 
         if winner != "":
             if winner == "local_player":
@@ -568,23 +560,19 @@ class Controller(DogPlayerInterface):
 
         elif winner == "":
 
-
             # Criar um dicionário com a jogada atual
             local_positions = self._table.get_local_field().get_positions()
             remote_positions = self._table.get_remote_field().get_positions()
 
-
-            all_positions = local_positions + remote_positions
-
             move = {
                 "card": [card.to_dict() for card in self._table.get_local_field().get_sacrifice_cards()],  # Convert cards to dict
-                "position": [position.to_dict() for position in all_positions],  # Convert positions to dict
+                "local_positions": [position.to_dict() for position in local_positions],  # Convert local positions to dict
+                "remote_positions": [position.to_dict() for position in remote_positions],
                 "action": "invoke_card",  # Exemplo: ação realizada
                 "match_status": self._table.get_match_status(),  # Adicionando o status da partida
                 "turn_player_id" : self._table.get_turn_player().get_id()
             }
 
-            print(move["position"])
             # Enviar a jogada para o DOG server
             self.dog_server_interface.proxy.send_move(move)
 

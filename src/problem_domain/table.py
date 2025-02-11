@@ -270,7 +270,10 @@ class Table:
     def invoke_card(self, selected_position, player, row=None): 
         hand = player.get_hand()
         print("valor do rowwwwwwwwwwwwwwwwww: ", row)
-        field = self._local_field
+        if self._local_player.get_id() < self._remote_player.get_id():
+            field = self._local_field
+        else:
+            field = self._remote_field
 
         invocation_card = hand.get_invocation_card()
         if invocation_card != None:
