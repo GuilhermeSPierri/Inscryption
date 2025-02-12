@@ -59,9 +59,6 @@ class Table:
     def get_buy_tokens(self):
         return self._buy_tokens
 
-    def get_position_in_field(self, position_in_field: int): 
-        return self._local_field.get_position_in_field(position_in_field)
-        
     def get_position_in_hand(self, position_in_hand: int): 
         return self._local_player.get_hand().get_position_in_hand(position_in_hand)
     
@@ -87,7 +84,8 @@ class Table:
         self._remote_field.get_card_in_position(position)
 
     def get_field_card_in_position(self, position):
-        return self._local_field.get_card_in_position(position)
+        field = self.get_player_field()
+        return field.get_card_in_position(position)
     
     def get_damage(self, card):
         return card.get_damage()
@@ -228,14 +226,14 @@ class Table:
                 invocation_card = hand.get_invocation_card()
 
                 if turn_player:
-                    field = self._local_field
+                    field = self.get_player_field()
 
                 if already_selected:
                     origin = selected_position.get_origin()
 
                     if origin == "field":
-                        self._local_field.remove_from_sacrifice_cards(selected_card)
-                        print("Sacrifice cardaaa", self._local_field.get_sacrifice_cards())
+                        field.remove_from_sacrifice_cards(selected_card)
+                        print("Sacrifice cardaaa", field.get_sacrifice_cards())
                         selected_card.clear_already_selected()
                         self.clear_selected_card()
 
@@ -250,7 +248,7 @@ class Table:
                     elif selected_card == field.get_card_in_position(selected_position):
                         #field.append_to_sacrifice_cards(selected_card)
                         selected_card.set_already_selected()
-                        print("Sacrifice carda", self._local_field.get_sacrifice_cards())
+                        print("Sacrifice carda", field.get_sacrifice_cards())
                     
                     else:
                         field.clear_sacrifice_cards()
