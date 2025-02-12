@@ -640,10 +640,10 @@ class Controller(DogPlayerInterface):
                             if my_widget_name == str(sacrifice_card)[-8:]:
                                 print("AAAAA entrou")
                                 is_deleted = True
-                                widget.config(text=f"Item {col + 1}")
+                                widget.config(text=f"Empty")
 
-                                self._table.get_position_in_field(col).set_occupied(False)
                                 self._table.get_position_in_field(col).set_card(None)
+                                self._table.get_position_in_field(col).set_occupied(False)
                                 self._table.get_local_field().remove_card_from_field(sacrifice_card)
                                 container.config(bg="SystemButtonFace")
                                 continue
