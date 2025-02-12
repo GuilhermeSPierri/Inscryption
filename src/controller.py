@@ -156,6 +156,8 @@ class Controller(DogPlayerInterface):
                 page.selected_card = None
 
         elif selected_position.get_origin() == "field":
+
+            field = self._table.get_player_field()
             col = position_in_hand % 4
 
             print(f"DENTRO DE SELECT_CARD = Selected card: {selected_card}", f"Position: {row} {col}", f"from {selected_position.get_origin()}")
@@ -164,7 +166,7 @@ class Controller(DogPlayerInterface):
                 page.selected_cards.remove((row, col))
                 page.cards_field_containers[row][col].config(bg="SystemButtonFace")
                 #self._table.get_local_field().remove_card_from_field(selected_card)
-                self._table.get_local_field().remove_from_sacrifice_cards(selected_card)
+                field.remove_from_sacrifice_cards(selected_card)
                 return
 
             # Highlight the new selected card in the field
@@ -172,8 +174,8 @@ class Controller(DogPlayerInterface):
                 print(f"DENTRO DO IF LA: Selected card: {selected_card}", f"Position: {row} {col}", f"from {selected_position.get_origin()}")
                 page.cards_field_containers[row][col].config(bg="lightblue")
                 page.selected_cards.append((row, col))
-                self._table.get_local_field().append_to_sacrifice_cards(selected_card)
-                print("tamanho da lista de sacrificio: ", len(self._table.get_local_field().get_sacrifice_cards()) )
+                field.append_to_sacrifice_cards(selected_card)
+                print("tamanho da lista de sacrificio: ", len(field.get_sacrifice_cards()) )
             else:
                 page.selected_cards = []
 
@@ -581,6 +583,7 @@ class Controller(DogPlayerInterface):
     def invoke_card(self, selected_position, position_in_field, player, row=None):
         invoked_card = self._table.invoke_card(selected_position, player, row)
 
+        field = self._table.get_player_field()
         # Update the field UI to reflect the invoked card
         game_page = self.get_frame("GamePage")
         if invoked_card:
@@ -617,7 +620,7 @@ class Controller(DogPlayerInterface):
                 game_page.selected_card = None
 
             # Remove sacrifice cards from the field
-            sacrifice_cards = self._table.get_local_field().get_sacrifice_cards()
+            sacrifice_cards = field.get_sacrifice_cards()
             print(f"Sacrifice cards: {sacrifice_cards} AQUII")
 
             for sacrifice_card in sacrifice_cards:
@@ -642,13 +645,13 @@ class Controller(DogPlayerInterface):
                                 is_deleted = True
                                 widget.config(text=f"Empty")
 
-                                self._table.get_position_in_field(col).set_card(None)
-                                self._table.get_position_in_field(col).set_occupied(False)
-                                self._table.get_local_field().remove_card_from_field(sacrifice_card)
+                                field.get_position_in_field(col).set_card(None)
+                                field.get_position_in_field(col).set_occupied(False)
+                                field.remove_card_from_field(sacrifice_card)
                                 container.config(bg="SystemButtonFace")
                                 continue
 
-            self._table.get_local_field().clear_sacrifice_cards()
+            field.clear_sacrifice_cards()
 
 
     def get_card_by_id(self, id):   
