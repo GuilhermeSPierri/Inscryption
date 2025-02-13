@@ -83,8 +83,7 @@ class Table:
     def get_remote_field_card_in_position(self, position): 
         self._remote_field.get_card_in_position(position)
 
-    def get_field_card_in_position(self, position):
-        field = self.get_player_field()
+    def get_field_card_in_position(self, position, field):
         return field.get_card_in_position(position)
     
     def get_damage(self, card):
@@ -275,7 +274,6 @@ class Table:
 
     def invoke_card(self, selected_position, player, row=None): 
         hand = player.get_hand()
-        print("valor do rowwwwwwwwwwwwwwwwww: ", row)
         if self._local_player.get_id() < self._remote_player.get_id():
             field = self._local_field
         else:
@@ -367,20 +365,29 @@ class Table:
     
     def pass_turn(self):
         for i in range(4):
-            local_card = self.get_field_card_in_position(i)
-
+            field = self.get_player_field()
+            local_card = self.get_field_card_in_position(i, field)
+            print("valor do i: ", i, "valor de local_card: ", local_card)
             if local_card != None:
-                remote_card = self.get_remote_field_card_in_position(i)
+                if field == self._local_field:
+                    field = self._remote_field
+                else:
+                    field = self._local_field
+
+                remote_card = field.get_card_in_position(i)
 
                 damage = self.get_damage(local_card)
 
                 if remote_card != None:
+                    print("ENTREI AQUI")
                     remote_card_hp = self.get_hp(remote_card)
                     self.execute_attack(damage, remote_card_hp, local_card, remote_card)
+                    print()
                 
                 else:
                     player = "remote"
                     self._scale.add_points(damage, player)
+                    print("points local scale: ", self._scale._local_player_points, "points remote scale: ", self._scale._remote_player_points)
         
 
         print("TURNO JOGADOR LOCAL: ", self._local_player.get_turn())

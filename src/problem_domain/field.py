@@ -16,8 +16,8 @@ class Field:
         return self._positions
     
     def get_card_in_position(self, position):
-        if position in self._positions:
-            return position.get_card()
+        if self._positions[position] in self._positions:
+            return self._positions[position].get_card()
 
     def get_sacrifice_cards(self):
         return self._sacrifice_cards
