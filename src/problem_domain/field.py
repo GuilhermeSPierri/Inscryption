@@ -16,8 +16,12 @@ class Field:
         return self._positions
     
     def get_card_in_position(self, position):
-        if self._positions[position] in self._positions:
-            return self._positions[position].get_card()
+        if isinstance(position, Position):
+            if position in self._positions:
+                return position.get_card()
+        else:
+            if self._positions[position] in self._positions:
+                return self._positions[position].get_card()
 
     def get_sacrifice_cards(self):
         return self._sacrifice_cards
@@ -47,11 +51,8 @@ class Field:
                 return
 
     def invoke_card_in_position(self, card, selected_position):
-        print('selected_position dado: ', selected_position)
-        print('self._positions atual: ', self._positions)
         if any(selected_position == pos for pos in self._positions):
             selected_position.set_card(card)
             selected_position.set_occupied(True)
-            print("Card ", card,  " invoked in position ", selected_position)
         else:
             raise ValueError("Invalid position")

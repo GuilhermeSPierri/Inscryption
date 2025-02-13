@@ -181,10 +181,10 @@ class Table:
         points_difference = self._scale.calcule_points_difference()
         
         if (points_difference <= -7):
-            winner ="local"
+            winner = "local_player"
         
         elif (points_difference >= 7):
-            winner = "remote"
+            winner = "remote_player"
 
         else:
             winner = ""

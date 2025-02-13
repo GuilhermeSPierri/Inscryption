@@ -182,8 +182,6 @@ class Controller(DogPlayerInterface):
     def select_position(self, page, position_in_field=None, position_in_hand=None, row=None,event=None):
         turn_player = self._table.get_turn_player()
 
-        print("CAMPO LOCAL: ", self._table.get_local_field().get_positions())
-        print("CAMPO REMOTO: ", self._table.get_remote_field().get_positions())
         if turn_player.get_id() == self._table.get_local_player().get_id():
             if position_in_field is not None:
                 if self._table._local_player.get_id() < self._table._remote_player.get_id():
@@ -552,6 +550,22 @@ class Controller(DogPlayerInterface):
     def pass_turn(self):
         winner = self._table.pass_turn()
 
+        # Criar um dicionário com a jogada atual
+        local_positions = self._table.get_local_field().get_positions()
+        remote_positions = self._table.get_remote_field().get_positions()
+
+        move = {
+            "card": [card.to_dict() for card in self._table.get_local_field().get_sacrifice_cards()],  # Convert cards to dict
+            "local_positions": [position.to_dict() for position in local_positions],  # Convert local positions to dict
+            "remote_positions": [position.to_dict() for position in remote_positions],
+            "action": "invoke_card",  # Exemplo: ação realizada
+            "match_status": self._table.get_match_status(),  # Adicionando o status da partida
+            "turn_player_id" : self._table.get_turn_player().get_id()
+        }
+
+        # Enviar a jogada para o DOG server
+        self.dog_server_interface.proxy.send_move(move)
+
         if winner != "":
             if winner == "local_player":
                 messagebox.showinfo("Jogo finalizado", "O jogador Local venceu")
@@ -559,24 +573,6 @@ class Controller(DogPlayerInterface):
             elif winner == "remote_player":
                 messagebox.showinfo("Jogo finalizado", "O jogador Remoto venceu")
                 self.show_frame("StartPage")
-
-        elif winner == "":
-
-            # Criar um dicionário com a jogada atual
-            local_positions = self._table.get_local_field().get_positions()
-            remote_positions = self._table.get_remote_field().get_positions()
-
-            move = {
-                "card": [card.to_dict() for card in self._table.get_local_field().get_sacrifice_cards()],  # Convert cards to dict
-                "local_positions": [position.to_dict() for position in local_positions],  # Convert local positions to dict
-                "remote_positions": [position.to_dict() for position in remote_positions],
-                "action": "invoke_card",  # Exemplo: ação realizada
-                "match_status": self._table.get_match_status(),  # Adicionando o status da partida
-                "turn_player_id" : self._table.get_turn_player().get_id()
-            }
-
-            # Enviar a jogada para o DOG server
-            self.dog_server_interface.proxy.send_move(move)
 
     ######### Logic for the player #########
 
