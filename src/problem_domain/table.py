@@ -247,7 +247,7 @@ class Table:
                     elif selected_card == field.get_card_in_position(selected_position):
                         #field.append_to_sacrifice_cards(selected_card)
                         selected_card.set_already_selected()
-                        print("Sacrifice carda", field.get_sacrifice_cards())
+                        print("Sacrifice carda", field.get_sacrifice_cards())   
                     
                     else:
                         field.clear_sacrifice_cards()
@@ -301,16 +301,14 @@ class Table:
     def clear_selected_position(self): 
         pass
 
-    def execute_attack(self, damage, life, local_card, remote_card): 
+    def execute_attack(self, damage, life, remote_card): 
         remaing_hp, is_alive = self.deal_damage(life, damage)
 
         if is_alive:
             remote_card.set_hp(remaing_hp)
-            self.activate_glyph(local_card)
 
         else:
             self._remote_field.remove_card_from_field(remote_card)
-            self.activate_glyph(local_card)
         
 
     def invoke_card_in_field(self, move): 
@@ -367,39 +365,31 @@ class Table:
         for i in range(4):
             field = self.get_player_field()
             local_card = self.get_field_card_in_position(i, field)
-            print("valor do i: ", i, "valor de local_card: ", local_card)
+
             if local_card != None:
+
                 if field == self._local_field:
                     field = self._remote_field
                 else:
                     field = self._local_field
 
+                self.activate_glyph(local_card)
                 remote_card = field.get_card_in_position(i)
 
                 damage = self.get_damage(local_card)
 
                 if remote_card != None:
-                    print("ENTREI AQUI")
                     remote_card_hp = self.get_hp(remote_card)
-                    self.execute_attack(damage, remote_card_hp, local_card, remote_card)
-                    print()
+                    self.execute_attack(damage, remote_card_hp,remote_card)
                 
                 else:
                     player = "remote"
                     self._scale.add_points(damage, player)
                     print("points local scale: ", self._scale._local_player_points, "points remote scale: ", self._scale._remote_player_points)
-        
-
-        print("TURNO JOGADOR LOCAL: ", self._local_player.get_turn())
-        print("TURNO JOGADOR REMOTO: ", self._remote_player.get_turn())
+    
 
         self._local_player.pass_turn()
         self._remote_player.pass_turn()
-
-        print("troquei de turno!!!!!!!!!!")
-
-        print("TURNO JOGADOR LOCAL: ", self._local_player.get_turn())
-        print("TURNO JOGADOR REMOTO: ", self._remote_player.get_turn())
         self._local_player.add_buy_token(1)
         self._remote_player.add_buy_token(1)
         winner = self.check_for_winner()
