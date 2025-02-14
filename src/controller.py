@@ -211,6 +211,8 @@ class Controller(DogPlayerInterface):
                         self.select_card(page, selected_position, position_in_field, row)
                     elif position_in_hand is not None:
                         self.select_card(page, selected_position, position_in_hand)
+
+                print(f"occupied: {occupied}  selected_position._field: {selected_position._field}" )
                 if not occupied and selected_position._field:
                     self.invoke_card(selected_position, position_in_field, turn_player, row)
 
@@ -459,6 +461,7 @@ class Controller(DogPlayerInterface):
                 if index in hand_dict:
                     card_data = hand_dict[index]
                     card_label = f"{str(card_data['id'])[-8:]} \n{card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
+                    self._table.get_position_in_hand(index).set_card(card_data["id"])
                 else:
                     card_label = "Empty"
                 
@@ -587,6 +590,7 @@ class Controller(DogPlayerInterface):
         field = self._table.get_player_field()
         # Update the field UI to reflect the invoked card
         game_page = self.get_frame("GamePage")
+        self.update_hand_UI(game_page)
         if invoked_card:
             col = position_in_field
             card_data = {
@@ -600,7 +604,7 @@ class Controller(DogPlayerInterface):
             # Update the field container with the card data
             container = game_page.cards_field_containers[row][col]
             container.config(bg="SystemButtonFace")  # Reset the background
-
+            
             for widget in container.winfo_children():
                 if isinstance(widget, tk.Label):
                     widget.config(text=card_label)
