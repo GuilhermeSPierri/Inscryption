@@ -495,8 +495,7 @@ class Controller(DogPlayerInterface):
         if game_page:
             # Atualiza o campo de batalha
             self.update_field_UI(game_page, move)
-            # Atualiza a escala (se necessário)
-            #self.update_scale_UI(game_page, move)
+
 
 
     def update_field_UI(self, game_page, move):
@@ -513,22 +512,19 @@ class Controller(DogPlayerInterface):
         for row in range (1):
             for col in range(4):
 
-            #Para atualizar o local_field
-                print(f'Posição {col}: {positions[col]}')
-                print('Posições:', positions)
                 posicao = Position.from_dict(positions[col])
                 field.set_position(col, posicao)
+
                 # Atualizar o contêiner correspondente no campo de batalha
-                print(f'row: {row}, col: {col}')
                 if field == self._table.get_local_field():
                     container = game_page.cards_field_containers[0][col]
                 else:
                     container = game_page.cards_field_containers[2][col]
+
                 # Verificar se há uma carta na posição
                 
                 if positions[col]["occupied"]:
                     card_data = SacrificeCard.from_dict(positions[col]["card"])
-                    print("AQUIIIIIIIIIIIIIIIIIIIIIIII", str(posicao.get_card)[-8:], "ZZZZZZZZZZZZZZZZZZZZZZZZZZZ", str(posicao.get_card))
                     card_label = f"{str(card_data)[-8:]} \n {card_data.get_name()} \n Damage: {card_data.get_damage()} \n Life: {card_data.get_hp()}"
                 else:
                     card_label = "Empty"
@@ -556,8 +552,8 @@ class Controller(DogPlayerInterface):
         move = {
             "card": [card.to_dict() for card in self._table.get_local_field().get_sacrifice_cards()],  # Convert cards to dict
             "local_positions": [position.to_dict() for position in local_positions],  # Convert local positions to dict
-            "remote_positions": [position.to_dict() for position in remote_positions],
-            "action": "invoke_card",  # Exemplo: ação realizada
+            "remote_positions": [position.to_dict() for position in remote_positions], # Convert remote positions to dict
+            "action": "invoke_card", 
             "match_status": self._table.get_match_status(),  # Adicionando o status da partida
             "turn_player_id" : self._table.get_turn_player().get_id(),
             "local_scale" : self._table._scale._local_player_points,
@@ -701,7 +697,7 @@ class Controller(DogPlayerInterface):
     def receive_move(self, move):
         print("RECEBI A JOGADA", move["match_status"])
         if move["match_status"] == "finished":
-            messagebox.showinfo("Jogo finalizado", "O jogador inimigo venceu")
+            messagebox.showinfo("Jogo finalizado", "Você venceu a partida")
            # self.dog_server_interface.proxy.send_move(move)
             self.show_frame("StartPage")
             self.reset_game()

@@ -45,7 +45,6 @@ class Field:
     def remove_card_from_field(self, card):
         for position in self._positions:
             if position.get_card() == card:
-                print("ACHOU A CARTA SIM MEU DEUZI")
                 position.set_card(None)
                 position.set_occupied(False)
                 return

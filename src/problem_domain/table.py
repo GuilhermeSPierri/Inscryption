@@ -317,7 +317,12 @@ class Table:
             remote_card.set_hp(remaing_hp)
 
         else:
-            self._remote_field.remove_card_from_field(remote_card)
+            field = self.get_player_field()
+
+            if field == self._local_field:
+                self._remote_field.remove_card_from_field(remote_card)
+            else:
+                self._local_field.remove_card_from_field(remote_card)
         
 
     def invoke_card_in_field(self, move): 
@@ -333,15 +338,15 @@ class Table:
         pass
 
     def deal_damage(self, remote_card_life: int, damage: int): 
-        remaining_hp = remote_card_life - damage
+        remaing_hp = remote_card_life - damage
         
-        if remaining_hp <= 0:
+        if remaing_hp <= 0:
             is_alive = False
 
         else:
             is_alive = True
 
-        return remaining_hp, is_alive
+        return remaing_hp, is_alive
 
     def activate_glyph(self, card): 
         glyph = card.get_glyph()
@@ -376,25 +381,25 @@ class Table:
             local_card = self.get_field_card_in_position(i, field)
 
             if local_card != None:
-
                 if field == self._local_field:
                     field = self._remote_field
                 else:
                     field = self._local_field
 
-                self.activate_glyph(local_card)
                 remote_card = field.get_card_in_position(i)
 
                 damage = self.get_damage(local_card)
 
                 if remote_card != None:
-                    remote_card_hp = self.get_hp(remote_card)
-                    self.execute_attack(damage, remote_card_hp,remote_card)
+                    remote_card_hp = remote_card.get_hp()
+                    self.execute_attack(damage, remote_card_hp, remote_card)
                 
                 else:
                     player = "remote"
                     self._scale.add_points(damage, player)
                     print("points local scale: ", self._scale._local_player_points, "points remote scale: ", self._scale._remote_player_points)
+
+                self.activate_glyph(local_card) # Activates the glyph card after attack
     
 
         self._local_player.pass_turn()
@@ -403,16 +408,3 @@ class Table:
         self._remote_player.add_buy_token(1)
         winner = self.check_for_winner()
         return winner
-    
-    def reset_table(self):
-        self._local_player = Player()
-        self._remote_player = Player()
-        self._local_field = Field()
-        self._remote_field = Field()
-        self._match_status = 1  # int
-        self._local_deck = self._local_player.get_deck()  # Deck object
-        self._remote_deck = self._remote_player.get_deck()  # Deck object
-        self._scale = Scale()
-        self._squirrel_deck = None # TODO: Define the type of this attribute
-        self._buy_tokens = 1  # int
-        self._game_status = "waiting"  # string
