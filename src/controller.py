@@ -495,6 +495,7 @@ class Controller(DogPlayerInterface):
         if game_page:
             # Atualiza o campo de batalha
             self.update_field_UI(game_page, move)
+            self.dog_server_interface.proxy.send_move(move)
 
             # Atualiza a escala (se necessário)
             #self.update_scale_UI(game_page, move)
@@ -553,6 +554,15 @@ class Controller(DogPlayerInterface):
         # Criar um dicionário com a jogada atual
         local_positions = self._table.get_local_field().get_positions()
         remote_positions = self._table.get_remote_field().get_positions()
+        if winner != "":
+            if winner == "local_player":
+                messagebox.showinfo("Jogo finalizado", "O jogador Local venceu")
+
+            elif winner == "remote_player":
+                messagebox.showinfo("Jogo finalizado", "O jogador Remoto venceu")
+
+            self._table.set_match_status(2) # 2 = partida desconectada
+            self.show_frame("StartPage")
 
         move = {
             "card": [card.to_dict() for card in self._table.get_local_field().get_sacrifice_cards()],  # Convert cards to dict
@@ -568,14 +578,7 @@ class Controller(DogPlayerInterface):
         # Enviar a jogada para o DOG server
         self.dog_server_interface.proxy.send_move(move)
 
-        if winner != "":
-            if winner == "local_player":
-                messagebox.showinfo("Jogo finalizado", "O jogador Local venceu")
-                self.show_frame("StartPage")
-            elif winner == "remote_player":
-                messagebox.showinfo("Jogo finalizado", "O jogador Remoto venceu")
-                self.show_frame("StartPage")
-
+        
     ######### Logic for the player #########
 
     def invoke_card(self, selected_position, position_in_field, player, row=None):
@@ -687,9 +690,20 @@ class Controller(DogPlayerInterface):
     def receive_withdrawal_notification(self):
         self.dog_server_interface.proxy.get_status()
         messagebox.showinfo(message="Você desistiu da partida")
+        self._table.set_match_status(4) # 4 = desistencia
+        self.pass_turn()
+        self._table.set_match_status(2) # 2 = partida desconectada
+        self.pass_turn()
         self.show_frame("StartPage")
 
     def receive_move(self, move):
+        print("RECEBI A JOGADA", move["match_status"])
+        if move["match_status"] == "finished":
+            self._table.set_match_status(2)
+            messagebox.showinfo("Jogo finalizado", "O jogador inimigo venceu")
+            self.dog_server_interface.proxy.send_move(move) 
+            self.show_frame("StartPage")
+
         self._table._local_player.pass_turn()
         self._table._remote_player.pass_turn()
 

@@ -23,7 +23,15 @@ class Table:
 
     # Métodos existentes
     def get_match_status(self):
-        return self._match_status
+        if self._match_status == 4:
+            return "interrupted"
+        elif self._match_status == 2:
+            return "finished"
+        elif self._match_status == 1:
+            return "next"
+    
+    def set_match_status(self, status: int):
+        self._match_status = status
 
     def get_status(self):
         return {
