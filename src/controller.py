@@ -528,6 +528,7 @@ class Controller(DogPlayerInterface):
                 if positions[col]["occupied"]:
                     card_data = SacrificeCard.from_dict(positions[col]["card"])
                     card_label = f"{str(card_data)[-8:]} \n {card_data.get_name()} \n Damage: {card_data.get_damage()} \n Life: {card_data.get_hp()}"
+                    field.get_position_in_field(col).set_card(card_data)
                 else:
                     card_label = "Empty"
 
@@ -640,6 +641,7 @@ class Controller(DogPlayerInterface):
                         for widget in container.winfo_children():
                             my_widget = widget.cget("text")
                             my_widget_name = my_widget.split()[0]
+                            print(f"my_widget_name: {my_widget_name} sacrifice_card: {sacrifice_card}")
                             if my_widget_name == str(sacrifice_card)[-8:]:
                                 print("AAAAA entrou")
                                 is_deleted = True
