@@ -226,7 +226,6 @@ class Table:
             print("A CARTA SELECIONADA É", selected_card)
             
             if selected_card == None:
-                print(12312316127983618723612873126)
                 return
             else:
                 already_selected = selected_card.get_already_selected()
@@ -283,10 +282,7 @@ class Table:
 
     def invoke_card(self, selected_position, player, row=None): 
         hand = player.get_hand()
-        if self._local_player.get_id() < self._remote_player.get_id():
-            field = self._local_field
-        else:
-            field = self._remote_field
+        field = self.get_player_field()
 
         invocation_card = hand.get_invocation_card()
         if invocation_card != None:

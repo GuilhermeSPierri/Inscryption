@@ -188,11 +188,13 @@ class Controller(DogPlayerInterface):
                     if row == 0:
                         selected_position = self._table.get_local_field().get_position_in_field(position_in_field)
                     else:
+                        messagebox.showinfo("Field incorreto", "Este não é o seu campo!")
                         return
                 else:
                     if row == 2:
                         selected_position = self._table.get_remote_field().get_position_in_field(position_in_field)
                     else:
+                        messagebox.showinfo("Field incorreto", "Este não é o seu campo!")
                         return
                 selected_position.set_field(True)
 
