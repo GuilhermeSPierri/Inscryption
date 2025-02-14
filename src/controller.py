@@ -590,7 +590,7 @@ class Controller(DogPlayerInterface):
         field = self._table.get_player_field()
         # Update the field UI to reflect the invoked card
         game_page = self.get_frame("GamePage")
-        self.update_hand_UI(game_page)
+        #self.update_hand_UI(game_page)
         if invoked_card:
             col = position_in_field
             card_data = {
