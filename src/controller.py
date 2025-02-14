@@ -706,9 +706,13 @@ class Controller(DogPlayerInterface):
             self.show_frame("StartPage")
             self.reset_game()
 
+        self._table._scale.set_local_player_points(move["remote_scale"])
+        self._table._scale.set_remote_player_points(move["local_scale"])
+
         self._table._local_player.pass_turn()
         self._table._remote_player.pass_turn()
 
+        print(f"points local scale: {self._table._scale._local_player_points} points remote scale: {self._table._scale._remote_player_points}")
         # Atualiza a interface gráfica
         self.update_gui(move)
         print("EXECUTEI RECEIVE_MOVE")
