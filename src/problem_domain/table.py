@@ -196,6 +196,7 @@ class Table:
 
         else:
             winner = ""
+            self._match_status = 3
         
         return winner
 
