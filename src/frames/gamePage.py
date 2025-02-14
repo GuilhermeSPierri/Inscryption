@@ -52,12 +52,15 @@ class GamePage(Page):
 
         for j in range(4):
             container_field.grid_columnconfigure(j, weight=1)
-            
 
         self.cards_hand_containers = [[]]
         self.cards_field_containers = [[]]
         self.controller.create_hand_UI(self, container_hand)
         self.controller.create_field_UI(self, container_field)
+
+        # Add a label to display the scale information
+        self.scale_label = tk.Label(self, text="Your points: 0 | Enemy points: 0", font=LARGE_FONT)
+        self.scale_label.place(relx=0.05, rely=0.95, anchor="w")
 
     def reset_page(self):
         # Limpa os widgets existentes
@@ -75,9 +78,3 @@ class GamePage(Page):
 
     def get_hand_data(self):
         return self._hand_data
-
-
-        
-    
-
-    

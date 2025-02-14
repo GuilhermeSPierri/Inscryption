@@ -470,11 +470,12 @@ class Controller(DogPlayerInterface):
                     if isinstance(widget, tk.Label):
                         widget.config(text=card_label)
 
-    #def update_scale_UI(self, game_page, move):
-        # Atualizar a balança com base na jogada
-        #local_points = self._table._scale._local_player_points
-        #remote_points = self._table._scale._remote_player_points
-        #game_page.scale_label.config(text=f"Local: {local_points} | Remote: {remote_points}")
+    def update_scale_UI(self, local_points, remote_points, game_page):
+        if self._table._local_player.get_id() < self._table._remote_player.get_id():
+            game_page.scale_label.config(text=f"Your points: {local_points} | Enemy points: {remote_points}")
+        else:
+            game_page.scale_label.config(text=f"Your points: {remote_points} | Enemy points: {local_points}")
+        
 
 
     def buy_squirrel_card(self):
@@ -500,6 +501,16 @@ class Controller(DogPlayerInterface):
         if game_page:
             # Atualiza o campo de batalha
             self.update_field_UI(game_page, move)
+            # Atualiza a balança
+            local_points = self._table._scale._local_player_points
+            remote_points = self._table._scale._remote_player_points
+
+            self.update_scale_UI(local_points, remote_points, game_page)
+
+           # if self._table._local_player.get_id() < self._table._remote_player.get_id():
+           #     game_page.scale_label.config(text=f"Your points: {local_points} | Enemy points: {remote_points}")
+            #else:
+           #     game_page.scale_label.config(text=f"Your points: {remote_points} | Enemy points: {local_points}")
 
 
 
@@ -710,8 +721,8 @@ class Controller(DogPlayerInterface):
             self.show_frame("StartPage")
             self.reset_game()
 
-        self._table._scale.set_local_player_points(move["remote_scale"])
-        self._table._scale.set_remote_player_points(move["local_scale"])
+        self._table._scale.set_local_player_points(move["local_scale"])
+        self._table._scale.set_remote_player_points(move["remote_scale"])
 
         self._table._local_player.pass_turn()
         self._table._remote_player.pass_turn()
