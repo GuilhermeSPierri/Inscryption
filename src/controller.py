@@ -560,7 +560,9 @@ class Controller(DogPlayerInterface):
             "remote_positions": [position.to_dict() for position in remote_positions],
             "action": "invoke_card",  # Exemplo: ação realizada
             "match_status": self._table.get_match_status(),  # Adicionando o status da partida
-            "turn_player_id" : self._table.get_turn_player().get_id()
+            "turn_player_id" : self._table.get_turn_player().get_id(),
+            "local_scale" : self._table._scale._local_player_points,
+            "remote_scale" : self._table._scale._remote_player_points
         }
 
         # Enviar a jogada para o DOG server
@@ -684,11 +686,7 @@ class Controller(DogPlayerInterface):
 
     def receive_withdrawal_notification(self):
         self.dog_server_interface.proxy.get_status()
-        messagebox.showinfo(message="O oponente desistiu da partida")
-        self.show_frame("StartPage")
-
-    def make_withdrawal(self):
-        self.dog_server_interface.make_withdrawal()
+        messagebox.showinfo(message="Você desistiu da partida")
         self.show_frame("StartPage")
 
     def receive_move(self, move):
@@ -698,3 +696,8 @@ class Controller(DogPlayerInterface):
         # Atualiza a interface gráfica
         self.update_gui(move)
         print("EXECUTEI RECEIVE_MOVE")
+
+    def reset_game(self):
+        self._table.reset_table()
+        self._table._local_player.reset()
+        self._table._remote_player.reset()

@@ -38,12 +38,14 @@ class Player:
     # Métodos
     def reset(self) -> None:
         """Reseta o jogador para o estado inicial."""
-        self._bone = 0
+        self._bone = 0  # int
         self._hand = Hand()
-        self._my_turn = False
-        self._id = ""
-        self._symbol = 0
-        self._name = ""
+        self._my_turn = False  # boolean
+        self._id = ""  # string
+        self._symbol = 0  # int
+        self._my_deck = Deck()  # Deck
+        self._my_deck.generate_deck()
+        self._name = ""  # string
 
     def initialize(self, id: str = "") -> None:
         """Inicializa o jogador com os valores fornecidos."""
