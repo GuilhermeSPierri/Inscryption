@@ -12,6 +12,7 @@ class Player:
         self._my_deck = Deck()  # Deck
         self._my_deck.generate_deck()
         self._name = ""  # string
+        self._already_bougth_card = False
 
     def get_deck(self) -> object:
         """Retorna o deck do jogador."""
@@ -25,6 +26,9 @@ class Player:
         """Retorna se é o turno do jogador."""
         return self._my_turn
 
+    def get_already_bougth_card(self):
+        return self._already_bougth_card
+    
     def get_id(self) -> str:
         return self._id
 
@@ -34,6 +38,9 @@ class Player:
     def set_deck(self, deck: object) -> None:
         """Define o deck do jogador."""
         self._my_deck = deck
+
+    def set_already_bougth_card(self, bool):
+        self._already_bougth_card = bool
 
     # Métodos
     def reset(self) -> None:

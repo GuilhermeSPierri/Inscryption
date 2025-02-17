@@ -1,3 +1,4 @@
+from tkinter import messagebox
 from problem_domain.player import Player
 from problem_domain.field import Field
 from problem_domain.scale import Scale
@@ -400,7 +401,7 @@ class Table:
                     print("points local scale: ", self._scale._local_player_points, "points remote scale: ", self._scale._remote_player_points)
 
                 self.activate_glyph(local_card) # Activates the glyph card after attack
-    
+
 
         self._local_player.pass_turn()
         self._remote_player.pass_turn()
@@ -408,3 +409,4 @@ class Table:
         self._remote_player.add_buy_token(1)
         winner = self.check_for_winner()
         return winner
+        

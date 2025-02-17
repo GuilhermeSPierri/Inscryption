@@ -438,12 +438,12 @@ class Controller(DogPlayerInterface):
         if turn_player.get_id() == self._table._local_player.get_id():
             top_card = self._table.buy_deck_card()
             if top_card:
-                
                 # Update the UI
                 game_page = self.get_frame("GamePage")
                 if game_page:
                     self.update_hand_UI(game_page)
                     messagebox.showinfo("Inscryption", "Você comprou uma carta do deck")
+                    self._table._local_player.set_already_bougth_card(True)
             else:
                 messagebox.showinfo("Inscryption", "O deck está vazio")
 
@@ -491,6 +491,7 @@ class Controller(DogPlayerInterface):
                 if game_page:
                     self.update_hand_UI(game_page)
                     messagebox.showinfo("Inscryption", "Você comprou um Esquilo")
+                    self._table._local_player.set_already_bougth_card(True)
             else:
                 messagebox.showinfo("Inscryption", "Você já comprou uma carta!")
 
@@ -506,11 +507,6 @@ class Controller(DogPlayerInterface):
             remote_points = self._table._scale._remote_player_points
 
             self.update_scale_UI(local_points, remote_points, game_page)
-
-           # if self._table._local_player.get_id() < self._table._remote_player.get_id():
-           #     game_page.scale_label.config(text=f"Your points: {local_points} | Enemy points: {remote_points}")
-            #else:
-           #     game_page.scale_label.config(text=f"Your points: {remote_points} | Enemy points: {local_points}")
 
 
 
@@ -555,43 +551,44 @@ class Controller(DogPlayerInterface):
         # colocar a carta no campo
         pass
 
-    def buy_card_interface(self):
-        self._table.b
-        messagebox.showinfo("Inscryption", "Voce comprou uma carta")
+    def pass_turn(self, withdrawal=None):
+        turn_player = self._table.get_turn_player()
+        if (turn_player.get_id() == self._table._local_player.get_id() or withdrawal):
+            if (not self._table._local_player.get_already_bougth_card() and withdrawal==None):
+                messagebox.showinfo("Inscryption", "Você deve comprar uma carta para passar turno!")
+            else:   
+                winner = self._table.pass_turn()
 
-    def pass_turn(self):
-        winner = self._table.pass_turn()
+                self._table._local_player.set_already_bougth_card(False)
+                # Criar um dicionário com a jogada atual
+                local_positions = self._table.get_local_field().get_positions()
+                remote_positions = self._table.get_remote_field().get_positions()
 
-        # Criar um dicionário com a jogada atual
-        local_positions = self._table.get_local_field().get_positions()
-        remote_positions = self._table.get_remote_field().get_positions()
+                move = {
+                    "card": [card.to_dict() for card in self._table.get_local_field().get_sacrifice_cards()],  # Convert cards to dict
+                    "local_positions": [position.to_dict() for position in local_positions],  # Convert local positions to dict
+                    "remote_positions": [position.to_dict() for position in remote_positions], # Convert remote positions to dict
+                    "action": "invoke_card", 
+                    "match_status": self._table.get_match_status(),  # Adicionando o status da partida
+                    "turn_player_id" : self._table.get_turn_player().get_id(),
+                    "local_scale" : self._table._scale._local_player_points,
+                    "remote_scale" : self._table._scale._remote_player_points
+                }
+                if winner != "":
+                    if winner == "local_player":
+                        messagebox.showinfo("Jogo finalizado", "Você venceu")
 
-        move = {
-            "card": [card.to_dict() for card in self._table.get_local_field().get_sacrifice_cards()],  # Convert cards to dict
-            "local_positions": [position.to_dict() for position in local_positions],  # Convert local positions to dict
-            "remote_positions": [position.to_dict() for position in remote_positions], # Convert remote positions to dict
-            "action": "invoke_card", 
-            "match_status": self._table.get_match_status(),  # Adicionando o status da partida
-            "turn_player_id" : self._table.get_turn_player().get_id(),
-            "local_scale" : self._table._scale._local_player_points,
-            "remote_scale" : self._table._scale._remote_player_points
-        }
-        if winner != "":
-            if winner == "local_player":
-                messagebox.showinfo("Jogo finalizado", "O jogador Local venceu")
+                    elif winner == "remote_player":
+                        messagebox.showinfo("Jogo finalizado", "Você foi derrotado")
 
-            elif winner == "remote_player":
-                messagebox.showinfo("Jogo finalizado", "O jogador Remoto venceu")
+                    self._table.set_match_status(2) # 2 = partida desconectada
+                    move["match_status"] = "finished"
+                    self.show_frame("StartPage")
+                    self.reset_game()
 
-            self._table.set_match_status(2) # 2 = partida desconectada
-            move["match_status"] = "finished"
-            self.show_frame("StartPage")
-            self.reset_game()
-
-        # Enviar a jogada para o DOG server
-        self.dog_server_interface.proxy.send_move(move)
-        return move
-
+                self.dog_server_interface.proxy.send_move(move)
+                return move
+        
         
     ######### Logic for the player #########
 
@@ -707,7 +704,7 @@ class Controller(DogPlayerInterface):
         self.dog_server_interface.proxy.get_status()
         messagebox.showinfo(message="Você desistiu da partida")
         self._table.set_match_status(4) # 4 = desistencia
-        move = self.pass_turn()
+        move = self.pass_turn(True)
         move["match_status"] = "finished"
         self.dog_server_interface.proxy.send_move(move)
         self.show_frame("StartPage")
@@ -716,7 +713,7 @@ class Controller(DogPlayerInterface):
     def receive_move(self, move):
         print("RECEBI A JOGADA", move["match_status"])
         if move["match_status"] == "finished":
-            messagebox.showinfo("Jogo finalizado", "Você venceu a partida")
+            messagebox.showinfo("Jogo finalizado", "O jogador inimigo venceu a partida")
            # self.dog_server_interface.proxy.send_move(move)
             self.show_frame("StartPage")
             self.reset_game()

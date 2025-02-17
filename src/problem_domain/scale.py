@@ -11,10 +11,7 @@ class Scale:
             self._remote_player_points += points
         else:
             raise ValueError("Invalid player")
-    
-    def check_for_winner(self):
-        pass
-        
+                
     def calcule_points_difference(self):
         return self._local_player_points - self._remote_player_points
 

@@ -65,9 +65,6 @@ class PlayerInterface(DogPlayerInterface):
     def update_list_of_cards(self, list_of_cards): 
         pass
 
-    def pass_turn(self): 
-        pass
-
     def get_page(self, page_name: str): 
         pass
 
