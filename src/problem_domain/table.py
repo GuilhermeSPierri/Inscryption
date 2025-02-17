@@ -398,7 +398,6 @@ class Table:
                     else:
                         player_field = "remote"
                     self._scale.add_points(damage, player_field)
-                    print("points local scale: ", self._scale._local_player_points, "points remote scale: ", self._scale._remote_player_points)
 
                 self.activate_glyph(local_card) # Activates the glyph card after attack
 

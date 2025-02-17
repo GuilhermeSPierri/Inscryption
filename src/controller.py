@@ -40,8 +40,8 @@ class Controller(DogPlayerInterface):
     ######### Logic for the game page #########
     
     def create_hand_UI(self, page, container):
-
-        if self._players:
+        print("valor de self._players: ", self._players)
+        if self._players:   
             if self._players[0][1] == self._table._local_player.get_id():
                 hand_dict = {idx: {
                     "id": card,
@@ -50,7 +50,7 @@ class Controller(DogPlayerInterface):
                     "life": card.get_hp()
                 } for idx, card in self.get_local_hand().items()}
 
-            elif self._players[1][1] == self._table._local_player.get_id():
+            elif self._players[1][1] == self._table._remote_player.get_id():
                 hand_dict = {idx: {
                     "id": card,
                     "name": card.get_name(),
@@ -343,23 +343,23 @@ class Controller(DogPlayerInterface):
         # Salvar o deck
         print("Salvando deck...")
         deck_data = deck_data_func()
-        try:
-            if len(deck_data) == 20:
-                self._table._local_deck.reset_deck()
-                for _, card_dict in deck_data.items():
-                    card_object = self.library.get_card(card_dict["name"])
-                    self._table._local_deck.add_card_to_deck(card_object)
-                messagebox.showinfo("Deck salvo", "Deck salvo com sucesso")
+        
+        print("tamanho de deck_data: ", len(deck_data))
+        if len(deck_data) == 20:
+            self._table._local_deck.reset_deck()
+            for _, card_dict in deck_data.items():
+                card_object = self.library.get_card(card_dict["name"])
+                self._table._local_deck.add_card_to_deck(card_object)
+            messagebox.showinfo("Deck salvo", "Deck salvo com sucesso")
 
-                # Atualiza a interface da GamePage
-                game_page = self.get_frame("GamePage")
-                game_page.reset_page()
+            # Atualiza a interface da GamePage
+            #game_page = self.get_frame("GamePage")
+            #game_page.reset_page()
 
-                self.show_frame("StartPage")
-            else:
-                messagebox.showerror("Erro", "Deck precisa ter 20 cartas")
-        except:
-            pass
+            self.show_frame("StartPage")
+        else:
+            messagebox.showerror("Erro", "Deck precisa ter 20 cartas")
+
 
     ######### Logic for the library #########
 
@@ -572,22 +572,27 @@ class Controller(DogPlayerInterface):
                     "match_status": self._table.get_match_status(),  # Adicionando o status da partida
                     "turn_player_id" : self._table.get_turn_player().get_id(),
                     "local_scale" : self._table._scale._local_player_points,
-                    "remote_scale" : self._table._scale._remote_player_points
+                    "remote_scale" : self._table._scale._remote_player_points,
+                    "game_status" : "" # just for control the game logic
                 }
+
                 if winner != "":
+                    print("EXECUTEI AQUIIIIIIIIIIIIIIIIIIIIIII")
                     if winner == "local_player":
                         messagebox.showinfo("Jogo finalizado", "Você venceu")
 
                     elif winner == "remote_player":
                         messagebox.showinfo("Jogo finalizado", "Você foi derrotado")
 
-                    self._table.set_match_status(2) # 2 = partida desconectada
-                    move["match_status"] = "finished"
-                    self.show_frame("StartPage")
+                    self._table.set_match_status(2) # 2 = partida desconectada~
+                    self.show_frame("StartPage")    
                     self.reset_game()
-
-                self.dog_server_interface.proxy.send_move(move)
-                return move
+                
+                if withdrawal:
+                    return move
+                else:
+                    self.dog_server_interface.proxy.send_move(move)
+                    return move
         
         
     ######### Logic for the player #########
@@ -702,21 +707,30 @@ class Controller(DogPlayerInterface):
 
     def receive_withdrawal_notification(self):
         self.dog_server_interface.proxy.get_status()
-        messagebox.showinfo(message="Você desistiu da partida")
+        messagebox.showinfo(message="Você abandonou a partida")
         self._table.set_match_status(4) # 4 = desistencia
         move = self.pass_turn(True)
-        move["match_status"] = "finished"
+        move["match_status"] = "finished" # from the Dog
+        move["game_status"] = "abandoned" # just for control the game logic
+
         self.dog_server_interface.proxy.send_move(move)
         self.show_frame("StartPage")
         self.reset_game()
 
     def receive_move(self, move):
-        print("RECEBI A JOGADA", move["match_status"])
-        if move["match_status"] == "finished":
-            messagebox.showinfo("Jogo finalizado", "O jogador inimigo venceu a partida")
-           # self.dog_server_interface.proxy.send_move(move)
+        print("RECEBI A JOGADA", move["match_status"] )
+
+        if move["match_status"] == "finished" and move["game_status"] == "abandoned":
+            messagebox.showinfo("Jogo finalizado", "O jogador inimigo abandonou a partida")
             self.show_frame("StartPage")
             self.reset_game()
+
+        elif move["match_status"] == "finished":
+            messagebox.showinfo("Jogo finalizado", "O jogador inimigo venceu a partida")
+            self.show_frame("StartPage")
+            self.reset_game()
+
+
 
         self._table._scale.set_local_player_points(move["local_scale"])
         self._table._scale.set_remote_player_points(move["remote_scale"])
