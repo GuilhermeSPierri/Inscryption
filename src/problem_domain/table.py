@@ -372,7 +372,20 @@ class Table:
         self._local_deck.set_card_list(list_of_cards)
         self._local_player.set_deck(self._local_deck)
 
-    
+    def reset(self):
+        self._local_player = Player()
+        self._remote_player = Player()
+        self._local_field = Field()
+        self._remote_field = Field()
+        self._match_status = 1  # int
+        self._local_deck = self._local_player.get_deck()  # Deck object
+        self._remote_deck = self._remote_player.get_deck()  # Deck object
+        self._scale = Scale()
+        self._squirrel_deck = None # TODO: Define the type of this attribute
+        self._buy_tokens = 1  # int
+        self._game_status = "waiting"  # string
+
+
     def pass_turn(self):
         for i in range(4):
             field = self.get_player_field()

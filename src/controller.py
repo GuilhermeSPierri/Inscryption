@@ -744,7 +744,7 @@ class Controller(DogPlayerInterface):
         print("EXECUTEI RECEIVE_MOVE")
 
     def reset_game(self):
-        self._table = Table()
+        self._table.reset()
         self._table.set_match_status(2)
         self._table._local_player.reset()
         self._table._remote_player.reset()
