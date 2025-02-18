@@ -445,7 +445,10 @@ class Controller(DogPlayerInterface):
                     messagebox.showinfo("Inscryption", "Você comprou uma carta do deck")
                     self._table._local_player.set_already_bougth_card(True)
             else:
-                messagebox.showinfo("Inscryption", "O deck está vazio")
+                if self._table.get_buy_tokens() == 0:
+                    messagebox.showinfo("Inscryption", "Você já comprou uma carta neste turno")
+                else:
+                    messagebox.showinfo("Inscryption", "O deck está vazio")
 
     def update_hand_UI(self, game_page):
         hand_dict = {idx: {
@@ -598,79 +601,84 @@ class Controller(DogPlayerInterface):
     ######### Logic for the player #########
 
     def invoke_card(self, selected_position, position_in_field, player, row=None):
-        invoked_card = self._table.invoke_card(selected_position, player, row)
+        if self._table.get_buy_tokens() == 0:
 
-        field = self._table.get_player_field()
-        # Update the field UI to reflect the invoked card
-        game_page = self.get_frame("GamePage")
-        #self.update_hand_UI(game_page)
-        if invoked_card:
-            col = position_in_field
-            card_data = {
-                "id": invoked_card,
-                "name": invoked_card.get_name(),
-                "damage": invoked_card.get_damage(),
-                "life": invoked_card.get_hp()
-            }
-            card_label = f"{str(card_data['id'])[-8:]} \n {card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
+            invoked_card = self._table.invoke_card(selected_position, player, row)
 
-            # Update the field container with the card data
-            container = game_page.cards_field_containers[row][col]
-            container.config(bg="SystemButtonFace")  # Reset the background
-            
-            for widget in container.winfo_children():
-                if isinstance(widget, tk.Label):
-                    widget.config(text=card_label)
+            field = self._table.get_player_field()
+            # Update the field UI to reflect the invoked card
+            game_page = self.get_frame("GamePage")
+            #self.update_hand_UI(game_page)
+            if invoked_card:
+                col = position_in_field
+                card_data = {
+                    "id": invoked_card,
+                    "name": invoked_card.get_name(),
+                    "damage": invoked_card.get_damage(),
+                    "life": invoked_card.get_hp()
+                }
+                card_label = f"{str(card_data['id'])[-8:]} \n {card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
 
-            # Ensure the card is no longer in the hand
-            print(f"Selected card: {game_page.selected_card}")
-            if game_page.selected_card:
-                hand_row, hand_col = game_page.selected_card
-                # Reset the container in the hand to its original state
-                container = game_page.cards_hand_containers[hand_row][hand_col]
+                # Update the field container with the card data
+                container = game_page.cards_field_containers[row][col]
                 container.config(bg="SystemButtonFace")  # Reset the background
                 
-                # Update the tk.Label (textLabel) inside the container
                 for widget in container.winfo_children():
-                    if isinstance(widget, tk.Label):  # Check if the child is the textLabel
-                        widget.config(text="Empty")
-                
-                game_page.selected_card = None
+                    if isinstance(widget, tk.Label):
+                        widget.config(text=card_label)
 
-            # Remove sacrifice cards from the field
-            sacrifice_cards = field.get_sacrifice_cards()
-            print(f"Sacrifice cards: {sacrifice_cards} AQUII")
+                # Ensure the card is no longer in the hand
+                print(f"Selected card: {game_page.selected_card}")
+                if game_page.selected_card:
+                    hand_row, hand_col = game_page.selected_card
+                    # Reset the container in the hand to its original state
+                    container = game_page.cards_hand_containers[hand_row][hand_col]
+                    container.config(bg="SystemButtonFace")  # Reset the background
+                    
+                    # Update the tk.Label (textLabel) inside the container
+                    for widget in container.winfo_children():
+                        if isinstance(widget, tk.Label):  # Check if the child is the textLabel
+                            widget.config(text="Empty")
+                    
+                    game_page.selected_card = None
 
-            for sacrifice_card in sacrifice_cards:
-                is_deleted = False
-                for row in range(3):
-                    if is_deleted:
-                        break
-                    for col in range(4):
+                # Remove sacrifice cards from the field
+                sacrifice_cards = field.get_sacrifice_cards()
+                print(f"Sacrifice cards: {sacrifice_cards} AQUII")
+
+                for sacrifice_card in sacrifice_cards:
+                    is_deleted = False
+                    for row in range(3):
                         if is_deleted:
                             break
+                        for col in range(4):
+                            if is_deleted:
+                                break
 
-                        try:
-                            container = game_page.cards_field_containers[row][col]
-                        except:
-                            break
+                            try:
+                                container = game_page.cards_field_containers[row][col]
+                            except:
+                                break
 
-                        for widget in container.winfo_children():
-                            my_widget = widget.cget("text")
-                            my_widget_name = my_widget.split()[0]
-                            print(f"my_widget_name: {my_widget_name} sacrifice_card: {sacrifice_card}")
-                            if my_widget_name == str(sacrifice_card)[-8:]:
-                                print("AAAAA entrou")
-                                is_deleted = True
-                                widget.config(text=f"Empty")
+                            for widget in container.winfo_children():
+                                my_widget = widget.cget("text")
+                                my_widget_name = my_widget.split()[0]
+                                print(f"my_widget_name: {my_widget_name} sacrifice_card: {sacrifice_card}")
+                                if my_widget_name == str(sacrifice_card)[-8:]:
+                                    print("AAAAA entrou")
+                                    is_deleted = True
+                                    widget.config(text=f"Empty")
 
-                                field.get_position_in_field(col).set_card(None)
-                                field.get_position_in_field(col).set_occupied(False)
-                                field.remove_card_from_field(sacrifice_card)
-                                container.config(bg="SystemButtonFace")
-                                continue
+                                    field.get_position_in_field(col).set_card(None)
+                                    field.get_position_in_field(col).set_occupied(False)
+                                    field.remove_card_from_field(sacrifice_card)
+                                    container.config(bg="SystemButtonFace")
+                                    continue
 
-            field.clear_sacrifice_cards()
+                field.clear_sacrifice_cards()
+        else:
+            messagebox.showinfo("Inscryption", "Você deve comprar uma carta antes de invocar")
+
 
 
     def get_card_by_id(self, id):   
