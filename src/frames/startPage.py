@@ -19,6 +19,3 @@ class StartPage(Page):
         exit_button = Button(self, "Sair do Jogo", 20, 5, "exit_game", self.controller)
         exit_button.place(relx=0.5, rely=0.8, anchor="center")
 
-    def reset_page(self):
-        pass
-

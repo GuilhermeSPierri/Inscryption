@@ -11,10 +11,6 @@ class Card(ABC):
         self._type = type
         self._already_selected = False
 
-    @abstractmethod
-    def attack(self, target):
-        pass
-
     def get_damage(self):
         return self._damage
     

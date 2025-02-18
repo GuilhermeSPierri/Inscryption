@@ -547,10 +547,6 @@ class Controller(DogPlayerInterface):
                         widget.config(text=card_label)
 
 
-    def place_card(self, card, pos):
-        # colocar a carta no campo
-        pass
-
     def pass_turn(self, withdrawal=None):
         turn_player = self._table.get_turn_player()
         if (turn_player.get_id() == self._table._local_player.get_id() or withdrawal):

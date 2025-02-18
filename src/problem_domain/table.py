@@ -71,23 +71,12 @@ class Table:
     def get_position_in_hand(self, position_in_hand: int): 
         return self._local_player.get_hand().get_position_in_hand(position_in_hand)
     
-    def get_origin_of_card(self, selected_card): 
-        pass
-
     def get_local_field(self):
         return self._local_field
-
-    def get_field_in_field(self): 
-        pass
 
     def get_remote_field(self): 
         return self._remote_field
 
-    def get_field_card(self, position): 
-        pass
-
-    def get_remote_field_card(self, position): 
-        pass
 
     def get_remote_field_card_in_position(self, position): 
         self._remote_field.get_card_in_position(position)
@@ -106,15 +95,6 @@ class Table:
 
     def set_remote_deck(self, deck: object) -> None:
         self._remote_deck = deck
-
-    def set_life_card(self, card, life): 
-        pass
-
-    def receive_move(self):
-        pass
-
-    def clear_table(self):
-        pass
 
     def start_match(self, players: str):
         # Logic to initialize the match
@@ -143,18 +123,6 @@ class Table:
             self._local_player.get_hand().add_card_to_hand(squirrel)
             self.decrement_buy_tokens()
             return squirrel
-
-
-    def create_deck_buy_buttons(self):
-        # Logic to create buttons for buying cards
-        pass
-
-    def create_deck_squirrel_button(self):
-        pass
-
-    def place_card(self, position: object, card: object) -> None:
-        # Logic to place a card on the field
-        pass
 
     def buy_deck_card(self):
         if (self._buy_tokens == 1):
@@ -202,23 +170,6 @@ class Table:
         
         return winner
 
-    def select_position(self): 
-        pass
-
-    def verify_position(self, position): 
-        pass
-
-    def card_attack(self, card_id: int): 
-        pass
-
-    def card_attack_scale(self): 
-        pass
-
-    def position_contains_card(self, position): 
-        pass
-
-    def check_front_path(self, position): 
-        pass
 
     def select_card(self, selected_position): 
         turn_player = self.get_turn_player()
@@ -244,7 +195,6 @@ class Table:
                         field.remove_from_sacrifice_cards(selected_card)
                         print("Sacrifice cardaaa", field.get_sacrifice_cards())
                         selected_card.clear_already_selected()
-                        self.clear_selected_card()
 
                     elif origin == "hand":
                         hand.clear_invocation_card()
@@ -271,8 +221,7 @@ class Table:
     def set_position(self, selected_position, boolean): 
         selected_position.set_occupied(boolean)
 
-    def clear_selected_card(self): 
-        pass
+
 
     def get_player_field(self):
         if self._local_player.get_id() < self._remote_player.get_id():
@@ -302,11 +251,8 @@ class Table:
 
                 field.invoke_card_in_position(invocation_card, selected_position)
                 hand.clear_invocation_card()
-                self.clear_selected_position()
                 return invocation_card
 
-    def clear_selected_position(self): 
-        pass
 
     def execute_attack(self, damage, life, remote_card): 
         remaing_hp, is_alive = self.deal_damage(life, damage)
@@ -322,18 +268,6 @@ class Table:
             else:
                 self._local_field.remove_card_from_field(remote_card)
         
-
-    def invoke_card_in_field(self, move): 
-        pass
-
-    def update_local_field(self, a_move: dict): 
-        pass
-
-    def update_remote_field(self, a_move: dict): 
-        pass
-
-    def update_scale(self, a_move: dict): 
-        pass
 
     def deal_damage(self, remote_card_life: int, damage: int): 
         remaing_hp = remote_card_life - damage
