@@ -62,6 +62,9 @@ class GamePage(Page):
         self.scale_label = tk.Label(self, text="Your points: 0 | Enemy points: 0", font=LARGE_FONT)
         self.scale_label.place(relx=0.05, rely=0.95, anchor="w")
 
+        self.bones_label = tk.Label(self, text="Bones: 0", font=LARGE_FONT)
+        self.bones_label.place(relx=0.95, rely=0.95, anchor="e")
+
     def reset_page(self):
         # Limpa os widgets existentes
         for widget in self.winfo_children():

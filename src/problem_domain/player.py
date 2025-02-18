@@ -50,8 +50,8 @@ class Player:
         self._my_turn = False  # boolean
         self._id = ""  # string
         self._symbol = 0  # int
-        self._my_deck = Deck()  # Deck
-        self._my_deck.generate_deck()
+        #self._my_deck = Deck()  # Deck
+        #self._my_deck.generate_deck()
         self._name = ""  # string
 
     def initialize(self, id: str = "") -> None:
@@ -73,10 +73,6 @@ class Player:
     def add_card_to_hand(self, card: object) -> None:
         if self._hand is not None:
             self._hand.add_card_to_hand(card)
-
-    def add_buy_token(self, amount: int) -> None:
-        """Adiciona fichas de compra ao jogador."""
-        self._bone += amount
     
     def initial_hand(self, deck):
         for _ in range(3):
@@ -85,3 +81,11 @@ class Player:
     def pass_turn(self):
         self._my_turn = not self._my_turn
 
+    def get_bones(self):
+        return self._bone
+    
+    def increment_bones(self):
+        self._bone += 1
+
+    def decrement_bones(self, value):
+        self._bone -= value

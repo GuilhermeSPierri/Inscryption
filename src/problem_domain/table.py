@@ -5,6 +5,7 @@ from problem_domain.scale import Scale
 from problem_domain.deck import Deck
 from problem_domain.cards.sacrificeCard import SacrificeCard
 from problem_domain.cards.squirrelCard import SquirrelCard
+from problem_domain.cards.boneCard import BoneCard
 import random
 
 class Table:
@@ -127,7 +128,7 @@ class Table:
     def buy_deck_card(self):
         if (self._buy_tokens == 1):
             top_card = self.get_local_deck().get_top_card()
-            self.get_local_hand().add_card_to_hand(top_card)
+            self._local_player.get_hand().add_card_to_hand(top_card)
             self.decrement_buy_tokens()
             return top_card
 
@@ -240,18 +241,33 @@ class Table:
             cost_invocation = invocation_card.get_cost()
             sacrifice_cards = field.get_sacrifice_cards()
 
-            if cost_invocation == len(sacrifice_cards):
-                for card in sacrifice_cards:
-                    field.remove_card_from_field(card)
+            if isinstance(invocation_card, SquirrelCard) or isinstance(invocation_card, SacrificeCard):
+                if cost_invocation == len(sacrifice_cards):
+                    for card in sacrifice_cards:
+                        field.remove_card_from_field(card)
 
-                for card in hand.get_card_list():
-                    if card == invocation_card:
-                        hand.remove_from_hand(card)
-                        break
+                    for card in hand.get_card_list():
+                        if card == invocation_card:
+                            hand.remove_from_hand(card)
+                            break
 
-                field.invoke_card_in_position(invocation_card, selected_position)
-                hand.clear_invocation_card()
-                return invocation_card
+                    field.invoke_card_in_position(invocation_card, selected_position)
+                    hand.clear_invocation_card()
+                    return invocation_card
+                
+            elif isinstance(invocation_card, BoneCard):
+                if cost_invocation <= player.get_bones():
+                    player.decrement_bones(cost_invocation)
+
+                    for card in hand.get_card_list():
+                        if card == invocation_card:
+                            hand.remove_from_hand(card)
+                            break
+                    field.invoke_card_in_position(invocation_card, selected_position)
+                    hand.clear_invocation_card()
+
+                    return invocation_card
+
 
 
     def execute_attack(self, damage, life, remote_card): 
@@ -349,8 +365,6 @@ class Table:
 
         self._local_player.pass_turn()
         self._remote_player.pass_turn()
-        self._local_player.add_buy_token(1)
-        self._remote_player.add_buy_token(1)
         winner = self.check_for_winner()
         return winner
         

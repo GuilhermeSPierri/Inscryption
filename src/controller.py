@@ -12,6 +12,7 @@ from problem_domain.library import Library
 from problem_domain.table import Table
 from problem_domain.position import Position
 from problem_domain.cards.sacrificeCard import SacrificeCard
+from problem_domain.cards.boneCard import BoneCard
 
 class Controller(DogPlayerInterface):
     def __init__(self, *args, **kwargs):
@@ -474,9 +475,10 @@ class Controller(DogPlayerInterface):
                         widget.config(text=card_label)
 
     def update_scale_UI(self, local_points, remote_points, game_page):
-            game_page.scale_label.config(text=f"Your points: {local_points} | Enemy points: {remote_points}")
+        game_page.scale_label.config(text=f"Your points: {local_points} | Enemy points: {remote_points}")
         
-
+    def update_bones_UI(self, game_page, bones):
+        game_page.bones_label.config(text=f"Bones: {bones}")
 
     def buy_squirrel_card(self):
         turn_player = self._table.get_turn_player()
@@ -603,9 +605,12 @@ class Controller(DogPlayerInterface):
 
             invoked_card = self._table.invoke_card(selected_position, player, row)
 
+
             field = self._table.get_player_field()
             # Update the field UI to reflect the invoked card
             game_page = self.get_frame("GamePage")
+            if isinstance(invoked_card, BoneCard):
+                self.update_bones_UI(game_page, player.get_bones())
             #self.update_hand_UI(game_page)
             if invoked_card:
                 col = position_in_field
@@ -641,39 +646,43 @@ class Controller(DogPlayerInterface):
                     game_page.selected_card = None
 
                 # Remove sacrifice cards from the field
-                sacrifice_cards = field.get_sacrifice_cards()
-                print(f"Sacrifice cards: {sacrifice_cards} AQUII")
 
-                for sacrifice_card in sacrifice_cards:
-                    is_deleted = False
-                    for row in range(3):
-                        if is_deleted:
-                            break
-                        for col in range(4):
+                if isinstance(invoked_card, SacrificeCard):
+                    sacrifice_cards = field.get_sacrifice_cards()
+                    print(f"Sacrifice cards: {sacrifice_cards} AQUII")
+
+                    for sacrifice_card in sacrifice_cards:
+                        is_deleted = False
+                        for row in range(3):
                             if is_deleted:
                                 break
+                            for col in range(4):
+                                if is_deleted:
+                                    break
 
-                            try:
-                                container = game_page.cards_field_containers[row][col]
-                            except:
-                                break
+                                try:
+                                    container = game_page.cards_field_containers[row][col]
+                                except:
+                                    break
 
-                            for widget in container.winfo_children():
-                                my_widget = widget.cget("text")
-                                my_widget_name = my_widget.split()[0]
-                                print(f"my_widget_name: {my_widget_name} sacrifice_card: {sacrifice_card}")
-                                if my_widget_name == str(sacrifice_card)[-8:]:
-                                    print("AAAAA entrou")
-                                    is_deleted = True
-                                    widget.config(text=f"Empty")
+                                for widget in container.winfo_children():
+                                    my_widget = widget.cget("text")
+                                    my_widget_name = my_widget.split()[0]
+                                    print(f"my_widget_name: {my_widget_name} sacrifice_card: {sacrifice_card}")
+                                    if my_widget_name == str(sacrifice_card)[-8:]:
+                                        print("AAAAA entrou")
+                                        is_deleted = True
+                                        widget.config(text=f"Empty")
 
-                                    field.get_position_in_field(col).set_card(None)
-                                    field.get_position_in_field(col).set_occupied(False)
-                                    field.remove_card_from_field(sacrifice_card)
-                                    container.config(bg="SystemButtonFace")
-                                    continue
+                                        field.get_position_in_field(col).set_card(None)
+                                        field.get_position_in_field(col).set_occupied(False)
+                                        field.remove_card_from_field(sacrifice_card)
+                                        container.config(bg="SystemButtonFace")
+                                        player.increment_bones()
+                                        continue
 
                 field.clear_sacrifice_cards()
+                self.update_bones_UI(game_page, player.get_bones())
         else:
             messagebox.showinfo("Inscryption", "Você deve comprar uma carta antes de invocar")
 
