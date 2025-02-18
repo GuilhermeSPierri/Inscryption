@@ -590,6 +590,8 @@ class Controller(DogPlayerInterface):
                     move["match_status"] = "finished"
                     self.show_frame("StartPage")    
                     self.reset_game()
+                
+                self.update_gui(move)
 
                 if withdrawal:
                     return move
