@@ -6,8 +6,6 @@ class Scale:
     def add_points(self, points: int, player_field):
 
         if player_field == "local":
-            self._local_player_points += points
-        elif player_field == "remote":
             self._remote_player_points += points
         else:
             raise ValueError("Invalid player")

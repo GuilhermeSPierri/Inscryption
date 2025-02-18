@@ -191,10 +191,10 @@ class Table:
         points_difference = self._scale.calcule_points_difference()
         
         if (points_difference <= -7):
-            winner = "local_player"
+            winner = "remote_player"
         
         elif (points_difference >= 7):
-            winner = "remote_player"
+            winner = "local_player"
 
         else:
             winner = ""
@@ -406,10 +406,7 @@ class Table:
                     self.execute_attack(damage, remote_card_hp, remote_card)
                 
                 else:
-                    if self._local_player.get_id() < self._remote_player.get_id():
-                        player_field = "local"
-                    else:
-                        player_field = "remote"
+                    player_field = "local"
                     self._scale.add_points(damage, player_field)
 
                 self.activate_glyph(local_card) # Activates the glyph card after attack

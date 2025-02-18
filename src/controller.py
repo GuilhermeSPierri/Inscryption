@@ -471,10 +471,7 @@ class Controller(DogPlayerInterface):
                         widget.config(text=card_label)
 
     def update_scale_UI(self, local_points, remote_points, game_page):
-        if self._table._local_player.get_id() < self._table._remote_player.get_id():
             game_page.scale_label.config(text=f"Your points: {local_points} | Enemy points: {remote_points}")
-        else:
-            game_page.scale_label.config(text=f"Your points: {remote_points} | Enemy points: {local_points}")
         
 
 
@@ -577,17 +574,20 @@ class Controller(DogPlayerInterface):
                 }
 
                 if winner != "":
+                    print("local_player points: ", self._table._scale._local_player_points)
+                    print("remote points: ", self._table._scale._local_player_points)
                     print("EXECUTEI AQUIIIIIIIIIIIIIIIIIIIIIII")
-                    if winner == "local_player":
+                    if winner == "remote_player":
                         messagebox.showinfo("Jogo finalizado", "Você venceu")
 
-                    elif winner == "remote_player":
+                    elif winner == "local_player":
                         messagebox.showinfo("Jogo finalizado", "Você foi derrotado")
-
+                    
                     self._table.set_match_status(2) # 2 = partida desconectada~
+                    move["match_status"] = "finished"
                     self.show_frame("StartPage")    
                     self.reset_game()
-                
+
                 if withdrawal:
                     return move
                 else:
@@ -718,6 +718,7 @@ class Controller(DogPlayerInterface):
         self.reset_game()
 
     def receive_move(self, move):
+        print(self._table._match_status)
         print("RECEBI A JOGADA", move["match_status"] )
 
         if move["match_status"] == "finished" and move["game_status"] == "abandoned":
@@ -730,10 +731,8 @@ class Controller(DogPlayerInterface):
             self.show_frame("StartPage")
             self.reset_game()
 
-
-
-        self._table._scale.set_local_player_points(move["local_scale"])
-        self._table._scale.set_remote_player_points(move["remote_scale"])
+        self._table._scale.set_local_player_points(move["remote_scale"])
+        self._table._scale.set_remote_player_points(move["local_scale"])
 
         self._table._local_player.pass_turn()
         self._table._remote_player.pass_turn()
@@ -748,3 +747,4 @@ class Controller(DogPlayerInterface):
         self._table.set_match_status(2)
         self._table._local_player.reset()
         self._table._remote_player.reset()
+
