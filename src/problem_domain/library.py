@@ -1,3 +1,4 @@
+import copy
 from problem_domain.cards.card import Card
 from problem_domain.cards.boneCard import BoneCard
 from problem_domain.cards.sacrificeCard import SacrificeCard
@@ -47,7 +48,9 @@ class Library():
         try:
             for key, value in self._cards_model.items():
                 if value.get_name() == name:
-                    return value
+                    new_card = copy.copy(value)
+                    print("new_card", new_card)
+                    return new_card
         except Exception as e:
             print(f"Error: {e}")
         
