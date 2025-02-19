@@ -45,7 +45,7 @@ class Deck:
         """Gera um deck com base em uma lista de cartas."""
         list_of_cards = []
         for _ in range(20):
-            list_of_cards.append(SacrificeCard("Wolf", 3, 2, {"name": "Amplifier", "modifier": "life", "value": 1}, 1 ))
+            list_of_cards.append(SacrificeCard("Wolf", 3, 100, {"name": "Amplifier", "modifier": "life", "value": 1}, 1 ))
         self._card_list = list_of_cards
         return self
 

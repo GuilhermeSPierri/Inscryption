@@ -50,15 +50,11 @@ class Player:
         self._my_turn = False  # boolean
         self._id = ""  # string
         self._symbol = 0  # int
-        #self._my_deck = Deck()  # Deck
-        #self._my_deck.generate_deck()
         self._name = ""  # string
 
     def initialize(self, id: str = "") -> None:
         """Inicializa o jogador com os valores fornecidos."""
-        #self._symbol = symbol
         self._id = id
-        #self._name = name
 
     def add_card_to_deck(self, card_to_add: int) -> None:
         """Adiciona uma carta ao deck do jogador."""

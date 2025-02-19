@@ -59,7 +59,7 @@ class GamePage(Page):
         self.controller.create_field_UI(self, container_field)
 
         # Add a label to display the scale information
-        self.scale_label = tk.Label(self, text="Your points: 0 | Enemy points: 0", font=LARGE_FONT)
+        self.scale_label = tk.Label(self, text="Your scale: 0 | Enemy scale: 0", font=LARGE_FONT)
         self.scale_label.place(relx=0.05, rely=0.95, anchor="w")
 
         self.bones_label = tk.Label(self, text="Bones: 0", font=LARGE_FONT)

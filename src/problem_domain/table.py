@@ -35,30 +35,17 @@ class Table:
     def set_match_status(self, status: int):
         self._match_status = status
 
-    def get_status(self):
-        return {
-            "local_player": self._local_player,
-            "remote_player": self._remote_player,
-            "match_status": self._match_status,
-        }
-
     def get_turn_player(self):
         if self._remote_player.get_turn():
             return self._remote_player
         elif self._local_player.get_turn():
             return self._local_player
 
-    def get_number_cards_local_deck(self):
-        return len(self._local_deck) if self._local_deck else 0
-    
-    def get_local_hand(self) -> object:
-        return self._local_player.get_hand()
-    
     def get_local_player(self):
         return self._local_player
 
-    def get_remote_player(self):
-        return self._remote_player
+    def get_local_hand(self) -> object:
+        return self._local_player.get_hand()
 
     def get_remote_hand(self) -> object:
         return self._remote_player.get_hand()
@@ -77,7 +64,6 @@ class Table:
 
     def get_remote_field(self): 
         return self._remote_field
-
 
     def get_remote_field_card_in_position(self, position): 
         self._remote_field.get_card_in_position(position)
@@ -107,7 +93,6 @@ class Table:
         self._remote_deck = self._remote_player.get_deck()
         self._squirrel_deck = SquirrelCard("Squirrel", 1, 0, None, 0)
         self._local_deck = self.shuffle_deck(self._local_deck)
-        #self._remote_deck = self.shuffle_deck(self._remote_deck)
         self._local_player.initial_hand(self._local_deck)
         self._remote_player.initial_hand(self._remote_deck)
         if int(players[0][2]) == 1:
@@ -118,7 +103,6 @@ class Table:
 
     def buy_squirrel_card(self):
         if (self._buy_tokens == 1): 
-            print("meus tokens")
             squirrel = self._squirrel_deck
             self._squirrel_deck = SquirrelCard("Squirrel", 1, 0, None, 0)
             self._local_player.get_hand().add_card_to_hand(squirrel)
@@ -177,8 +161,7 @@ class Table:
         selected_card = None
         if turn_player:
             selected_card = selected_position.get_card()
-            print("A CARTA SELECIONADA É", selected_card)
-            
+
             if selected_card == None:
                 return
             else:
@@ -194,7 +177,6 @@ class Table:
 
                     if origin == "field":
                         field.remove_from_sacrifice_cards(selected_card)
-                        print("Sacrifice cardaaa", field.get_sacrifice_cards())
                         selected_card.clear_already_selected()
 
                     elif origin == "hand":
@@ -206,9 +188,7 @@ class Table:
                         selected_card.set_already_selected()
                     
                     elif selected_card == field.get_card_in_position(selected_position):
-                        #field.append_to_sacrifice_cards(selected_card)
                         selected_card.set_already_selected()
-                        print("Sacrifice carda", field.get_sacrifice_cards())   
                     
                     else:
                         field.clear_sacrifice_cards()
@@ -269,7 +249,6 @@ class Table:
                     return invocation_card
 
 
-
     def execute_attack(self, damage, life, remote_card): 
         remaing_hp, is_alive = self.deal_damage(life, damage)
 
@@ -323,8 +302,6 @@ class Table:
         self._local_player.set_deck(self._local_deck)
 
     def reset(self):
-        self._local_player = Player()
-        self._remote_player = Player()
         self._local_field = Field()
         self._remote_field = Field()
         self._match_status = 1  # int
@@ -361,7 +338,6 @@ class Table:
 
                 self.activate_glyph(local_card) # Activates the glyph card after attack
         self._buy_tokens = 1
-
 
         self._local_player.pass_turn()
         self._remote_player.pass_turn()

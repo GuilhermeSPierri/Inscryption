@@ -41,7 +41,6 @@ class Controller(DogPlayerInterface):
     ######### Logic for the game page #########
     
     def create_hand_UI(self, page, container):
-        print("valor de self._players: ", self._players)
         if self._players:   
             if self._players[0][1] == self._table._local_player.get_id():
                 hand_dict = {idx: {
@@ -318,7 +317,7 @@ class Controller(DogPlayerInterface):
 
         # Remove from deck data
         if card_index in page.get_my_deck_data():
-            removed_card = page.get_my_deck_data().pop(card_index)
+            page.get_my_deck_data().pop(card_index)
 
         # Fill the gap in the UI
         placeholder = self.create_container_grid(
@@ -334,20 +333,14 @@ class Controller(DogPlayerInterface):
 
     def save_deck(self, deck_data_func):
         # Salvar o deck
-        print("Salvando deck...")
         deck_data = deck_data_func()
         
-        print("tamanho de deck_data: ", len(deck_data))
         if len(deck_data) == 20:
             self._table._local_deck.reset_deck()
             for _, card_dict in deck_data.items():
                 card_object = self.library.get_card(card_dict["name"])
                 self._table._local_deck.add_card_to_deck(card_object)
             messagebox.showinfo("Deck salvo", "Deck salvo com sucesso")
-
-            # Atualiza a interface da GamePage
-            #game_page = self.get_frame("GamePage")
-            #game_page.reset_page()
 
             self.show_frame("StartPage")
         else:
@@ -372,11 +365,6 @@ class Controller(DogPlayerInterface):
         return {idx: card for idx, card in enumerate(hand.get_card_list())}
 
     ######### Logic for all the pages #########
-
-    def end_fullscreen(self, event=None):
-        self.fullscreen = False
-        self.attributes("-fullscreen", False)
-        return "break"
     
     def fill_pages(self, main_window):
         container = tk.Frame(main_window)
@@ -404,26 +392,6 @@ class Controller(DogPlayerInterface):
         quit()
 
     ######### Logic for the game page #########
-
-    def transfer_card(self, page, row, col):
-        if page.selected_card:
-            if page.occupied_slots[row][col]:
-                return
-
-            hand_row, hand_col = page.selected_card
-
-            card = page.cards_hand_containers[hand_row][hand_col]
-
-            field_card = tk.LabelFrame(page.cards_field_containers[row][col], text=card.cget("text"), padx=10, pady=10)
-            field_card.pack(fill="both", expand=True)
-
-            card.grid_forget()
-            page.cards_hand_containers[hand_row][hand_col].config(bg="SystemButtonFace")
-            page.selected_card = None
-
-            page.occupied_slots[row][col] = True
-
-            field_card.bind("<Button-1>", lambda e: None)
 
     def buy_deck_card(self):
         # Get the top card from the deck
@@ -467,15 +435,13 @@ class Controller(DogPlayerInterface):
                         widget.config(text=card_label)
 
     def update_scale_UI(self, local_points, remote_points, game_page):
-        game_page.scale_label.config(text=f"Your points: {local_points} | Enemy points: {remote_points}")
+        game_page.scale_label.config(text=f"Your scale: {local_points} | Enemy scale: {remote_points}")
         
     def update_bones_UI(self, game_page, bones):
         game_page.bones_label.config(text=f"Bones: {bones}")
 
     def buy_squirrel_card(self):
         turn_player = self._table.get_turn_player()
-        print("turno do jogador: ", turn_player.get_id())
-        print("este é o jogador local da mesa: ", self._table._local_player.get_id())
         if turn_player.get_id() == self._table._local_player.get_id():
             # Get the top squirrel card from the deck
             squirrel_card = self._table.buy_squirrel_card()
@@ -496,6 +462,7 @@ class Controller(DogPlayerInterface):
         if game_page:
             # Atualiza o campo de batalha
             self.update_field_UI(game_page, move)
+
             # Atualiza a balança
             local_points = self._table._scale._local_player_points
             remote_points = self._table._scale._remote_player_points
@@ -503,12 +470,10 @@ class Controller(DogPlayerInterface):
             self.update_scale_UI(local_points, remote_points, game_page)
 
 
-
     def update_field_UI(self, game_page, move):
         # Atualiza o campo de batalha com base na jogada
         local_positions = move.get("local_positions", [])
         remote_positions = move.get("remote_positions", [])
-
 
         self.update_field(game_page, self._table.get_local_field(), local_positions)
         self.update_field(game_page, self._table.get_remote_field(), remote_positions)
@@ -567,9 +532,6 @@ class Controller(DogPlayerInterface):
                 }
 
                 if winner != "":
-                    print("local_player points: ", self._table._scale._local_player_points)
-                    print("remote points: ", self._table._scale._local_player_points)
-                    print("EXECUTEI AQUIIIIIIIIIIIIIIIIIIIIIII")
                     if winner == "remote_player":
                         messagebox.showinfo("Jogo finalizado", "Você venceu")
 
@@ -593,16 +555,15 @@ class Controller(DogPlayerInterface):
 
     def invoke_card(self, selected_position, position_in_field, player, row=None):
         if self._table.get_buy_tokens() == 0:
-
             invoked_card = self._table.invoke_card(selected_position, player, row)
-
-
             field = self._table.get_player_field()
+
             # Update the field UI to reflect the invoked card
             game_page = self.get_frame("GamePage")
+
             if isinstance(invoked_card, BoneCard):
                 self.update_bones_UI(game_page, player.get_bones())
-            #self.update_hand_UI(game_page)
+
             if invoked_card:
                 col = position_in_field
                 card_data = {
@@ -622,7 +583,6 @@ class Controller(DogPlayerInterface):
                         widget.config(text=card_label)
 
                 # Ensure the card is no longer in the hand
-                print(f"Selected card: {game_page.selected_card}")
                 if game_page.selected_card:
                     hand_row, hand_col = game_page.selected_card
                     # Reset the container in the hand to its original state
@@ -640,8 +600,7 @@ class Controller(DogPlayerInterface):
 
                 if isinstance(invoked_card, SacrificeCard):
                     sacrifice_cards = field.get_sacrifice_cards()
-                    print(f"Sacrifice cards: {sacrifice_cards} AQUII")
-
+        
                     for sacrifice_card in sacrifice_cards:
                         is_deleted = False
                         for row in range(3):
@@ -650,7 +609,6 @@ class Controller(DogPlayerInterface):
                             for col in range(4):
                                 if is_deleted:
                                     break
-
                                 try:
                                     container = game_page.cards_field_containers[row][col]
                                 except:
@@ -659,12 +617,10 @@ class Controller(DogPlayerInterface):
                                 for widget in container.winfo_children():
                                     my_widget = widget.cget("text")
                                     my_widget_name = my_widget.split()[0]
-                                    print(f"my_widget_name: {my_widget_name} sacrifice_card: {sacrifice_card}")
+
                                     if my_widget_name == str(sacrifice_card)[-8:]:
-                                        print("AAAAA entrou")
                                         is_deleted = True
                                         widget.config(text=f"Empty")
-
                                         field.get_position_in_field(col).set_card(None)
                                         field.get_position_in_field(col).set_occupied(False)
                                         field.remove_card_from_field(sacrifice_card)
@@ -677,10 +633,6 @@ class Controller(DogPlayerInterface):
         else:
             messagebox.showinfo("Inscryption", "Você deve comprar uma carta antes de invocar")
 
-
-
-    def get_card_by_id(self, id):   
-        return self.library.get_card(id)
 
     ######### Logic for the dog #########
 
@@ -699,7 +651,6 @@ class Controller(DogPlayerInterface):
             game_page.reset_page()
             self.show_frame("GamePage")
             
-
     def receive_start(self, start_status):
         self.reset_game()
         message = start_status.get_message()
@@ -725,19 +676,14 @@ class Controller(DogPlayerInterface):
         self.reset_game()
 
     def receive_move(self, move):
-        print(self._table._match_status)
-        print("RECEBI A JOGADA", move["match_status"] )
-
         self._table._scale.set_local_player_points(move["remote_scale"])
         self._table._scale.set_remote_player_points(move["local_scale"])
 
         self._table._local_player.pass_turn()
         self._table._remote_player.pass_turn()
 
-        print(f"points local scale: {self._table._scale._local_player_points} points remote scale: {self._table._scale._remote_player_points}")
         # Atualiza a interface gráfica
         self.update_gui(move)
-        print("EXECUTEI RECEIVE_MOVE")
 
         if move["match_status"] == "finished" and move["game_status"] == "abandoned":
             messagebox.showinfo("Jogo finalizado", "O jogador inimigo abandonou a partida")
@@ -753,4 +699,3 @@ class Controller(DogPlayerInterface):
         self._table.set_match_status(2)
         self._table._local_player.reset()
         self._table._remote_player.reset()
-
