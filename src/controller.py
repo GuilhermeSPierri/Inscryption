@@ -340,12 +340,12 @@ class Controller(DogPlayerInterface):
             for _, card_dict in deck_data.items():
                 card_object = self.library.get_card(card_dict["name"])
                 self._table._local_deck.add_card_to_deck(card_object)
+            self._table._local_player.set_deck(self._table._local_deck)
             messagebox.showinfo("Deck salvo", "Deck salvo com sucesso")
 
             self.show_frame("StartPage")
         else:
             messagebox.showerror("Erro", "Deck precisa ter 20 cartas")
-
 
     ######### Logic for the library #########
 
@@ -638,7 +638,6 @@ class Controller(DogPlayerInterface):
 
     def start_match(self): 
         start_status = self.dog_server_interface.start_match(2)
-        self.reset_game()
         code = start_status.get_code()
         message = start_status.get_message()
         if code == "0" or code == "1":
@@ -646,18 +645,19 @@ class Controller(DogPlayerInterface):
         elif code == "2":
             players = start_status.get_players()
             self._players = players
+            self.reset_game()
             self._table.start_match(players)
             game_page = self.get_frame("GamePage")
             game_page.reset_page()
             self.show_frame("GamePage")
             
     def receive_start(self, start_status):
-        self.reset_game()
         message = start_status.get_message()
         messagebox.showinfo(message=message)
         if message == "Partida iniciada":
             players = start_status.get_players()
             self._players = players
+            self.reset_game()
             self._table.start_match(players)
             game_page = self.get_frame("GamePage")
             game_page.reset_page()

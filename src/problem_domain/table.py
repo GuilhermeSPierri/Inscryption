@@ -85,12 +85,13 @@ class Table:
 
     def start_match(self, players: str):
         # Logic to initialize the match
-        self._local_player.reset()
-        self._remote_player.reset()
         self._local_player.initialize(players[0][1])
         self._remote_player.initialize(players[1][1])
+
         self._local_deck = self._local_player.get_deck()
         self._remote_deck = self._remote_player.get_deck()
+
+        
         self._squirrel_deck = SquirrelCard("Squirrel", 1, 0, None, 0)
         self._local_deck = self.shuffle_deck(self._local_deck)
         self._local_player.initial_hand(self._local_deck)
@@ -305,10 +306,7 @@ class Table:
         self._local_field = Field()
         self._remote_field = Field()
         self._match_status = 1  # int
-        self._local_deck = self._local_player.get_deck()  # Deck object
-        self._remote_deck = self._remote_player.get_deck()  # Deck object
         self._scale = Scale()
-        self._squirrel_deck = None # TODO: Define the type of this attribute
         self._buy_tokens = 1  # int
         self._game_status = "waiting"  # string
 
