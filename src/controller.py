@@ -136,8 +136,6 @@ class Controller(DogPlayerInterface):
             col = position_in_hand % 3
             row = position_in_hand // 3
 
-            print(f"DENTRO DE SELECT_CARD = Selected card: {selected_card}", f"Position: {row} {col}", f"from {selected_position.get_origin()}")
-
             # If clicking the same card again, just deselect it
             if (row, col) == page.selected_card:
                 page.cards_hand_containers[row][col].config(bg="SystemButtonFace")
@@ -161,22 +159,18 @@ class Controller(DogPlayerInterface):
             field = self._table.get_player_field()
             col = position_in_hand % 4
 
-            print(f"DENTRO DE SELECT_CARD = Selected card: {selected_card}", f"Position: {row} {col}", f"from {selected_position.get_origin()}")
             # If clicking the same card again, just deselect it
             if (row, col) in page.selected_cards:
                 page.selected_cards.remove((row, col))
                 page.cards_field_containers[row][col].config(bg="SystemButtonFace")
-                #self._table.get_local_field().remove_card_from_field(selected_card)
                 field.remove_from_sacrifice_cards(selected_card)
                 return
 
             # Highlight the new selected card in the field
             elif selected_card is not None and selected_card.get_name() != "Empty":
-                print(f"DENTRO DO IF LA: Selected card: {selected_card}", f"Position: {row} {col}", f"from {selected_position.get_origin()}")
                 page.cards_field_containers[row][col].config(bg="lightblue")
                 page.selected_cards.append((row, col))
                 field.append_to_sacrifice_cards(selected_card)
-                print("tamanho da lista de sacrificio: ", len(field.get_sacrifice_cards()) )
             else:
                 page.selected_cards = []
 
@@ -203,7 +197,6 @@ class Controller(DogPlayerInterface):
                 selected_position = self._table.get_position_in_hand(position_in_hand)
                 selected_position.set_hand(True)
 
-            print("ID's:", turn_player.get_id(), "id local player da mesa :", self._table._local_player.get_id())
             if turn_player.get_id() == self._table._local_player.get_id() and selected_position is not None:
                 occupied = self._table.check_position(selected_position)
 
@@ -213,7 +206,6 @@ class Controller(DogPlayerInterface):
                     elif position_in_hand is not None:
                         self.select_card(page, selected_position, position_in_hand)
 
-                print(f"occupied: {occupied}  selected_position._field: {selected_position._field}" )
                 if not occupied and selected_position._field:
                     self.invoke_card(selected_position, position_in_field, turn_player, row)
 
@@ -587,7 +579,6 @@ class Controller(DogPlayerInterface):
                     self._table.set_match_status(2) # 2 = partida desconectada~
                     move["match_status"] = "finished"
                     self.show_frame("StartPage")    
-                    self.reset_game()
                 
                 self.update_gui(move)
 
@@ -695,7 +686,7 @@ class Controller(DogPlayerInterface):
 
     def start_match(self): 
         start_status = self.dog_server_interface.start_match(2)
-
+        self.reset_game()
         code = start_status.get_code()
         message = start_status.get_message()
         if code == "0" or code == "1":
@@ -710,6 +701,7 @@ class Controller(DogPlayerInterface):
             
 
     def receive_start(self, start_status):
+        self.reset_game()
         message = start_status.get_message()
         messagebox.showinfo(message=message)
         if message == "Partida iniciada":
@@ -736,16 +728,6 @@ class Controller(DogPlayerInterface):
         print(self._table._match_status)
         print("RECEBI A JOGADA", move["match_status"] )
 
-        if move["match_status"] == "finished" and move["game_status"] == "abandoned":
-            messagebox.showinfo("Jogo finalizado", "O jogador inimigo abandonou a partida")
-            self.show_frame("StartPage")
-            self.reset_game()
-
-        elif move["match_status"] == "finished":
-            messagebox.showinfo("Jogo finalizado", "O jogador inimigo venceu a partida")
-            self.show_frame("StartPage")
-            self.reset_game()
-
         self._table._scale.set_local_player_points(move["remote_scale"])
         self._table._scale.set_remote_player_points(move["local_scale"])
 
@@ -756,6 +738,15 @@ class Controller(DogPlayerInterface):
         # Atualiza a interface gráfica
         self.update_gui(move)
         print("EXECUTEI RECEIVE_MOVE")
+
+        if move["match_status"] == "finished" and move["game_status"] == "abandoned":
+            messagebox.showinfo("Jogo finalizado", "O jogador inimigo abandonou a partida")
+            self.show_frame("StartPage")
+
+
+        elif move["match_status"] == "finished":
+            messagebox.showinfo("Jogo finalizado", "O jogador inimigo venceu a partida")
+            self.show_frame("StartPage")
 
     def reset_game(self):
         self._table.reset()
