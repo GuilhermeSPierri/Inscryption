@@ -13,6 +13,8 @@ from problem_domain.table import Table
 from problem_domain.position import Position
 from problem_domain.cards.sacrificeCard import SacrificeCard
 from problem_domain.cards.boneCard import BoneCard
+from tkinter import PhotoImage, Label
+from PIL import Image, ImageTk
 
 class Controller(DogPlayerInterface):
     def __init__(self, *args, **kwargs):
@@ -41,54 +43,73 @@ class Controller(DogPlayerInterface):
     ######### Logic for the game page #########
     
     def create_hand_UI(self, page, container):
-        if self._players:   
+        if self._players:
             if self._players[0][1] == self._table._local_player.get_id():
                 hand_dict = {idx: {
                     "id": card,
                     "name": card.get_name(),
                     "damage": card.get_damage(),
-                    "life": card.get_hp()
+                    "life": card.get_hp(),
+                    "image": card.get_image_path()  
                 } for idx, card in self.get_local_hand().items()}
-
             elif self._players[1][1] == self._table._remote_player.get_id():
                 hand_dict = {idx: {
                     "id": card,
                     "name": card.get_name(),
                     "damage": card.get_damage(),
-                    "life": card.get_hp()
+                    "life": card.get_hp(),
+                    "image": card.get_image_path()
                 } for idx, card in self.get_remote_hand().items()}
 
             for row in range(3):
                 for col in range(3):
                     index = row * 3 + col
                     
-                    # Check if the index exists in hand_data
                     if index in hand_dict:
                         card_data = hand_dict[index]
-                        card_label = f"{str(card_data['id'])[-8:]} \n {card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
+                        image_path = card_data.get("image", "default_image.png")
                     else:
-                        # Empty slot for unavailable indices
-                        card_label = "Empty"
-                    
-                    # Create the card container
+                        image_path = "card.png"
+
+                    # Criar container para a carta
                     container_card = self.create_container_grid(
                         container,
                         f"Container {row} {col}",
-                        10,
-                        10,
+                        10,  # Espaçamento
+                        10,  # Espaçamento
                         row,
                         col,
-                        card_label
-                    )
-                    
-                    # Bind the click event for card selection
-                    container_card.bind(
-                        "<Button-1>",
-                        lambda event, page=page, position_in_field=None, position_in_hand=index: 
-                        self.select_position(page, position_in_field, position_in_hand, event)
+                        ""  
                     )
 
-                    # Ensure the cards_hand_containers list structure is maintained
+                    # Atualiza para garantir que tenha dimensões corretas
+                    container_card.update_idletasks()
+                    
+                    def set_background_image(container_card=container_card, image_path=image_path):
+                        width = container_card.winfo_width()
+                        height = container_card.winfo_height()
+                        
+                        # Redimensiona a imagem para o tamanho do container
+                        image = Image.open(image_path)
+                        image = image.resize((width, height), Image.Resampling.LANCZOS)
+                        tk_image = ImageTk.PhotoImage(image)
+
+                        # Criar Label para a imagem
+                        bg_label = Label(container_card, image=tk_image, bd=0, highlightthickness=0)
+                        bg_label.image = tk_image  
+                        bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Faz a imagem preencher tudo
+
+                        # Adicionar evento de clique na imagem e no container
+                        def on_click(event, page=page, position_in_field=None, position_in_hand=index):
+                            self.select_position(page, position_in_field, position_in_hand, event)
+
+                        container_card.bind("<Button-1>", on_click)
+                        bg_label.bind("<Button-1>", on_click)
+
+                    # Aguarda 100ms para garantir que o tamanho do container seja obtido corretamente
+                    container_card.after(100, set_background_image)
+
+                    # Armazena o container na estrutura da página
                     if len(page.cards_hand_containers) <= row:
                         page.cards_hand_containers.append([])
                     page.cards_hand_containers[row].append(container_card)

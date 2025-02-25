@@ -23,6 +23,10 @@ class Card(ABC):
     def clear_already_selected(self):
         self._already_selected = False
 
+
+    def get_image_path(self):
+        return "card.png"
+
     def get_cost(self):
         return self._cost
 
