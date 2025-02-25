@@ -203,8 +203,6 @@ class Table:
     def set_position(self, selected_position, boolean): 
         selected_position.set_occupied(boolean)
 
-
-
     def get_player_field(self):
         if self._local_player.get_id() < self._remote_player.get_id():
             field = self._local_field
@@ -213,7 +211,7 @@ class Table:
 
         return field
 
-    def invoke_card(self, selected_position, player, row=None): 
+    def invoke_card(self, selected_position, player): 
         hand = player.get_hand()
         field = self.get_player_field()
 

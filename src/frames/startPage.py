@@ -16,6 +16,6 @@ class StartPage(Page):
         deck_button = Button(self, "Criar Deck", 20, 5, "show_frame", self.controller, ("DeckPage",))
         deck_button.place(relx=0.5, rely=0.7, anchor="center")
 
-        exit_button = Button(self, "Sair do Jogo", 20, 5, "exit_game", self.controller)
+        exit_button = Button(self, "Sair do Jogo", 20, 5, "leave_game", self.controller)
         exit_button.place(relx=0.5, rely=0.8, anchor="center")
 

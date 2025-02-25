@@ -4,7 +4,7 @@ from problem_domain.hand import Hand
 class Player:
     def __init__(self):
         # Atributos privados
-        self._bone = 0  # int
+        self._bones = 0  # int
         self._hand = Hand()
         self._my_turn = False  # boolean
         self._id = ""  # string
@@ -12,7 +12,9 @@ class Player:
         self._my_deck = Deck()  # Deck
         self._my_deck.generate_deck()
         self._name = ""  # string
-        self._already_bougth_card = False
+
+    def get_bones(self):
+        return self._bones
 
     def get_deck(self) -> object:
         """Retorna o deck do jogador."""
@@ -25,9 +27,6 @@ class Player:
     def get_turn(self) -> bool:
         """Retorna se é o turno do jogador."""
         return self._my_turn
-
-    def get_already_bougth_card(self):
-        return self._already_bougth_card
     
     def get_id(self) -> str:
         return self._id
@@ -39,13 +38,10 @@ class Player:
         """Define o deck do jogador."""
         self._my_deck = deck
 
-    def set_already_bougth_card(self, bool):
-        self._already_bougth_card = bool
-
     # Métodos
     def reset(self) -> None:
         """Reseta o jogador para o estado inicial."""
-        self._bone = 0  # int
+        self._bones = 0  # int
         self._hand = Hand()
         self._my_turn = False  # boolean
         self._id = ""  # string
@@ -55,16 +51,6 @@ class Player:
     def initialize(self, id: str = "") -> None:
         """Inicializa o jogador com os valores fornecidos."""
         self._id = id
-
-    def add_card_to_deck(self, card_to_add: int) -> None:
-        """Adiciona uma carta ao deck do jogador."""
-        if self._my_deck is not None:
-            self._my_deck.append(card_to_add)
-
-    def remove_card_from_deck(self, card_to_remove: int) -> None:
-        """Remove uma carta do deck do jogador."""
-        if self._my_deck is not None and card_to_remove in self._my_deck:
-            self._my_deck.remove(card_to_remove)
 
     def add_card_to_hand(self, card: object) -> None:
         if self._hand is not None:
@@ -76,12 +62,9 @@ class Player:
 
     def pass_turn(self):
         self._my_turn = not self._my_turn
-
-    def get_bones(self):
-        return self._bone
     
     def increment_bones(self):
-        self._bone += 1
+        self._bones += 1
 
     def decrement_bones(self, value):
-        self._bone -= value
+        self._bones -= value

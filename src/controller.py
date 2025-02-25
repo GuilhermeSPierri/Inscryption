@@ -114,9 +114,6 @@ class Controller(DogPlayerInterface):
                         page.cards_hand_containers.append([])
                     page.cards_hand_containers[row].append(container_card)
 
-
-
-
     def create_field_UI(self, page, container):
         for row in range(3):
             if row == 1:  # Continua ignorando a linha do meio
@@ -265,7 +262,7 @@ class Controller(DogPlayerInterface):
         self.populate_card_container(
             left_container, 
             page.get_all_cards_data(), 
-            lambda card_data, idx: self.add_card_to_deck_UI(card_data, idx, page),
+            lambda card_data: self.add_card_to_deck_UI(card_data, page),
             page.all_cards_containers
         )
 
@@ -298,7 +295,7 @@ class Controller(DogPlayerInterface):
                     container_list.append([])
                 container_list[row].append(card_container)
    
-    def add_card_to_deck_UI(self, card_data, index, page):
+    def add_card_to_deck_UI(self, card_data, page):
         for row in range(5):
             for col in range(4):
                 if page.my_deck_containers[row][col].cget("text") == "Empty":
@@ -409,7 +406,7 @@ class Controller(DogPlayerInterface):
     def get_frame(self, page_name):
         return self.frames.get(page_name)
 
-    def exit_game(self):
+    def leave_game(self):
         quit()
 
     ######### Logic for the game page #########
@@ -425,7 +422,6 @@ class Controller(DogPlayerInterface):
                 if game_page:
                     self.update_hand_UI(game_page)
                     messagebox.showinfo("Inscryption", "Você comprou uma carta do deck")
-                    self._table._local_player.set_already_bougth_card(True)
             else:
                 if self._table.get_buy_tokens() == 0:
                     messagebox.showinfo("Inscryption", "Você já comprou uma carta neste turno")
@@ -472,7 +468,6 @@ class Controller(DogPlayerInterface):
                 if game_page:
                     self.update_hand_UI(game_page)
                     messagebox.showinfo("Inscryption", "Você comprou um Esquilo")
-                    self._table._local_player.set_already_bougth_card(True)
             else:
                 messagebox.showinfo("Inscryption", "Você já comprou uma carta!")
 
@@ -530,12 +525,11 @@ class Controller(DogPlayerInterface):
     def pass_turn(self, withdrawal=None):
         turn_player = self._table.get_turn_player()
         if (turn_player.get_id() == self._table._local_player.get_id() or withdrawal):
-            if (not self._table._local_player.get_already_bougth_card() and withdrawal==None):
+            if (self._table._buy_tokens == 1 and withdrawal==None):
                 messagebox.showinfo("Inscryption", "Você deve comprar uma carta para passar turno!")
             else:   
                 winner = self._table.pass_turn()
 
-                self._table._local_player.set_already_bougth_card(False)
                 # Criar um dicionário com a jogada atual
                 local_positions = self._table.get_local_field().get_positions()
                 remote_positions = self._table.get_remote_field().get_positions()
@@ -576,7 +570,7 @@ class Controller(DogPlayerInterface):
 
     def invoke_card(self, selected_position, position_in_field, player, row=None):
         if self._table.get_buy_tokens() == 0:
-            invoked_card = self._table.invoke_card(selected_position, player, row)
+            invoked_card = self._table.invoke_card(selected_position, player)
             field = self._table.get_player_field()
 
             # Update the field UI to reflect the invoked card
