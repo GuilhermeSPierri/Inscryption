@@ -28,11 +28,6 @@ class Deck:
         """Retorna a lista de cartas no deck."""
         return self._card_list
     
-    def get_top_card(self) -> 'Card':
-        if self._card_list:
-            return self._card_list.pop(0)
-        return None
-
     def set_card_list(self, card_list: list) -> None:
         """Define a lista de cartas do deck."""
         self._card_list = card_list
