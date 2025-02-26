@@ -31,40 +31,63 @@ class Controller(DogPlayerInterface):
         
     ######### Logic for general purposes #########
 
-    def _update_canvas_image(self, canvas, image_path):
-        """Atualiza um Canvas com uma imagem redimensionável"""
-        # Carregamento inicial
-        canvas.update_idletasks()
-        current_width = canvas.winfo_width()
-        current_height = canvas.winfo_height()
-        
+    def _update_canvas_image(self, canvas, image_path, preserve_elements=False):
+        """Atualiza um Canvas com uma imagem redimensionável preservando elementos se necessário"""
         try:
+            if not preserve_elements:
+                canvas.delete("all")
+            else:
+                # Mantém apenas elementos específicos
+                canvas.delete("card_image")
+                canvas.delete("text")
+
+            current_width = canvas.winfo_width()
+            current_height = canvas.winfo_height()
+
             image = Image.open(image_path)
             image = image.resize((current_width, current_height), Image.Resampling.LANCZOS)
             tk_image = ImageTk.PhotoImage(image)
-            canvas.delete("all")
-            canvas.image_ref = tk_image  # Mantém referência
+            
+            canvas.image_ref = tk_image
             canvas.create_image(0, 0, anchor="nw", image=tk_image, tags="card_image")
+
+            # Reaplica elementos visuais após redimensionamento
+            if hasattr(canvas, 'saved_tags'):
+                for tag in canvas.saved_tags:
+                    if tag == "border":
+                        canvas.create_rectangle(
+                            2, 2, 
+                            current_width-2, current_height-2,
+                            outline="red" if "sacrifice" in tag else "yellow", 
+                            width=3, 
+                            tags="border"
+                        )
+                    elif tag == "sacrifice_text":
+                        canvas.create_text(
+                            current_width/2, current_height-20,
+                            text="SACRIFÍCIO",
+                            fill="red",
+                            font=("Arial", 10, "bold"),
+                            tags="sacrifice_text"
+                        )
+
         except Exception as e:
-            print(f"Erro ao carregar imagem: {e}")
-            return
+            print(f"Erro ao atualizar imagem: {e}")
+
+        # Mantém registro dos elementos ativos
+        canvas.saved_tags = []
+        if "border" in canvas.gettags("all"):
+            canvas.saved_tags.append("border")
+        if "sacrifice_text" in canvas.gettags("all"):
+            canvas.saved_tags.append("sacrifice_text")
 
         # Configura redimensionamento
         def resize(event):
-            if event.width <= 0 or event.height <= 0:
-                return
-            try:
-                image = Image.open(image_path)
-                image = image.resize((event.width, event.height), Image.Resampling.LANCZOS)
-                tk_image = ImageTk.PhotoImage(image)
-                canvas.delete("all")
-                canvas.image_ref = tk_image
-                canvas.create_image(0, 0, anchor="nw", image=tk_image, tags="card_image")
-            except Exception as e:
-                print(f"Erro ao redimensionar: {e}")
+            if event.width > 0 and event.height > 0:
+                self._update_canvas_image(canvas, image_path, preserve_elements=True)
 
         canvas.bind("<Configure>", resize)
-        canvas.event_generate("<Configure>")  # Força renderização inicial
+        canvas.event_generate("<Configure>")
 
     def create_container_grid(self, parent, text, padx, pady, row, col, textLabel):
         # Cria um Canvas como container
@@ -209,43 +232,74 @@ class Controller(DogPlayerInterface):
             page.selected_cards = []
 
         if selected_position.get_origin() == "hand":
-            # Deselect the previously selected card in hand
+            # Desseleciona carta anterior na mão
             col = position_in_hand % 3
-            row = position_in_hand // 3
+            row_hand = position_in_hand // 3
 
-            # If clicking the same card again, just deselect it
-            if (row, col) == page.selected_card:
-                page.cards_hand_containers[row][col].config(bg="SystemButtonFace")
+            # Clique na mesma carta
+            if (row_hand, col) == getattr(page, 'selected_card', None):
+                canvas = page.cards_hand_containers[row_hand][col]
+                canvas.delete("border")
+                canvas.config(bg="SystemButtonFace")
                 page.selected_card = None
                 return
 
+            # Remove destaque anterior
             if page.selected_card:
-                prevrow, prevcol = page.selected_card
-                page.cards_hand_containers[prevrow][prevcol].config(bg="SystemButtonFace")
-                page.selected_card = (row, col)
+                prev_row, prev_col = page.selected_card
+                prev_canvas = page.cards_hand_containers[prev_row][prev_col]
+                prev_canvas.delete("border")
+                prev_canvas.config(bg="SystemButtonFace")
 
-            # Highlight the new selected card in hand
+            # Adiciona novo destaque
             if selected_card is not None:
-                page.cards_hand_containers[row][col].config(bg="yellow")
-                page.selected_card = (row, col)
+                canvas = page.cards_hand_containers[row_hand][col]
+                canvas.delete("border")
+                canvas.create_rectangle(
+                    2, 2, 
+                    canvas.winfo_width()-2, canvas.winfo_height()-2,
+                    outline="yellow", width=3, tags="border"
+                )
+                canvas.config(bg="lightgray")
+                page.selected_card = (row_hand, col)
             else:
                 page.selected_card = None
 
         elif selected_position.get_origin() == "field":
-
             field = self._table.get_player_field()
             col = position_in_hand % 4
 
-            # If clicking the same card again, just deselect it
+            # Desseleciona se clicar novamente
             if (row, col) in page.selected_cards:
+                canvas = page.cards_field_containers[row][col]
+                canvas.delete("border")
+                canvas.delete("sacrifice_text")
                 page.selected_cards.remove((row, col))
-                page.cards_field_containers[row][col].config(bg="SystemButtonFace")
                 field.remove_from_sacrifice_cards(selected_card)
                 return
 
-            # Highlight the new selected card in the field
-            elif selected_card is not None and selected_card.get_name() != "Empty":
-                page.cards_field_containers[row][col].config(bg="lightblue")
+            # Adiciona novo sacrifício
+            if selected_card is not None and selected_card.get_name() != "Empty":
+                canvas = page.cards_field_containers[row][col]
+                canvas.delete("border")
+                canvas.delete("sacrifice_text")
+                
+                # Borda vermelha
+                canvas.create_rectangle(
+                    2, 2, 
+                    canvas.winfo_width()-2, canvas.winfo_height()-2,
+                    outline="red", width=3, tags="border"
+                )
+                
+                # Texto de sacrifício
+                canvas.create_text(
+                    canvas.winfo_width()/2, canvas.winfo_height()-20,
+                    text="SACRIFÍCIO", 
+                    fill="red", 
+                    font=("Arial", 10, "bold"),
+                    tags="sacrifice_text"
+                )
+                
                 page.selected_cards.append((row, col))
                 field.append_to_sacrifice_cards(selected_card)
             else:
@@ -685,7 +739,7 @@ class Controller(DogPlayerInterface):
                                         # Compara com o ID da carta sacrificada (últimos 8 caracteres)
                                         if card_id == str(sacrifice_card)[-8:]:
                                             # Reseta para imagem vazia
-                                            self._update_canvas_image(target_container, "assets/card.png")
+                                            self._update_canvas_image(target_container, "assets/card.png", preserve_elements=False)
                                             field.get_position_in_field(c).set_card(None)
                                             field.get_position_in_field(c).set_occupied(False)
                                             print("SO PRA CONFERIR")
