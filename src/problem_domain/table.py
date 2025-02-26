@@ -96,6 +96,7 @@ class Table:
         self._local_deck = self.shuffle_deck(self._local_deck)
         self._local_player.initial_hand(self._local_deck)
         self._remote_player.initial_hand(self._remote_deck)
+        self._game_status = "running"
         if int(players[0][2]) == 1:
             self._local_player.pass_turn()
         else:
@@ -109,6 +110,8 @@ class Table:
             self._local_player.get_hand().add_card_to_hand(squirrel)
             self.decrement_buy_tokens()
             return squirrel
+        else:
+            messagebox.showinfo("Inscryption", "Você já comprou uma carta neste turno!")
 
     def buy_deck_card(self):
         if (self._buy_tokens == 1):

@@ -417,7 +417,6 @@ class Controller(DogPlayerInterface):
                 self._table._local_deck.add_card_to_deck(card_object)
             self._table._local_player.set_deck(self._table._local_deck)
             messagebox.showinfo("Deck salvo", "Deck salvo com sucesso")
-
             self.show_frame("StartPage")
         else:
             messagebox.showerror("Erro", "Deck precisa ter 20 cartas")
@@ -557,6 +556,8 @@ class Controller(DogPlayerInterface):
                     messagebox.showinfo("Inscryption", "Você comprou um Esquilo")
             else:
                 messagebox.showinfo("Inscryption", "Você já comprou uma carta!")
+        else:
+            messagebox.showinfo("Inscryption", "Não é o seu turno!")
 
 
     def update_gui(self, move):
@@ -642,6 +643,7 @@ class Controller(DogPlayerInterface):
                     
                     self._table.set_match_status(2) # 2 = partida desconectada~
                     move["match_status"] = "finished"
+                    move["game_status"] = "finished"
                     self.show_frame("StartPage")    
                 
                 self.update_gui(move)

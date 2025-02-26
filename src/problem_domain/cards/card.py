@@ -24,7 +24,6 @@ class Card(ABC):
     def clear_already_selected(self):
         self._already_selected = False
 
-
     def get_image_path(self):
         return self._image
 
