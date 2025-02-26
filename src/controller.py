@@ -71,6 +71,7 @@ class Controller(DogPlayerInterface):
                             tags="sacrifice_text"
                         )
 
+            canvas.event_generate("<Configure>")
         except Exception as e:
             print(f"Erro ao atualizar imagem: {e}")
 
@@ -164,6 +165,9 @@ class Controller(DogPlayerInterface):
                         10, 10, row, col, ""
                     )
                     
+                    # Força a atualização do layout para obter as dimensões corretas
+                    canvas_card.update_idletasks()
+                    
                     # Define o caminho da imagem
                     image_path = (
                         hand_dict[index].get_image_path() 
@@ -209,6 +213,9 @@ class Controller(DogPlayerInterface):
                     f"Container {row} {col}",
                     10, 10, row, col, ""
                 )
+                
+                # Força a atualização do layout
+                canvas_card.update_idletasks()
                 
                 # Inicializa com imagem vazia
                 self._update_canvas_image(canvas_card, "assets/card.png")
