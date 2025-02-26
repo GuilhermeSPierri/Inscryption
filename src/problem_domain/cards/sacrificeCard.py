@@ -2,9 +2,8 @@ from problem_domain.cards.card import Card
 
 class SacrificeCard(Card):
 
-    def __init__(self, name: str, life: int, damage: int, glyph: None, cost: int):
-        super().__init__("Sacrifice", name, life, damage, glyph, cost)
-
+    def __init__(self, name: str, life: int, damage: int, glyph: None, cost: int, image: str):
+        super().__init__("Sacrifice", name, life, damage, glyph, cost, image)
 
     @classmethod
     def from_dict(cls, data: dict):
@@ -17,5 +16,6 @@ class SacrificeCard(Card):
             life=data["hp"],
             damage=data["damage"],
             glyph=data["glyph"],
-            cost=data["cost"]
+            cost=data["cost"],
+            image=data["image"]
         )

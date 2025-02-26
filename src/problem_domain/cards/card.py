@@ -2,7 +2,8 @@ from abc import ABC, abstractmethod
 
 class Card(ABC):
 
-    def __init__(self, type: str, name: str, hp: int, damage: int, glyph: None, cost: None):
+    def __init__(self, type: str, name: str, hp: int, damage: int, glyph: None, cost: None, image: None):
+        self._image = image
         self._damage = damage
         self._hp = hp
         self._cost = cost
@@ -25,7 +26,7 @@ class Card(ABC):
 
 
     def get_image_path(self):
-        return "card.png"
+        return self._image
 
     def get_cost(self):
         return self._cost
@@ -53,7 +54,8 @@ class Card(ABC):
             "damage": self._damage,
             "hp": self._hp,
             "glyph": self._glyph,
-            "cost": self._cost
+            "cost": self._cost,
+            "image": self._image
         }
     
     @classmethod

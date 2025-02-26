@@ -10,11 +10,11 @@ class Library():
         self._cards_model = dict()
         self._pointer_id = 0
 
-        self.add_card(SacrificeCard("Deer", 1, 1, {"name": "Amplifier", "modifier": "life", "value": 1}, 1))
-        self.add_card(SacrificeCard("Bear", 5, 3, {"name": "Amplifier", "modifier": "damage", "value": 2}, 2))
-        self.add_card(SquirrelCard("Squirrel", 1, 0, None, 0))
-        self.add_card(SacrificeCard("Wolf", 3, 100, {"name": "Amplifier", "modifier": "life", "value": 1}, 1 ))
-        self.add_card(BoneCard("Vulture", 1, 2, None, 1))
+        self.add_card(SacrificeCard("Deer", 1, 1, {"name": "Amplifier", "modifier": "life", "value": 1}, 1, "assets/Wolf.png"))
+        self.add_card(SacrificeCard("Bear", 5, 3, {"name": "Guardian", "modifier": "damage", "value": 1}, 2, "assets/Wolf.png"))
+        self.add_card(SquirrelCard("Squirrel", 1, 0, None, 0, "assets/Squirrel.png"))
+        self.add_card(SacrificeCard("Wolf", 3, 100, {"name": "'Amplifier'", "modifier": "life", "value": 1}, 1, "assets/Wolf.png"))
+        self.add_card(BoneCard("Vulture", 1, 2, None, 1, "assets/Wolf.png"))
 
 
     def add_card(self, card: Card):

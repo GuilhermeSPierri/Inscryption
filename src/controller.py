@@ -67,9 +67,9 @@ class Controller(DogPlayerInterface):
                     
                     if index in hand_dict:
                         card_data = hand_dict[index]
-                        image_path = card_data.get("image", "card.png")
+                        image_path = card_data.get("image", card_data["image"])
                     else:
-                        image_path = "card.png"
+                        image_path = "assets/card.png"
 
                     # Criar container para a carta
                     container_card = self.create_container_grid(
@@ -271,6 +271,7 @@ class Controller(DogPlayerInterface):
         )
 
 
+
     def populate_card_container(self, container, card_data_dict, on_click, container_list):
         for row in range(5):
             for col in range(4):
@@ -280,29 +281,36 @@ class Controller(DogPlayerInterface):
                     card_data = card_data_dict[index]
                     card_label = f"{card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
                     card_container = self.create_container_grid(container, "", 10, 10, row, col, card_label)
-
+                    
+                    # Ensure the layout updates before getting dimensions
+                    container.update_idletasks()
+                    card_container.update_idletasks()
+                    container_width = max(140, card_container.winfo_width())
+                    container_height = max(190, card_container.winfo_height())
+                    
                     # Load and resize the card image
-                    image_path = card_data.get("image", "card.png")
+                    image_path = card_data.get("image", card_data["image"])
                     image = Image.open(image_path)
-                    #image = image.resize((card_container.winfo_width(), card_container.winfo_height()), Image.Resampling.LANCZOS)
+                    image = image.resize((container_width, container_height), Image.Resampling.LANCZOS)
                     tk_image = ImageTk.PhotoImage(image)
-
+                    
                     # Create a Label for the image and set it as the background
                     bg_label = Label(card_container, image=tk_image)
                     bg_label.image = tk_image  # Prevent garbage collection
                     bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Make the image cover the entire container
-
+                    
                     # Bind the click event
                     card_container.bind("<Button-1>", lambda e, cd=card_data, idx=index: on_click(cd, idx))
                     bg_label.bind("<Button-1>", lambda e, cd=card_data, idx=index: on_click(cd, idx))
                 else:
                     # Empty placeholder
                     card_container = self.create_container_grid(container, "Empty", 10, 10, row, col, "Empty")
-
+                
                 # Store reference
                 if len(container_list) <= row:
                     container_list.append([])
                 container_list[row].append(card_container)
+
    
     def add_card_to_deck_UI(self, card_data, index, page):
         for row in range(5):
@@ -322,11 +330,12 @@ class Controller(DogPlayerInterface):
                     
                     # Ensure the layout updates before getting dimensions
                     page.update_idletasks()
-                    container_width = card_container.winfo_width()
-                    container_height = card_container.winfo_height()
+                    card_container.update_idletasks()
+                    container_width = max(100, card_container.winfo_width())
+                    container_height = max(150, card_container.winfo_height())
                     
                     # Load and resize the card image
-                    image_path = card_data.get("image", "card.png")
+                    image_path = card_data.get("image", "assets/card.png")
                     image = Image.open(image_path)
                     image = image.resize((container_width, container_height), Image.Resampling.LANCZOS)
                     tk_image = ImageTk.PhotoImage(image)
@@ -461,23 +470,53 @@ class Controller(DogPlayerInterface):
             "id": card,
             "name": card.get_name(),
             "damage": card.get_damage(),
-            "life": card.get_hp()
+            "life": card.get_hp(),
+            "image": card.get_image_path()  # Add image path
         } for idx, card in self.get_local_hand().items()}
         
         for row in range(3):
             for col in range(3):
                 index = row * 3 + col
+                container_card = game_page.cards_hand_containers[row][col]
                 if index in hand_dict:
                     card_data = hand_dict[index]
                     card_label = f"{str(card_data['id'])[-8:]} \n{card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
                     self._table.get_position_in_hand(index).set_card(card_data["id"])
+                    
+                    # Load and resize the card image
+                    image_path = card_data.get("image", "assets/card.png")
+                    image = Image.open(image_path)
+
+                    # Update the container to get the correct dimensions
+                    container_card.update_idletasks()
+                    width = container_card.winfo_width()
+                    height = container_card.winfo_height()
+
+                    # Resize the image to fit the container
+                    image = image.resize((width, height), Image.Resampling.LANCZOS)
+                    tk_image = ImageTk.PhotoImage(image)
+
+                    # Create a Label for the image and set it as the background
+                    bg_label = Label(container_card, image=tk_image)
+                    bg_label.image = tk_image  # Prevent garbage collection
+                    bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Make the image cover the entire container
+
+                    # Bind the click event to both the container and the image
+                    def on_click(event, page=game_page, position_in_field=None, position_in_hand=index):
+                        self.select_position(page, position_in_field, position_in_hand, event)
+
+                    container_card.bind("<Button-1>", on_click)
+                    bg_label.bind("<Button-1>", on_click)
+
+                    # Update the text label
+                    for widget in container_card.winfo_children():
+                        if isinstance(widget, tk.Label) and widget != bg_label:
+                            widget.config(text=card_label)
                 else:
                     card_label = "Empty"
-                
-                container_card = game_page.cards_hand_containers[row][col]
-                for widget in container_card.winfo_children():
-                    if isinstance(widget, tk.Label):
-                        widget.config(text=card_label)
+                    for widget in container_card.winfo_children():
+                        if isinstance(widget, tk.Label):
+                            widget.config(text=card_label)
 
     def update_scale_UI(self, local_points, remote_points, game_page):
         game_page.scale_label.config(text=f"Your scale: {local_points} | Enemy scale: {remote_points}")
@@ -613,16 +652,39 @@ class Controller(DogPlayerInterface):
                     "id": invoked_card,
                     "name": invoked_card.get_name(),
                     "damage": invoked_card.get_damage(),
-                    "life": invoked_card.get_hp()
+                    "life": invoked_card.get_hp(),
+                    "image": invoked_card.get_image_path()
                 }
                 card_label = f"{str(card_data['id'])[-8:]} \n {card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
 
                 # Update the field container with the card data
                 container = game_page.cards_field_containers[row][col]
                 container.config(bg="SystemButtonFace")  # Reset the background
-                
+
+                # Load and resize the card image
+                image_path = card_data.get("image", "assets/card.png")
+                image = Image.open(image_path)
+                container.update_idletasks()
+                width = container.winfo_width()
+                height = container.winfo_height()
+                image = image.resize((width, height), Image.Resampling.LANCZOS)
+                tk_image = ImageTk.PhotoImage(image)
+
+                # Create a Label for the image and set it as the background
+                bg_label = Label(container, image=tk_image)
+                bg_label.image = tk_image  # Prevent garbage collection
+                bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Make the image cover the entire container
+
+                # Bind the click event to both the container and the image
+                def on_click(event, page=game_page, position_in_field=col, position_in_hand=None, row=row):
+                    self.select_position(page, position_in_field, position_in_hand, row, event)
+
+                container.bind("<Button-1>", on_click)
+                bg_label.bind("<Button-1>", on_click)
+
+                # Update the text label
                 for widget in container.winfo_children():
-                    if isinstance(widget, tk.Label):
+                    if isinstance(widget, tk.Label) and widget != bg_label:
                         widget.config(text=card_label)
 
                 # Ensure the card is no longer in the hand
@@ -631,19 +693,32 @@ class Controller(DogPlayerInterface):
                     # Reset the container in the hand to its original state
                     container = game_page.cards_hand_containers[hand_row][hand_col]
                     container.config(bg="SystemButtonFace")  # Reset the background
-                    
-                    # Update the tk.Label (textLabel) inside the container
+
+                    # Load and resize the default card image
+                    default_image_path = "assets/card.png"
+                    default_image = Image.open(default_image_path)
+                    container.update_idletasks()
+                    width = container.winfo_width()
+                    height = container.winfo_height()
+                    default_image = default_image.resize((width, height), Image.Resampling.LANCZOS)
+                    tk_default_image = ImageTk.PhotoImage(default_image)
+
+                    # Create a Label for the default image and set it as the background
+                    default_bg_label = Label(container, image=tk_default_image)
+                    default_bg_label.image = tk_default_image  # Prevent garbage collection
+                    default_bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Make the image cover the entire container
+
+                    # Update the text label
                     for widget in container.winfo_children():
-                        if isinstance(widget, tk.Label):  # Check if the child is the textLabel
+                        if isinstance(widget, tk.Label) and widget != default_bg_label:
                             widget.config(text="Empty")
-                    
+
                     game_page.selected_card = None
 
                 # Remove sacrifice cards from the field
-
                 if isinstance(invoked_card, SacrificeCard):
                     sacrifice_cards = field.get_sacrifice_cards()
-        
+
                     for sacrifice_card in sacrifice_cards:
                         is_deleted = False
                         for row in range(3):
@@ -659,8 +734,12 @@ class Controller(DogPlayerInterface):
 
                                 for widget in container.winfo_children():
                                     my_widget = widget.cget("text")
-                                    my_widget_name = my_widget.split()[0]
-
+                                    print("MY WIDGETNAME: ", my_widget)
+                                    try:
+                                        my_widget_name = my_widget.split()[0]
+                                    except:
+                                        my_widget_name = my_widget
+                                    print(my_widget)
                                     if my_widget_name == str(sacrifice_card)[-8:]:
                                         is_deleted = True
                                         widget.config(text=f"Empty")
@@ -668,11 +747,25 @@ class Controller(DogPlayerInterface):
                                         field.get_position_in_field(col).set_occupied(False)
                                         field.remove_card_from_field(sacrifice_card)
                                         container.config(bg="SystemButtonFace")
-                                        player.increment_bones()
+
+                                        # Load and resize the default card image
+                                        default_image_path = "assets/card.png"
+                                        default_image = Image.open(default_image_path)
+                                        container.update_idletasks()
+                                        width = container.winfo_width()
+                                        height = container.winfo_height()
+                                        default_image = default_image.resize((width, height), Image.Resampling.LANCZOS)
+                                        tk_default_image = ImageTk.PhotoImage(default_image)
+
+                                        # Create a Label for the default image and set it as the background
+                                        default_bg_label = Label(container, image=tk_default_image)
+                                        default_bg_label.image = tk_default_image  # Prevent garbage collection
+                                        default_bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Make the image cover the entire container
+
                                         continue
 
-                field.clear_sacrifice_cards()
-                self.update_bones_UI(game_page, player.get_bones())
+                    field.clear_sacrifice_cards()
+                    self.update_bones_UI(game_page, player.get_bones())
         else:
             messagebox.showinfo("Inscryption", "Você deve comprar uma carta antes de invocar")
 

@@ -92,7 +92,7 @@ class Table:
         self._remote_deck = self._remote_player.get_deck()
 
         
-        self._squirrel_deck = SquirrelCard("Squirrel", 1, 0, None, 0)
+        self._squirrel_deck = SquirrelCard("Squirrel", 1, 0, None, 0, "assets/Squirrel.png")
         self._local_deck = self.shuffle_deck(self._local_deck)
         self._local_player.initial_hand(self._local_deck)
         self._remote_player.initial_hand(self._remote_deck)
@@ -105,7 +105,7 @@ class Table:
     def buy_squirrel_card(self):
         if (self._buy_tokens == 1): 
             squirrel = self._squirrel_deck
-            self._squirrel_deck = SquirrelCard("Squirrel", 1, 0, None, 0)
+            self._squirrel_deck = SquirrelCard("Squirrel", 1, 0, None, 0, "assets/Squirrel.png")
             self._local_player.get_hand().add_card_to_hand(squirrel)
             self.decrement_buy_tokens()
             return squirrel
