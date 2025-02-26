@@ -123,11 +123,31 @@ class Controller(DogPlayerInterface):
                     10,
                     row,
                     col,
-                    f"Item {row * 2 + col}"
+                    ""  # Não exibir texto, pois será sobreposto pela imagem
                 )
+
+                # Obter dimensões do container
+                container_card.update_idletasks()  # Atualiza para garantir que tenha dimensões corretas
+                width = container_card.winfo_width()
+                height = container_card.winfo_height()
+
+                # Redimensionar a imagem para ocupar todo o container
+                image = Image.open("assets/card.png")
+                image = image.resize((width, height), Image.Resampling.LANCZOS)
+                tk_image = ImageTk.PhotoImage(image)
+
+                # Criar um Label para a imagem e definir como fundo
+                bg_label = Label(container_card, image=tk_image)
+                bg_label.image = tk_image  # Evita garbage collection
+                bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Faz a imagem cobrir tudo
 
                 # Bind usando partial para garantir a passagem correta das coordenadas
                 container_card.bind(
+                    "<Button-1>",
+                    lambda event, page=page, position_in_field=col, position_in_hand=None, row=row: 
+                    self.select_position(page, position_in_field, position_in_hand, row, event)
+                )
+                bg_label.bind(
                     "<Button-1>",
                     lambda event, page=page, position_in_field=col, position_in_hand=None, row=row: 
                     self.select_position(page, position_in_field, position_in_hand, row, event)
@@ -718,8 +738,10 @@ class Controller(DogPlayerInterface):
                 # Remove sacrifice cards from the field
                 if isinstance(invoked_card, SacrificeCard):
                     sacrifice_cards = field.get_sacrifice_cards()
-
+                    print("CARTAS DE SACRIFICIO:", sacrifice_cards)
                     for sacrifice_card in sacrifice_cards:
+                        print("SACRIFICIO:", sacrifice_card)
+                        print("BONES: ", player.get_bones())
                         is_deleted = False
                         for row in range(3):
                             if is_deleted:
@@ -738,7 +760,7 @@ class Controller(DogPlayerInterface):
                                     try:
                                         my_widget_name = my_widget.split()[0]
                                     except:
-                                        my_widget_name = my_widget
+                                        continue
                                     print(my_widget)
                                     if my_widget_name == str(sacrifice_card)[-8:]:
                                         is_deleted = True
@@ -762,7 +784,8 @@ class Controller(DogPlayerInterface):
                                         default_bg_label.image = tk_default_image  # Prevent garbage collection
                                         default_bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Make the image cover the entire container
 
-                                        continue
+                                        player.increment_bones()
+                                        break
 
                     field.clear_sacrifice_cards()
                     self.update_bones_UI(game_page, player.get_bones())
