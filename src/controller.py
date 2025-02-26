@@ -5,7 +5,7 @@ from tkinter import simpledialog
 from frames.startPage import StartPage  
 from frames.gamePage import GamePage  
 from frames.deckPage import DeckPage
-from fonts.font import *
+from fonts.font import SMALL_FONT
 from dog.dog_interface import DogPlayerInterface
 from dog.dog_actor import DogActor
 from problem_domain.library import Library
@@ -31,131 +31,146 @@ class Controller(DogPlayerInterface):
         
     ######### Logic for general purposes #########
 
+
+
     def create_container_grid(self, parent, text, padx, pady, row, col, textLabel):
-        container = tk.LabelFrame(parent, text=text, padx=padx, pady=pady)
-        container.grid(row = row, column= col, padx=5, pady=5, sticky="nsew")
-
-        label = tk.Label(container, text=textLabel)
-        label.pack(padx=5, pady=5)
-
+        # Cria um Canvas como container
+        container = tk.Canvas(
+            parent,
+            width=140,          # Largura mínima inicial
+            height=190,         # Altura mínima inicial
+            bg="white",
+            highlightthickness=0,  # Remove borda do Canvas
+            borderwidth=0           # Remove borda interna
+        )
+        container.grid(row=row, column=col, padx=padx, pady=pady, sticky="nsew")
+        
+        # Adiciona texto se necessário
+        if textLabel:
+            container.create_text(
+                10, 
+                10, 
+                text=textLabel, 
+                anchor="nw", 
+                font=SMALL_FONT,  # Garanta que SMALL_FONT está importada
+                tags="text"
+            )
+        
         return container
     
     ######### Logic for the game page #########
     
     def create_hand_UI(self, page, container):
         if self._players:
-            if self._players[0][1] == self._table._local_player.get_id():
-                hand_dict = {idx: {
-                    "id": card,
-                    "name": card.get_name(),
-                    "damage": card.get_damage(),
-                    "life": card.get_hp(),
-                    "image": card.get_image_path()  
-                } for idx, card in self.get_local_hand().items()}
-            elif self._players[1][1] == self._table._remote_player.get_id():
-                hand_dict = {idx: {
-                    "id": card,
-                    "name": card.get_name(),
-                    "damage": card.get_damage(),
-                    "life": card.get_hp(),
-                    "image": card.get_image_path()
-                } for idx, card in self.get_remote_hand().items()}
+            hand_dict = (
+                self.get_local_hand() 
+                if self._players[0][1] == self._table._local_player.get_id() 
+                else self.get_remote_hand()
+            )
 
             for row in range(3):
                 for col in range(3):
                     index = row * 3 + col
                     
-                    if index in hand_dict:
-                        card_data = hand_dict[index]
-                        image_path = card_data.get("image", card_data["image"])
-                    else:
-                        image_path = "assets/card.png"
-
-                    # Criar container para a carta
-                    container_card = self.create_container_grid(
-                        container,
+                    # Cria o Canvas para a carta
+                    canvas_card = self.create_container_grid(
+                        container, 
                         f"Container {row} {col}",
-                        10,
-                        10,
-                        row,
-                        col,
-                        ""  # Não exibir texto, pois será sobreposto pela imagem
+                        10, 10, row, col, ""
                     )
-
-                    # Obter dimensões do container
-                    container_card.update_idletasks()  # Atualiza para garantir que tenha dimensões corretas
-                    width = container_card.winfo_width()
-                    height = container_card.winfo_height()
-
-                    # Redimensionar a imagem para ocupar todo o container
+                    
+                    # Define o caminho da imagem
+                    image_path = (
+                        hand_dict[index].get_image_path() 
+                        if index in hand_dict 
+                        else "assets/card.png"
+                    )
+                    
+                    # --- Carregamento Inicial Imediato ---
+                    canvas_card.update_idletasks()  # Força atualização das dimensões
+                    current_width = canvas_card.winfo_width()
+                    current_height = canvas_card.winfo_height()
+                    
+                    # Carrega a imagem inicial
                     image = Image.open(image_path)
-                    image = image.resize((width, height), Image.Resampling.LANCZOS)
+                    image = image.resize((current_width, current_height), Image.Resampling.LANCZOS)
                     tk_image = ImageTk.PhotoImage(image)
-
-                    # Criar um Label para a imagem e definir como fundo
-                    bg_label = Label(container_card, image=tk_image)
-                    bg_label.image = tk_image  # Evita garbage collection
-                    bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Faz a imagem cobrir tudo
-
-                    # Associar o clique na imagem e no container
-                    def on_click(event, page=page, position_in_field=None, position_in_hand=index):
-                        self.select_position(page, position_in_field, position_in_hand, event)
-
-                    container_card.bind("<Button-1>", on_click)
-                    bg_label.bind("<Button-1>", on_click)
-
-                    # Armazena o container na estrutura da página
+                    canvas_card.image_ref = tk_image  # Mantém referência
+                    canvas_card.create_image(0, 0, anchor="nw", image=tk_image, tags="card_image")
+                    
+                    # Função de redimensionamento dinâmico
+                    def resize_image(event, canvas=canvas_card, img_path=image_path):
+                        if event.width <= 0 or event.height <= 0:
+                            return
+                        image = Image.open(img_path)
+                        image = image.resize((event.width, event.height), Image.Resampling.LANCZOS)
+                        tk_image = ImageTk.PhotoImage(image)
+                        canvas.delete("all")
+                        canvas.image_ref = tk_image  # Nova referência
+                        canvas.create_image(0, 0, anchor="nw", image=tk_image, tags="card_image")
+                    
+                    canvas_card.bind("<Configure>", resize_image)
+                    canvas_card.event_generate("<Configure>")  # Força o primeiro redimensionamento
+                    
+                    # Vincula o clique
+                    canvas_card.bind(
+                        "<Button-1>", 
+                        lambda e, page=page, pos_in_hand=index: 
+                            self.select_position(page, None, pos_in_hand, e)
+                    )
+                    
+                    # Armazena referência
                     if len(page.cards_hand_containers) <= row:
                         page.cards_hand_containers.append([])
-                    page.cards_hand_containers[row].append(container_card)
+                    page.cards_hand_containers[row].append(canvas_card)
 
     def create_field_UI(self, page, container):
         for row in range(3):
-            if row == 1:  # Continua ignorando a linha do meio
+            if row == 1:  # Ignora linha do meio
                 page.cards_field_containers.append([])
                 continue
 
             for col in range(4):
-                container_card = self.create_container_grid(
-                    container,
+                # Cria o container (Canvas)
+                canvas_card = self.create_container_grid(
+                    container, 
                     f"Container {row} {col}",
-                    10,
-                    10,
-                    row,
-                    col,
-                    ""  # Não exibir texto, pois será sobreposto pela imagem
+                    10, 10, row, col, ""
                 )
-
-                # Obter dimensões do container
-                container_card.update_idletasks()  # Atualiza para garantir que tenha dimensões corretas
-                width = container_card.winfo_width()
-                height = container_card.winfo_height()
-
-                # Redimensionar a imagem para ocupar todo o container
-                image = Image.open("assets/card.png")
-                image = image.resize((width, height), Image.Resampling.LANCZOS)
-                tk_image = ImageTk.PhotoImage(image)
-
-                # Criar um Label para a imagem e definir como fundo
-                bg_label = Label(container_card, image=tk_image)
-                bg_label.image = tk_image  # Evita garbage collection
-                bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Faz a imagem cobrir tudo
-
-                # Bind usando partial para garantir a passagem correta das coordenadas
-                container_card.bind(
-                    "<Button-1>",
-                    lambda event, page=page, position_in_field=col, position_in_hand=None, row=row: 
-                    self.select_position(page, position_in_field, position_in_hand, row, event)
+                
+                # Define caminho da imagem padrão
+                image_path = "assets/card.png"
+                
+                # Função de redimensionamento
+                def resize_image(event, canvas=canvas_card, img_path=image_path):
+                    if event.width <= 0 or event.height <= 0:
+                        return
+                    
+                    image = Image.open(img_path)
+                    image = image.resize((event.width, event.height), Image.Resampling.LANCZOS)
+                    tk_image = ImageTk.PhotoImage(image)
+                    canvas.delete("all")
+                    canvas.image = tk_image
+                    canvas.create_image(0, 0, anchor="nw", image=tk_image, tags="card_image")
+                
+                # Vincula o redimensionamento
+                canvas_card.bind("<Configure>", resize_image)
+                
+                # Força redimensionamento inicial
+                canvas_card.update_idletasks()
+                canvas_card.event_generate("<Configure>")
+                
+                # Vincula o clique
+                canvas_card.bind(
+                    "<Button-1>", 
+                    lambda e, page=page, pos_in_field=col, r=row: 
+                        self.select_position(page, pos_in_field, None, r, e)
                 )
-                bg_label.bind(
-                    "<Button-1>",
-                    lambda event, page=page, position_in_field=col, position_in_hand=None, row=row: 
-                    self.select_position(page, position_in_field, position_in_hand, row, event)
-                )
-
+                
+                # Armazena referência
                 if len(page.cards_field_containers) <= row:
                     page.cards_field_containers.append([])
-                page.cards_field_containers[row].append(container_card)
+                page.cards_field_containers[row].append(canvas_card)
         
     def select_card(self, page, selected_position, position_in_hand, row=None):
         selected_card = self._table.select_card(selected_position)
@@ -485,57 +500,48 @@ class Controller(DogPlayerInterface):
                     messagebox.showinfo("Inscryption", "O deck está vazio")
 
     def update_hand_UI(self, game_page):
-        hand_dict = {idx: {
-            "id": card,
-            "name": card.get_name(),
-            "damage": card.get_damage(),
-            "life": card.get_hp(),
-            "image": card.get_image_path()  # Add image path
-        } for idx, card in self.get_local_hand().items()}
+        hand_dict = {idx: card for idx, card in self.get_local_hand().items()}
         
         for row in range(3):
             for col in range(3):
                 index = row * 3 + col
-                container_card = game_page.cards_hand_containers[row][col]
+                canvas_card = game_page.cards_hand_containers[row][col]
+                
+                # Limpa o Canvas completamente
+                canvas_card.delete("all")
+                
+                # Define o caminho da imagem
                 if index in hand_dict:
-                    card_data = hand_dict[index]
-                    card_label = f"{str(card_data['id'])[-8:]} \n{card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
-                    self._table.get_position_in_hand(index).set_card(card_data["id"])
-                    
-                    # Load and resize the card image
-                    image_path = card_data.get("image", "assets/card.png")
-                    image = Image.open(image_path)
-
-                    # Update the container to get the correct dimensions
-                    container_card.update_idletasks()
-                    width = container_card.winfo_width()
-                    height = container_card.winfo_height()
-
-                    # Resize the image to fit the container
-                    image = image.resize((width, height), Image.Resampling.LANCZOS)
-                    tk_image = ImageTk.PhotoImage(image)
-
-                    # Create a Label for the image and set it as the background
-                    bg_label = Label(container_card, image=tk_image)
-                    bg_label.image = tk_image  # Prevent garbage collection
-                    bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Make the image cover the entire container
-
-                    # Bind the click event to both the container and the image
-                    def on_click(event, page=game_page, position_in_field=None, position_in_hand=index):
-                        self.select_position(page, position_in_field, position_in_hand, event)
-
-                    container_card.bind("<Button-1>", on_click)
-                    bg_label.bind("<Button-1>", on_click)
-
-                    # Update the text label
-                    for widget in container_card.winfo_children():
-                        if isinstance(widget, tk.Label) and widget != bg_label:
-                            widget.config(text=card_label)
+                    card = hand_dict[index]
+                    image_path = card.get_image_path()
                 else:
-                    card_label = "Empty"
-                    for widget in container_card.winfo_children():
-                        if isinstance(widget, tk.Label):
-                            widget.config(text=card_label)
+                    image_path = "assets/card.png"
+                
+                # --- Carregamento Inicial Imediato ---
+                canvas_card.update_idletasks()
+                current_width = canvas_card.winfo_width()
+                current_height = canvas_card.winfo_height()
+                
+                # Carrega a imagem inicial
+                image = Image.open(image_path)
+                image = image.resize((current_width, current_height), Image.Resampling.LANCZOS)
+                tk_image = ImageTk.PhotoImage(image)
+                canvas_card.image_ref = tk_image  # Mantém referência
+                canvas_card.create_image(0, 0, anchor="nw", image=tk_image, tags="card_image")
+                
+                # Função de redimensionamento dinâmico
+                def resize_image(event, canvas=canvas_card, img_path=image_path):
+                    if event.width <= 0 or event.height <= 0:
+                        return
+                    image = Image.open(img_path)
+                    image = image.resize((event.width, event.height), Image.Resampling.LANCZOS)
+                    tk_image = ImageTk.PhotoImage(image)
+                    canvas.delete("all")
+                    canvas.image_ref = tk_image
+                    canvas.create_image(0, 0, anchor="nw", image=tk_image, tags="card_image")
+                
+                canvas_card.bind("<Configure>", resize_image)
+                canvas_card.event_generate("<Configure>")  # Força atualização
 
     def update_scale_UI(self, local_points, remote_points, game_page):
         game_page.scale_label.config(text=f"Your scale: {local_points} | Enemy scale: {remote_points}")
@@ -661,8 +667,6 @@ class Controller(DogPlayerInterface):
         if self._table.get_buy_tokens() == 0:
             invoked_card = self._table.invoke_card(selected_position, player)
             field = self._table.get_player_field()
-
-            # Update the field UI to reflect the invoked card
             game_page = self.get_frame("GamePage")
 
             if isinstance(invoked_card, BoneCard):
@@ -677,120 +681,152 @@ class Controller(DogPlayerInterface):
                     "life": invoked_card.get_hp(),
                     "image": invoked_card.get_image_path()
                 }
-                card_label = f"{str(card_data['id'])[-8:]} \n {card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
 
-                # Update the field container with the card data
+                # --- Atualização da invoked_card ---
                 container = game_page.cards_field_containers[row][col]
-                container.config(bg="SystemButtonFace")  # Reset the background
-
-                # Load and resize the card image
-                image_path = card_data.get("image", "assets/card.png")
-                image = Image.open(image_path)
+                
+                # Força o cálculo das dimensões ANTES do redimensionamento
                 container.update_idletasks()
-                width = container.winfo_width()
-                height = container.winfo_height()
-                image = image.resize((width, height), Image.Resampling.LANCZOS)
+                
+                # Nova estratégia: Criar imagem diretamente com dimensões atuais
+                current_width = container.winfo_width()
+                current_height = container.winfo_height()
+                
+                # Gera imagem inicial imediatamente
+                image = Image.open(card_data["image"])
+                image = image.resize((current_width, current_height), Image.Resampling.LANCZOS)
                 tk_image = ImageTk.PhotoImage(image)
+                
+                container.delete("all")
+                container.image_ref = tk_image  # Mantém referência persistente
+                container.create_image(0, 0, anchor="nw", image=tk_image, tags="card_image")
+                container.create_text(
+                    10, 10,
+                    text=f"{str(card_data['id'])[-8:]}\n{card_data['name']}\nDamage: {card_data['damage']}",
+                    anchor="nw",
+                    font=SMALL_FONT,
+                    tags="card_text"
+                )
 
-                # Create a Label for the image and set it as the background
-                bg_label = Label(container, image=tk_image)
-                bg_label.image = tk_image  # Prevent garbage collection
-                bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Make the image cover the entire container
+                # Configura redimensionamento dinâmico
+                def resize_image(event, canvas=container, img_path=card_data["image"]):
+                    if event.width <= 0 or event.height <= 0:
+                        return
+                    
+                    image = Image.open(img_path)
+                    image = image.resize((event.width, event.height), Image.Resampling.LANCZOS)
+                    tk_image = ImageTk.PhotoImage(image)
+                    canvas.delete("all")
+                    canvas.image_ref = tk_image  # Nova referência
+                    canvas.create_image(0, 0, anchor="nw", image=tk_image, tags="card_image")
+                    canvas.create_text(
+                        10, 10,
+                        text=f"{str(card_data['id'])[-8:]}\n{card_data['name']}\nDamage: {card_data['damage']}",
+                        anchor="nw",
+                        font=SMALL_FONT,
+                        tags="card_text"
+                    )
 
-                # Bind the click event to both the container and the image
-                def on_click(event, page=game_page, position_in_field=col, position_in_hand=None, row=row):
-                    self.select_position(page, position_in_field, position_in_hand, row, event)
+                container.bind("<Configure>", resize_image)
+                container.event_generate("<Configure>")  # Força atualização
 
-                container.bind("<Button-1>", on_click)
-                bg_label.bind("<Button-1>", on_click)
-
-                # Update the text label
-                for widget in container.winfo_children():
-                    if isinstance(widget, tk.Label) and widget != bg_label:
-                        widget.config(text=card_label)
-
-                # Ensure the card is no longer in the hand
+                # --- Atualização da mão ---
                 if game_page.selected_card:
                     hand_row, hand_col = game_page.selected_card
-                    # Reset the container in the hand to its original state
-                    container = game_page.cards_hand_containers[hand_row][hand_col]
-                    container.config(bg="SystemButtonFace")  # Reset the background
+                    hand_container = game_page.cards_hand_containers[hand_row][hand_col]
+                    
+                    # Atualização imediata com imagem vazia
+                    hand_container.update_idletasks()
+                    empty_width = hand_container.winfo_width()
+                    empty_height = hand_container.winfo_height()
+                    
+                    empty_image = Image.open("assets/card.png")
+                    empty_image = empty_image.resize((empty_width, empty_height), Image.Resampling.LANCZOS)
+                    tk_empty_image = ImageTk.PhotoImage(empty_image)
+                    
+                    hand_container.delete("all")
+                    hand_container.image_ref = tk_empty_image
+                    hand_container.create_image(0, 0, anchor="nw", image=tk_empty_image)
 
-                    # Load and resize the default card image
-                    default_image_path = "assets/card.png"
-                    default_image = Image.open(default_image_path)
-                    container.update_idletasks()
-                    width = container.winfo_width()
-                    height = container.winfo_height()
-                    default_image = default_image.resize((width, height), Image.Resampling.LANCZOS)
-                    tk_default_image = ImageTk.PhotoImage(default_image)
+                    # Configura redimensionamento
+                    def resize_empty(event, canvas=hand_container):
+                        if event.width <= 0 or event.height <= 0:
+                            return
+                        
+                        image = Image.open("assets/card.png")
+                        image = image.resize((event.width, event.height), Image.Resampling.LANCZOS)
+                        tk_image = ImageTk.PhotoImage(image)
+                        canvas.delete("all")
+                        canvas.image_ref = tk_image
+                        canvas.create_image(0, 0, anchor="nw", image=tk_image)
 
-                    # Create a Label for the default image and set it as the background
-                    default_bg_label = Label(container, image=tk_default_image)
-                    default_bg_label.image = tk_default_image  # Prevent garbage collection
-                    default_bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Make the image cover the entire container
-
-                    # Update the text label
-                    for widget in container.winfo_children():
-                        if isinstance(widget, tk.Label) and widget != default_bg_label:
-                            widget.config(text="Empty")
-
+                    hand_container.bind("<Configure>", resize_empty)
                     game_page.selected_card = None
 
-                # Remove sacrifice cards from the field
+                # --- Processamento de sacrifícios ---
                 if isinstance(invoked_card, SacrificeCard):
                     sacrifice_cards = field.get_sacrifice_cards()
-                    print("CARTAS DE SACRIFICIO:", sacrifice_cards)
+                    
                     for sacrifice_card in sacrifice_cards:
-                        print("SACRIFICIO:", sacrifice_card)
-                        print("BONES: ", player.get_bones())
-                        is_deleted = False
-                        for row in range(3):
-                            if is_deleted:
-                                break
-                            for col in range(4):
-                                if is_deleted:
-                                    break
+                        for r in range(3):
+                            for c in range(4):
                                 try:
-                                    container = game_page.cards_field_containers[row][col]
-                                except:
-                                    break
+                                    target_container = game_page.cards_field_containers[r][c]
+                                    text_items = target_container.find_withtag("card_text")
+                                    
+                                    if text_items:
+                                        text_content = target_container.itemcget(text_items[0], "text")
+                                        card_id = text_content.split("\n")[0].strip()
+                                        
+                                        if card_id == str(sacrifice_card)[-8:]:
+                                            # Atualização imediata
+                                            target_container.update_idletasks()
+                                            current_width = target_container.winfo_width()
+                                            current_height = target_container.winfo_height()
+                                            
+                                            empty_image = Image.open("assets/card.png")
+                                            empty_image = empty_image.resize(
+                                                (current_width, current_height), 
+                                                Image.Resampling.LANCZOS
+                                            )
+                                            tk_empty_image = ImageTk.PhotoImage(empty_image)
+                                            
+                                            target_container.delete("all")
+                                            target_container.image_ref = tk_empty_image
+                                            target_container.create_image(0, 0, anchor="nw", image=tk_empty_image)
 
-                                for widget in container.winfo_children():
-                                    my_widget = widget.cget("text")
-                                    print("MY WIDGETNAME: ", my_widget)
-                                    try:
-                                        my_widget_name = my_widget.split()[0]
-                                    except:
-                                        continue
-                                    print(my_widget)
-                                    if my_widget_name == str(sacrifice_card)[-8:]:
-                                        is_deleted = True
-                                        widget.config(text=f"Empty")
-                                        field.get_position_in_field(col).set_card(None)
-                                        field.get_position_in_field(col).set_occupied(False)
-                                        field.remove_card_from_field(sacrifice_card)
-                                        container.config(bg="SystemButtonFace")
+                                            # Configura redimensionamento
+                                            def resize_sacrifice(event, canvas=target_container):
+                                                if event.width <= 0 or event.height <= 0:
+                                                    return
+                                                
+                                                image = Image.open("assets/card.png")
+                                                image = image.resize((event.width, event.height), Image.Resampling.LANCZOS)
+                                                tk_image = ImageTk.PhotoImage(image)
+                                                canvas.delete("all")
+                                                canvas.image_ref = tk_image
+                                                canvas.create_image(0, 0, anchor="nw", image=tk_image)
 
-                                        # Load and resize the default card image
-                                        default_image_path = "assets/card.png"
-                                        default_image = Image.open(default_image_path)
-                                        container.update_idletasks()
-                                        width = container.winfo_width()
-                                        height = container.winfo_height()
-                                        default_image = default_image.resize((width, height), Image.Resampling.LANCZOS)
-                                        tk_default_image = ImageTk.PhotoImage(default_image)
+                                            target_container.bind("<Configure>", resize_sacrifice)
+                                            target_container.event_generate("<Configure>")
 
-                                        # Create a Label for the default image and set it as the background
-                                        default_bg_label = Label(container, image=tk_default_image)
-                                        default_bg_label.image = tk_default_image  # Prevent garbage collection
-                                        default_bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Make the image cover the entire container
-
-                                        player.increment_bones()
-                                        break
+                                            # Atualiza estado
+                                            field.get_position_in_field(c).set_card(None)
+                                            field.get_position_in_field(c).set_occupied(False)
+                                            field.remove_card_from_field(sacrifice_card)
+                                            player.increment_bones()
+                                            break
+                                    
+                                except (IndexError, AttributeError):
+                                    continue
 
                     field.clear_sacrifice_cards()
                     self.update_bones_UI(game_page, player.get_bones())
+
+            # Força atualização geral da interface
+            game_page.update_idletasks()
+            game_page.update()
+
         else:
             messagebox.showinfo("Inscryption", "Você deve comprar uma carta antes de invocar")
 
