@@ -65,6 +65,7 @@ class GamePage(Page):
         bones_image = tk.PhotoImage(file="bones.png").zoom(2, 2)  # Enlarge the image 2x
         self.bones_label = tk.Label(self, text="Bones: 0", font=LARGE_FONT, image=bones_image, compound="center", anchor="center", padx=10)
         self.bones_label.image = bones_image  # Keep a reference to the image
+        self.bones_label.config(width=bones_image.width(), height=bones_image.height())  # Set the label size to the image size
         self.bones_label.place(relx=0.95, rely=0.95, anchor="e")
 
     def reset_page(self):
