@@ -13,7 +13,7 @@ class Library():
         self.add_card(SacrificeCard("Deer", 1, 1, {"name": "Amplifier", "modifier": "life", "value": 1}, 1, "assets/Wolf.png"))
         self.add_card(SacrificeCard("Bear", 5, 3, {"name": "Guardian", "modifier": "damage", "value": 1}, 2, "assets/Bear.png"))
         self.add_card(SquirrelCard("Squirrel", 1, 0, None, 0, "assets/Squirrel.png"))
-        self.add_card(SacrificeCard("Wolf", 3, 100, {"name": "'Amplifier'", "modifier": "life", "value": 1}, 1, "assets/Wolf.png"))
+        self.add_card(SacrificeCard("Wolf", 3, 2, {"name": "'Amplifier", "modifier": "life", "value": 1}, 1, "assets/Wolf.png"))
         self.add_card(BoneCard("Vulture", 1, 2, None, 1, "assets/Vulture.png"))
 
 
@@ -48,7 +48,7 @@ class Library():
         try:
             for key, value in self._cards_model.items():
                 if value.get_name() == name:
-                    new_card = copy.copy(value)
+                    new_card = copy.deepcopy(value)
                     return new_card
         except Exception as e:
             print(f"Error: {e}")

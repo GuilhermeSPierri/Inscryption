@@ -289,23 +289,33 @@ class Controller(DogPlayerInterface):
     ################### Logic for the deck page ###################
 
     def create_deck_page_UI(self, page):
-        # Get all cards and deck information
-        all_cards_dict = {idx: {
-            "name": card.get_name(),
-            "damage": card.get_damage(),
-            "life": card.get_hp(),
-            "image": card.get_image_path()  # Add image path
-        } for idx, card in self.get_all_cards().items()}
+        # Construir dicionários com ID baseado no objeto
+        all_cards = list(self.get_all_cards().values())  # Lista de objetos Card
+        
+        all_cards_dict = {
+            idx: {
+                "id": str(card)[-8:],  # ID como string dos últimos 8 caracteres
+                "name": card.get_name(),
+                "damage": card.get_damage(),
+                "life": card.get_hp(),
+                "image": card.get_image_path()
+            } for idx, card in enumerate(all_cards)
+        }
 
-        deck_info_dict = {idx: {
-            "name": card.get_name(),
-            "damage": card.get_damage(),
-            "life": card.get_hp(),
-            "image": card.get_image_path()  # Add image path
-        } for idx, card in self.get_deck_info().items()}
+        deck_cards = list(self.get_deck_info().values())  # Lista de objetos Card no deck
+        deck_info_dict = {
+            idx: {
+                "id": str(card)[-8:],  # ID como string dos últimos 8 caracteres
+                "name": card.get_name(),
+                "damage": card.get_damage(),
+                "life": card.get_hp(),
+                "image": card.get_image_path()
+            } for idx, card in enumerate(deck_cards)
+        }
 
         page.set_all_cards_data(all_cards_dict)
         page.set_my_deck_data(deck_info_dict)
+
 
         # Create UI for the left container (all cards)
         left_container = tk.Frame(page, bg="lightgrey", relief=tk.RAISED, borderwidth=2)
@@ -341,130 +351,101 @@ class Controller(DogPlayerInterface):
         for row in range(5):
             for col in range(4):
                 index = row * 4 + col
+                card_container = self.create_container_grid(container, "", 10, 10, row, col, "")
                 
-                if index < len(card_data_dict):
+                if index in card_data_dict:
                     card_data = card_data_dict[index]
-                    card_label = f"{card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
-                    card_container = self.create_container_grid(container, "", 10, 10, row, col, card_label)
-                    
-                    # Ensure the layout updates before getting dimensions
-                    container.update_idletasks()
-                    card_container.update_idletasks()
-                    container_width = max(140, card_container.winfo_width())
-                    container_height = max(190, card_container.winfo_height())
-                    
-                    # Load and resize the card image
-                    image_path = card_data.get("image", card_data["image"])
-                    image = Image.open(image_path)
-                    image = image.resize((container_width, container_height), Image.Resampling.LANCZOS)
-                    tk_image = ImageTk.PhotoImage(image)
-                    
-                    # Create a Label for the image and set it as the background
-                    bg_label = Label(card_container, image=tk_image)
-                    bg_label.image = tk_image  # Prevent garbage collection
-                    bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Make the image cover the entire container
-                    
-                    # Bind the click event
-                    card_container.bind("<Button-1>", lambda e, cd=card_data, idx=index: on_click(cd, idx))
-                    bg_label.bind("<Button-1>", lambda e, cd=card_data, idx=index: on_click(cd, idx))
+                    # Garantir que o ID está presente
+                    card_id = card_data.get("id", str(card_data)[-8:])  # Fallback seguro
+                    card_container.create_text(
+                        10, 10,
+                        text=f"{card_id}\n{card_data['name']}\nDamage: {card_data['damage']}",
+                        anchor="nw",
+                        font=SMALL_FONT,
+                        tags="text"
+                    )
+                    self._update_canvas_image(card_container, card_data["image"])
                 else:
-                    # Empty placeholder
-                    card_container = self.create_container_grid(container, "Empty", 10, 10, row, col, "Empty")
+                    card_container.create_text(
+                        10, 10,
+                        text="Empty",
+                        anchor="nw",
+                        font=SMALL_FONT,
+                        tags="text"
+                    )
+                    self._update_canvas_image(card_container, "assets/card.png")
+
+                card_container.bind("<Button-1>", lambda e, idx=index: on_click(card_data_dict.get(idx, {}), idx))
                 
-                # Store reference
                 if len(container_list) <= row:
                     container_list.append([])
                 container_list[row].append(card_container)
 
    
     def add_card_to_deck_UI(self, card_data, index, page):
-        for row in range(5):
-            for col in range(4):
-                if page.my_deck_containers[row][col].cget("text") == "Empty":
-                    # Replace the placeholder with the selected card
-                    card_label = f"{card_data['name']} \n Damage: {card_data['damage']} \n Life: {card_data['life']}"
-                    card_container = self.create_container_grid(
-                        page.my_deck_containers[row][col].master,  # Parent container
-                        "",
-                        10,
-                        10,
-                        row,
-                        col,
-                        card_label
-                    )
-                    
-                    # Ensure the layout updates before getting dimensions
-                    page.update_idletasks()
-                    card_container.update_idletasks()
-                    container_width = max(100, card_container.winfo_width())
-                    container_height = max(150, card_container.winfo_height())
-                    
-                    # Load and resize the card image
-                    image_path = card_data.get("image", "assets/card.png")
-                    image = Image.open(image_path)
-                    image = image.resize((container_width, container_height), Image.Resampling.LANCZOS)
-                    tk_image = ImageTk.PhotoImage(image)
-                    
-                    # Create a Label for the image and set it as the background
-                    bg_label = Label(card_container, image=tk_image)
-                    bg_label.image = tk_image  # Prevent garbage collection
-                    bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Make the image cover the entire container
-                    
-                    # Bind the removal function
-                    card_container.bind("<Button-1>", lambda e, idx=row * 4 + col: self.remove_card_from_deck_UI(idx, page))
-                    bg_label.bind("<Button-1>", lambda e, idx=row * 4 + col: self.remove_card_from_deck_UI(idx, page))
-                    
-                    # Update UI reference
-                    page.my_deck_containers[row][col].destroy()
-                    page.my_deck_containers[row][col] = card_container
-                    
-                    # Update deck data
-                    page.get_my_deck_data()[row * 4 + col] = card_data
-                    return
-        
+        # Procura por slots marcados como "Empty" nos dados
+        for slot_index in range(20):
+            if page.get_my_deck_data().get(slot_index, {}).get("name") == "Empty":
+                row = slot_index // 4
+                col = slot_index % 4
+                
+                # Atualiza dados
+                page.get_my_deck_data()[slot_index] = card_data
+                
+                # Atualiza UI
+                container = page.my_deck_containers[row][col]
+                container.delete("all")
+                container.create_text(
+                    10, 10,
+                    text=f"{str(card_data['id'])[-8:]}\n{card_data['name']}\nDamage: {card_data['damage']}",
+                    anchor="nw",
+                    font=SMALL_FONT,
+                    tags="text"
+                )
+                self._update_canvas_image(container, card_data["image"])
+                return
+                
         messagebox.showinfo("Deck cheio", "Seu deck já possui o tamanho máximo")
 
 
-
     def remove_card_from_deck_UI(self, card_index, page):
-        # Calculate row and column
         row = card_index // 4
         col = card_index % 4
-
-        # Remove UI element
-        if row < len(page.my_deck_containers) and col < len(page.my_deck_containers[row]):
-            page.my_deck_containers[row][col].destroy()
-
-        # Remove from deck data
-        if card_index in page.get_my_deck_data():
-            page.get_my_deck_data().pop(card_index)
-
-        # Fill the gap in the UI
-        placeholder = self.create_container_grid(
-            page.my_deck_containers[row][col].master,
-            "Empty",
-            10,
-            10,
-            row,
-            col,
-            "Empty"
-        )
-        page.my_deck_containers[row][col] = placeholder
+        
+        try:
+            # Mantém a estrutura de 20 slots, marcando como vazio
+            page.get_my_deck_data()[card_index] = {"name": "Empty"}
+            
+            # Atualiza o container
+            container = page.my_deck_containers[row][col]
+            container.delete("all")
+            container.create_text(
+                10, 10,
+                text="Empty",
+                anchor="nw",
+                font=SMALL_FONT,
+                tags="text"
+            )
+            self._update_canvas_image(container, "assets/card.png")
+            
+        except Exception as e:
+            print(f"Erro ao remover carta: {str(e)}")
 
     def save_deck(self, deck_data_func):
-        # Salvar o deck
         deck_data = deck_data_func()
         
-        if len(deck_data) == 20:
+        # Conta apenas cartas válidas (não "Empty")
+        valid_cards = [card for card in deck_data.values() if card.get("name") != "Empty"]
+        
+        if len(valid_cards) == 20:
             self._table._local_deck.reset_deck()
-            for _, card_dict in deck_data.items():
+            for card_dict in valid_cards:  # Ignora "Empty"
                 card_object = self.library.get_card(card_dict["name"])
                 self._table._local_deck.add_card_to_deck(card_object)
-            self._table._local_player.set_deck(self._table._local_deck)
             messagebox.showinfo("Deck salvo", "Deck salvo com sucesso")
             self.show_frame("StartPage")
         else:
-            messagebox.showerror("Erro", "Deck precisa ter 20 cartas")
+            messagebox.showerror("Erro", f"Deck precisa ter 20 cartas (atual: {len(valid_cards)})")
 
     ######### Logic for the library #########
 
@@ -699,13 +680,16 @@ class Controller(DogPlayerInterface):
                                         # Extrai o ID da carta do texto (primeira linha)
                                         text_content = target_container.itemcget(text_items[0], "text")
                                         card_id = text_content.split("\n")[0].strip()  # Pega a primeira linha
-                                        
+                                        print("CARD ID: ", card_id, "SACRIFICE CARD: ", sacrifice_card)
+
                                         # Compara com o ID da carta sacrificada (últimos 8 caracteres)
                                         if card_id == str(sacrifice_card)[-8:]:
                                             # Reseta para imagem vazia
                                             self._update_canvas_image(target_container, "assets/card.png")
                                             field.get_position_in_field(c).set_card(None)
                                             field.get_position_in_field(c).set_occupied(False)
+                                            print("SO PRA CONFERIR")
+                                            player.increment_bones()
                                             
                                 except (IndexError, AttributeError, KeyError) as e:
                                     print(f"Erro ao processar sacrifício: {e}")
