@@ -31,7 +31,40 @@ class Controller(DogPlayerInterface):
         
     ######### Logic for general purposes #########
 
+    def _update_canvas_image(self, canvas, image_path):
+        """Atualiza um Canvas com uma imagem redimensionável"""
+        # Carregamento inicial
+        canvas.update_idletasks()
+        current_width = canvas.winfo_width()
+        current_height = canvas.winfo_height()
+        
+        try:
+            image = Image.open(image_path)
+            image = image.resize((current_width, current_height), Image.Resampling.LANCZOS)
+            tk_image = ImageTk.PhotoImage(image)
+            canvas.delete("all")
+            canvas.image_ref = tk_image  # Mantém referência
+            canvas.create_image(0, 0, anchor="nw", image=tk_image, tags="card_image")
+        except Exception as e:
+            print(f"Erro ao carregar imagem: {e}")
+            return
 
+        # Configura redimensionamento
+        def resize(event):
+            if event.width <= 0 or event.height <= 0:
+                return
+            try:
+                image = Image.open(image_path)
+                image = image.resize((event.width, event.height), Image.Resampling.LANCZOS)
+                tk_image = ImageTk.PhotoImage(image)
+                canvas.delete("all")
+                canvas.image_ref = tk_image
+                canvas.create_image(0, 0, anchor="nw", image=tk_image, tags="card_image")
+            except Exception as e:
+                print(f"Erro ao redimensionar: {e}")
+
+        canvas.bind("<Configure>", resize)
+        canvas.event_generate("<Configure>")  # Força renderização inicial
 
     def create_container_grid(self, parent, text, padx, pady, row, col, textLabel):
         # Cria um Canvas como container
@@ -58,6 +91,35 @@ class Controller(DogPlayerInterface):
         
         return container
     
+    def _update_field_section(self, game_page, field, positions, is_local):
+        """Atualiza uma seção específica do campo (local ou remoto)"""
+        for col in range(4):
+            position_data = positions[col]
+            posicao = Position.from_dict(position_data)
+            field.set_position(col, posicao)
+
+            # Determina a linha correta (0 para local, 2 para remoto)
+            row = 0 if is_local else 2
+            container = game_page.cards_field_containers[row][col]
+
+            # Limpa o Canvas completamente
+            container.delete("all")
+
+            if position_data["occupied"]:
+                card = SacrificeCard.from_dict(position_data["card"])
+                # Atualiza a imagem
+                self._update_canvas_image(container, card.get_image_path())
+                # Adiciona texto com ID
+                container.create_text(
+                    10, 10,
+                    text=f"{str(card)[-8:]}\n{card.get_name()}\nDamage: {card.get_damage()}",
+                    anchor="nw",
+                    font=SMALL_FONT,
+                    tags="text"
+                )
+            else:
+                # Reseta para imagem vazia
+                self._update_canvas_image(container, "assets/card.png")
     ######### Logic for the game page #########
     
     def create_hand_UI(self, page, container):
@@ -86,31 +148,19 @@ class Controller(DogPlayerInterface):
                         else "assets/card.png"
                     )
                     
-                    # --- Carregamento Inicial Imediato ---
-                    canvas_card.update_idletasks()  # Força atualização das dimensões
-                    current_width = canvas_card.winfo_width()
-                    current_height = canvas_card.winfo_height()
+                    # Atualiza o Canvas com a imagem
+                    self._update_canvas_image(canvas_card, image_path)
                     
-                    # Carrega a imagem inicial
-                    image = Image.open(image_path)
-                    image = image.resize((current_width, current_height), Image.Resampling.LANCZOS)
-                    tk_image = ImageTk.PhotoImage(image)
-                    canvas_card.image_ref = tk_image  # Mantém referência
-                    canvas_card.create_image(0, 0, anchor="nw", image=tk_image, tags="card_image")
-                    
-                    # Função de redimensionamento dinâmico
-                    def resize_image(event, canvas=canvas_card, img_path=image_path):
-                        if event.width <= 0 or event.height <= 0:
-                            return
-                        image = Image.open(img_path)
-                        image = image.resize((event.width, event.height), Image.Resampling.LANCZOS)
-                        tk_image = ImageTk.PhotoImage(image)
-                        canvas.delete("all")
-                        canvas.image_ref = tk_image  # Nova referência
-                        canvas.create_image(0, 0, anchor="nw", image=tk_image, tags="card_image")
-                    
-                    canvas_card.bind("<Configure>", resize_image)
-                    canvas_card.event_generate("<Configure>")  # Força o primeiro redimensionamento
+                    # Adiciona texto (se houver carta)
+                    if index in hand_dict:
+                        card = hand_dict[index]
+                        canvas_card.create_text(
+                            10, 10,
+                            text=f"{card.get_name()}\nDamage: {card.get_damage()}",
+                            anchor="nw",
+                            font=SMALL_FONT,
+                            tags="text"
+                        )
                     
                     # Vincula o clique
                     canvas_card.bind(
@@ -131,34 +181,14 @@ class Controller(DogPlayerInterface):
                 continue
 
             for col in range(4):
-                # Cria o container (Canvas)
                 canvas_card = self.create_container_grid(
                     container, 
                     f"Container {row} {col}",
                     10, 10, row, col, ""
                 )
                 
-                # Define caminho da imagem padrão
-                image_path = "assets/card.png"
-                
-                # Função de redimensionamento
-                def resize_image(event, canvas=canvas_card, img_path=image_path):
-                    if event.width <= 0 or event.height <= 0:
-                        return
-                    
-                    image = Image.open(img_path)
-                    image = image.resize((event.width, event.height), Image.Resampling.LANCZOS)
-                    tk_image = ImageTk.PhotoImage(image)
-                    canvas.delete("all")
-                    canvas.image = tk_image
-                    canvas.create_image(0, 0, anchor="nw", image=tk_image, tags="card_image")
-                
-                # Vincula o redimensionamento
-                canvas_card.bind("<Configure>", resize_image)
-                
-                # Força redimensionamento inicial
-                canvas_card.update_idletasks()
-                canvas_card.event_generate("<Configure>")
+                # Inicializa com imagem vazia
+                self._update_canvas_image(canvas_card, "assets/card.png")
                 
                 # Vincula o clique
                 canvas_card.bind(
@@ -507,9 +537,6 @@ class Controller(DogPlayerInterface):
                 index = row * 3 + col
                 canvas_card = game_page.cards_hand_containers[row][col]
                 
-                # Limpa o Canvas completamente
-                canvas_card.delete("all")
-                
                 # Define o caminho da imagem
                 if index in hand_dict:
                     card = hand_dict[index]
@@ -517,31 +544,19 @@ class Controller(DogPlayerInterface):
                 else:
                     image_path = "assets/card.png"
                 
-                # --- Carregamento Inicial Imediato ---
-                canvas_card.update_idletasks()
-                current_width = canvas_card.winfo_width()
-                current_height = canvas_card.winfo_height()
+                # Atualiza o Canvas
+                self._update_canvas_image(canvas_card, image_path)
                 
-                # Carrega a imagem inicial
-                image = Image.open(image_path)
-                image = image.resize((current_width, current_height), Image.Resampling.LANCZOS)
-                tk_image = ImageTk.PhotoImage(image)
-                canvas_card.image_ref = tk_image  # Mantém referência
-                canvas_card.create_image(0, 0, anchor="nw", image=tk_image, tags="card_image")
-                
-                # Função de redimensionamento dinâmico
-                def resize_image(event, canvas=canvas_card, img_path=image_path):
-                    if event.width <= 0 or event.height <= 0:
-                        return
-                    image = Image.open(img_path)
-                    image = image.resize((event.width, event.height), Image.Resampling.LANCZOS)
-                    tk_image = ImageTk.PhotoImage(image)
-                    canvas.delete("all")
-                    canvas.image_ref = tk_image
-                    canvas.create_image(0, 0, anchor="nw", image=tk_image, tags="card_image")
-                
-                canvas_card.bind("<Configure>", resize_image)
-                canvas_card.event_generate("<Configure>")  # Força atualização
+                # Remove texto antigo e adiciona novo
+                canvas_card.delete("text")
+                if index in hand_dict:
+                    canvas_card.create_text(
+                        10, 10,
+                        text=f"{card.get_name()}\nDamage: {card.get_damage()}",
+                        anchor="nw",
+                        font=SMALL_FONT,
+                        tags="text"
+                    )
 
     def update_scale_UI(self, local_points, remote_points, game_page):
         game_page.scale_label.config(text=f"Your scale: {local_points} | Enemy scale: {remote_points}")
@@ -585,35 +600,9 @@ class Controller(DogPlayerInterface):
         local_positions = move.get("local_positions", [])
         remote_positions = move.get("remote_positions", [])
 
-        self.update_field(game_page, self._table.get_local_field(), local_positions)
-        self.update_field(game_page, self._table.get_remote_field(), remote_positions)
-
-
-    def update_field(self, game_page, field, positions):
-        for row in range (1):
-            for col in range(4):
-
-                posicao = Position.from_dict(positions[col])
-                field.set_position(col, posicao)
-
-                # Atualizar o contêiner correspondente no campo de batalha
-                if field == self._table.get_local_field():
-                    container = game_page.cards_field_containers[0][col]
-                else:
-                    container = game_page.cards_field_containers[2][col]
-
-                # Verificar se há uma carta na posição
-                
-                if positions[col]["occupied"]:
-                    card_data = SacrificeCard.from_dict(positions[col]["card"])
-                    card_label = f"{str(card_data)[-8:]} \n {card_data.get_name()} \n Damage: {card_data.get_damage()} \n Life: {card_data.get_hp()}"
-                    field.get_position_in_field(col).set_card(card_data)
-                else:
-                    card_label = "Empty"
-
-                for widget in container.winfo_children():
-                    if isinstance(widget, tk.Label):
-                        widget.config(text=card_label)
+        # Atualiza ambos os campos (local e remoto)
+        self._update_field_section(game_page, self._table.get_local_field(), local_positions, is_local=True)
+        self._update_field_section(game_page, self._table.get_remote_field(), remote_positions, is_local=False)
 
 
     def pass_turn(self, withdrawal=None):
@@ -674,159 +663,56 @@ class Controller(DogPlayerInterface):
 
             if invoked_card:
                 col = position_in_field
-                card_data = {
-                    "id": invoked_card,
-                    "name": invoked_card.get_name(),
-                    "damage": invoked_card.get_damage(),
-                    "life": invoked_card.get_hp(),
-                    "image": invoked_card.get_image_path()
-                }
-
-                # --- Atualização da invoked_card ---
                 container = game_page.cards_field_containers[row][col]
                 
-                # Força o cálculo das dimensões ANTES do redimensionamento
-                container.update_idletasks()
+                # Atualiza com a imagem da carta invocada
+                self._update_canvas_image(container, invoked_card.get_image_path())
                 
-                # Nova estratégia: Criar imagem diretamente com dimensões atuais
-                current_width = container.winfo_width()
-                current_height = container.winfo_height()
-                
-                # Gera imagem inicial imediatamente
-                image = Image.open(card_data["image"])
-                image = image.resize((current_width, current_height), Image.Resampling.LANCZOS)
-                tk_image = ImageTk.PhotoImage(image)
-                
-                container.delete("all")
-                container.image_ref = tk_image  # Mantém referência persistente
-                container.create_image(0, 0, anchor="nw", image=tk_image, tags="card_image")
+                # Adiciona texto
                 container.create_text(
                     10, 10,
-                    text=f"{str(card_data['id'])[-8:]}\n{card_data['name']}\nDamage: {card_data['damage']}",
+                    text=f"{str(invoked_card)[-8:]}\n{invoked_card.get_name()}\nDamage: {invoked_card.get_damage()}",
                     anchor="nw",
                     font=SMALL_FONT,
-                    tags="card_text"
+                    tags="text"
                 )
 
-                # Configura redimensionamento dinâmico
-                def resize_image(event, canvas=container, img_path=card_data["image"]):
-                    if event.width <= 0 or event.height <= 0:
-                        return
-                    
-                    image = Image.open(img_path)
-                    image = image.resize((event.width, event.height), Image.Resampling.LANCZOS)
-                    tk_image = ImageTk.PhotoImage(image)
-                    canvas.delete("all")
-                    canvas.image_ref = tk_image  # Nova referência
-                    canvas.create_image(0, 0, anchor="nw", image=tk_image, tags="card_image")
-                    canvas.create_text(
-                        10, 10,
-                        text=f"{str(card_data['id'])[-8:]}\n{card_data['name']}\nDamage: {card_data['damage']}",
-                        anchor="nw",
-                        font=SMALL_FONT,
-                        tags="card_text"
-                    )
-
-                container.bind("<Configure>", resize_image)
-                container.event_generate("<Configure>")  # Força atualização
-
-                # --- Atualização da mão ---
+                # Remove carta da mão
                 if game_page.selected_card:
                     hand_row, hand_col = game_page.selected_card
                     hand_container = game_page.cards_hand_containers[hand_row][hand_col]
-                    
-                    # Atualização imediata com imagem vazia
-                    hand_container.update_idletasks()
-                    empty_width = hand_container.winfo_width()
-                    empty_height = hand_container.winfo_height()
-                    
-                    empty_image = Image.open("assets/card.png")
-                    empty_image = empty_image.resize((empty_width, empty_height), Image.Resampling.LANCZOS)
-                    tk_empty_image = ImageTk.PhotoImage(empty_image)
-                    
-                    hand_container.delete("all")
-                    hand_container.image_ref = tk_empty_image
-                    hand_container.create_image(0, 0, anchor="nw", image=tk_empty_image)
-
-                    # Configura redimensionamento
-                    def resize_empty(event, canvas=hand_container):
-                        if event.width <= 0 or event.height <= 0:
-                            return
-                        
-                        image = Image.open("assets/card.png")
-                        image = image.resize((event.width, event.height), Image.Resampling.LANCZOS)
-                        tk_image = ImageTk.PhotoImage(image)
-                        canvas.delete("all")
-                        canvas.image_ref = tk_image
-                        canvas.create_image(0, 0, anchor="nw", image=tk_image)
-
-                    hand_container.bind("<Configure>", resize_empty)
+                    self._update_canvas_image(hand_container, "assets/card.png")
                     game_page.selected_card = None
 
-                # --- Processamento de sacrifícios ---
+                # Processa sacrifícios
                 if isinstance(invoked_card, SacrificeCard):
-                    sacrifice_cards = field.get_sacrifice_cards()
-                    
-                    for sacrifice_card in sacrifice_cards:
+                    for sacrifice_card in field.get_sacrifice_cards():
                         for r in range(3):
+                            if r == 1:
+                                continue
                             for c in range(4):
                                 try:
                                     target_container = game_page.cards_field_containers[r][c]
-                                    text_items = target_container.find_withtag("card_text")
+                                    text_items = target_container.find_withtag("text")
                                     
                                     if text_items:
+                                        # Extrai o ID da carta do texto (primeira linha)
                                         text_content = target_container.itemcget(text_items[0], "text")
-                                        card_id = text_content.split("\n")[0].strip()
+                                        card_id = text_content.split("\n")[0].strip()  # Pega a primeira linha
                                         
+                                        # Compara com o ID da carta sacrificada (últimos 8 caracteres)
                                         if card_id == str(sacrifice_card)[-8:]:
-                                            # Atualização imediata
-                                            target_container.update_idletasks()
-                                            current_width = target_container.winfo_width()
-                                            current_height = target_container.winfo_height()
-                                            
-                                            empty_image = Image.open("assets/card.png")
-                                            empty_image = empty_image.resize(
-                                                (current_width, current_height), 
-                                                Image.Resampling.LANCZOS
-                                            )
-                                            tk_empty_image = ImageTk.PhotoImage(empty_image)
-                                            
-                                            target_container.delete("all")
-                                            target_container.image_ref = tk_empty_image
-                                            target_container.create_image(0, 0, anchor="nw", image=tk_empty_image)
-
-                                            # Configura redimensionamento
-                                            def resize_sacrifice(event, canvas=target_container):
-                                                if event.width <= 0 or event.height <= 0:
-                                                    return
-                                                
-                                                image = Image.open("assets/card.png")
-                                                image = image.resize((event.width, event.height), Image.Resampling.LANCZOS)
-                                                tk_image = ImageTk.PhotoImage(image)
-                                                canvas.delete("all")
-                                                canvas.image_ref = tk_image
-                                                canvas.create_image(0, 0, anchor="nw", image=tk_image)
-
-                                            target_container.bind("<Configure>", resize_sacrifice)
-                                            target_container.event_generate("<Configure>")
-
-                                            # Atualiza estado
+                                            # Reseta para imagem vazia
+                                            self._update_canvas_image(target_container, "assets/card.png")
                                             field.get_position_in_field(c).set_card(None)
                                             field.get_position_in_field(c).set_occupied(False)
-                                            field.remove_card_from_field(sacrifice_card)
-                                            player.increment_bones()
-                                            break
-                                    
-                                except (IndexError, AttributeError):
+                                            
+                                except (IndexError, AttributeError, KeyError) as e:
+                                    print(f"Erro ao processar sacrifício: {e}")
                                     continue
 
                     field.clear_sacrifice_cards()
                     self.update_bones_UI(game_page, player.get_bones())
-
-            # Força atualização geral da interface
-            game_page.update_idletasks()
-            game_page.update()
-
         else:
             messagebox.showinfo("Inscryption", "Você deve comprar uma carta antes de invocar")
 
