@@ -116,9 +116,13 @@ class Table:
     def buy_deck_card(self):
         if (self._buy_tokens == 1):
             top_card = self.get_local_deck().get_top_card()
-            self._local_player.get_hand().add_card_to_hand(top_card)
-            self.decrement_buy_tokens()
-            return top_card
+            if top_card:
+                self._local_player.get_hand().add_card_to_hand(top_card)
+                self.decrement_buy_tokens()
+            else:
+                messagebox.showinfo("Inscryption", "Você já comprou todas as suas cartas do deck!")
+        else:
+            messagebox.showinfo("Inscryption", "Você já comprou uma carta neste turno!")
 
     def check_deck_size(self):
         return len(self._local_deck) if self._local_deck else 0

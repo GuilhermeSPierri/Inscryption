@@ -558,18 +558,14 @@ class Controller(DogPlayerInterface):
         # Get the top card from the deck
         turn_player = self._table.get_turn_player()
         if turn_player.get_id() == self._table._local_player.get_id():
-            top_card = self._table.buy_deck_card()
-            if top_card:
-                # Update the UI
-                game_page = self.get_frame("GamePage")
-                if game_page:
-                    self.update_hand_UI(game_page)
-                    messagebox.showinfo("Inscryption", "Você comprou uma carta do deck")
-            else:
-                if self._table.get_buy_tokens() == 0:
-                    messagebox.showinfo("Inscryption", "Você já comprou uma carta neste turno")
-                else:
-                    messagebox.showinfo("Inscryption", "O deck está vazio")
+            self._table.buy_deck_card()
+            # Update the UI
+            game_page = self.get_frame("GamePage")
+            if game_page:
+                self.update_hand_UI(game_page)
+                messagebox.showinfo("Inscryption", "Você comprou uma carta do deck")
+        else:
+            messagebox.showinfo("Inscryption", "Não é o seu turno!")
 
     def update_hand_UI(self, game_page):
         hand_dict = {idx: card for idx, card in self.get_local_hand().items()}
@@ -762,13 +758,13 @@ class Controller(DogPlayerInterface):
 
     ######### Logic for the dog #########
 
-    def start_match(self): 
+    def start_match(self):
         start_status = self.dog_server_interface.start_match(2)
         code = start_status.get_code()
         message = start_status.get_message()
         if code == "0" or code == "1":
             messagebox.showinfo(message=message)
-        elif code == "2":
+        elif code == "2":   
             players = start_status.get_players()
             self._players = players
             self.reset_game()
