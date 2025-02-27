@@ -617,8 +617,6 @@ class Controller(DogPlayerInterface):
                 if game_page:
                     self.update_hand_UI(game_page)
                     messagebox.showinfo("Inscryption", "Você comprou um Esquilo")
-            else:
-                messagebox.showinfo("Inscryption", "Você já comprou uma carta!")
         else:
             messagebox.showinfo("Inscryption", "Não é o seu turno!")
 
