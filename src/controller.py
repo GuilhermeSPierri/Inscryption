@@ -13,6 +13,7 @@ from problem_domain.table import Table
 from problem_domain.position import Position
 from problem_domain.cards.sacrificeCard import SacrificeCard
 from problem_domain.cards.boneCard import BoneCard
+from problem_domain.cards.squirrelCard import SquirrelCard
 from tkinter import PhotoImage, Label
 from PIL import Image, ImageTk
 
@@ -781,34 +782,31 @@ class Controller(DogPlayerInterface):
                     game_page.selected_card = None
 
                 # Processa sacrifícios
-                if isinstance(invoked_card, SacrificeCard):
+                if isinstance(invoked_card, SacrificeCard) or isinstance(invoked_card, SquirrelCard):
                     for sacrifice_card in field.get_sacrifice_cards():
-                        for r in range(3):
-                            if r == 1:
-                                continue
-                            for c in range(4):
-                                try:
-                                    target_container = game_page.cards_field_containers[r][c]
-                                    text_items = target_container.find_withtag("text")
-                                    
-                                    if text_items:
-                                        # Extrai o ID da carta do texto (primeira linha)
-                                        text_content = target_container.itemcget(text_items[0], "text")
-                                        card_id = text_content.split("\n")[0].strip()  # Pega a primeira linha
-                                        print("CARD ID: ", card_id, "SACRIFICE CARD: ", sacrifice_card)
+                        for c in range(4):
+                            try:
+                                target_container = game_page.cards_field_containers[row][c]
+                                text_items = target_container.find_withtag("text")
+                                print("TEXT ITEMS: ", text_items)
+                                # Extrai o ID da carta do texto (primeira linha)
+                                #text_content = target_container.itemcget(text_items[0], "text")
+                                card_id = str(field.get_card_in_position(c))  # Pega a primeira linha
+                                print("CARD ID: ", card_id, "SACRIFICE CARD: ", sacrifice_card)
 
-                                        # Compara com o ID da carta sacrificada (últimos 8 caracteres)
-                                        if card_id == str(sacrifice_card)[-8:]:
-                                            # Reseta para imagem vazia
-                                            self._update_canvas_image(target_container, "assets/card.png", preserve_elements=False)
-                                            field.get_position_in_field(c).set_card(None)
-                                            field.get_position_in_field(c).set_occupied(False)
-                                            print("SO PRA CONFERIR")
-                                            player.increment_bones()
-                                            
-                                except (IndexError, AttributeError, KeyError) as e:
-                                    print(f"Erro ao processar sacrifício: {e}")
-                                    continue
+                                # Compara com o ID da carta sacrificada (últimos 8 caracteres)
+                                if card_id == str(sacrifice_card):
+                                    # Reseta para imagem vazia
+                                    self._update_canvas_image(target_container, "assets/card.png", preserve_elements=False)
+                                    field.remove_card_from_field(sacrifice_card)
+                                    field.get_position_in_field(c).set_card(None)
+                                    field.get_position_in_field(c).set_occupied(False)
+                                    print("SO PRA CONFERIR")
+                                    player.increment_bones()
+                                        
+                            except (IndexError, AttributeError, KeyError) as e:
+                                print(f"Erro ao processar sacrifício: {e}")
+                                continue
 
                     field.clear_sacrifice_cards()
                     self.update_bones_UI(game_page, player.get_bones())

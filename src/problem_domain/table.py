@@ -230,7 +230,8 @@ class Table:
             if isinstance(invocation_card, SquirrelCard) or isinstance(invocation_card, SacrificeCard):
                 if cost_invocation == len(sacrifice_cards):
                     for card in sacrifice_cards:
-                        field.remove_card_from_field(card)
+                        #field.remove_card_from_field(card)
+                        continue
 
                     for card in hand.get_card_list():
                         if card == invocation_card:
