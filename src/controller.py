@@ -133,12 +133,22 @@ class Controller(DogPlayerInterface):
                 card = SacrificeCard.from_dict(position_data["card"])
                 # Atualiza a imagem
                 self._update_canvas_image(container, card.get_image_path())
-                # Adiciona texto com ID
+
+                # Adiciona texto do hp da carta
                 container.create_text(
-                    10, 10,
-                    text=f"{str(card)[-8:]}\n{card.get_name()}\nDamage: {card.get_damage()}",
+                    80, 173,
+                    text=f"{card.get_hp()}",
                     anchor="nw",
-                    font=SMALL_FONT,
+                    font=("Arial", 14, "bold"),
+                    tags="text"
+                )
+
+                # Adiciona texto do dano da carta
+                container.create_text(
+                    21, 210,
+                    text=f"{card.get_damage()}",
+                    anchor="nw",
+                    font=("Arial", 14, "bold"),
                     tags="text"
                 )
             else:
@@ -417,12 +427,21 @@ class Controller(DogPlayerInterface):
                 if index in card_data_dict:
                     card_data = card_data_dict[index]
                     # Garantir que o ID está presente
-                    card_id = card_data.get("id", str(card_data)[-8:])  # Fallback seguro
+                  # Adiciona texto do hp da carta
                     card_container.create_text(
-                        10, 10,
-                        text=f"{card_id}\n{card_data['name']}\nDamage: {card_data['damage']}",
+                        80, 173,
+                        text=f"{card_data['life']}",
                         anchor="nw",
-                        font=SMALL_FONT,
+                        font=("Arial", 14, "bold"),
+                        tags="text"
+                    )
+
+                    # Adiciona texto do dano da carta
+                    card_container.create_text(
+                        21, 210,
+                        text=f"{card_data['damage']}",
+                        anchor="nw",
+                        font=("Arial", 14, "bold"),
                         tags="text"
                     )
                     self._update_canvas_image(card_container, card_data["image"])
@@ -457,10 +476,19 @@ class Controller(DogPlayerInterface):
                 container = page.my_deck_containers[row][col]
                 container.delete("all")
                 container.create_text(
-                    10, 10,
-                    text=f"{str(card_data['id'])[-8:]}\n{card_data['name']}\nDamage: {card_data['damage']}",
+                    80, 173,
+                    text=f"{card_data['life']}",
                     anchor="nw",
-                    font=SMALL_FONT,
+                    font=("Arial", 14, "bold"),
+                    tags="text"
+                )
+
+                # Adiciona texto do dano da carta
+                container.create_text(
+                    21, 210,
+                    text=f"{card_data['damage']}",
+                    anchor="nw",
+                    font=("Arial", 14, "bold"),
                     tags="text"
                 )
                 self._update_canvas_image(container, card_data["image"])
@@ -561,7 +589,7 @@ class Controller(DogPlayerInterface):
             self._table.buy_deck_card()
             # Update the UI
             game_page = self.get_frame("GamePage")
-            if game_page:
+            if game_page and self._table._buy_tokens == 0:
                 self.update_hand_UI(game_page)
                 messagebox.showinfo("Inscryption", "Você comprou uma carta do deck")
         else:
@@ -704,12 +732,21 @@ class Controller(DogPlayerInterface):
                 # Atualiza com a imagem da carta invocada
                 self._update_canvas_image(container, invoked_card.get_image_path())
                 
-                # Adiciona texto
+                # Adiciona texto do hp da carta
                 container.create_text(
-                    10, 10,
-                    text=f"{str(invoked_card)[-8:]}\n{invoked_card.get_name()}\nDamage: {invoked_card.get_damage()}",
+                    80, 173,
+                    text=f"{invoked_card.get_hp()}",
                     anchor="nw",
-                    font=SMALL_FONT,
+                    font=("Arial", 14, "bold"),
+                    tags="text"
+                )
+
+                # Adiciona texto do dano da carta
+                container.create_text(
+                    21, 210,
+                    text=f"{invoked_card.get_damage()}",
+                    anchor="nw",
+                    font=("Arial", 14, "bold"),
                     tags="text"
                 )
 
