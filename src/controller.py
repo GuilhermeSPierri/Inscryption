@@ -43,7 +43,6 @@ class Controller(DogPlayerInterface):
 
             current_width = canvas.winfo_width()
             current_height = canvas.winfo_height()
-
             image = Image.open(image_path)
             image = image.resize((current_width, current_height), Image.Resampling.LANCZOS)
             tk_image = ImageTk.PhotoImage(image)
@@ -134,21 +133,24 @@ class Controller(DogPlayerInterface):
                 # Atualiza a imagem
                 self._update_canvas_image(container, card.get_image_path())
 
-                # Adiciona texto do hp da carta
+                # Obtém a largura e altura do card_container (Canvas)
+                canvas_width = container.winfo_width()
+                canvas_height = container.winfo_height()
+
+                # Define posições relativas à largura e altura do canvas
                 container.create_text(
-                    80, 173,
+                    canvas_width * 0.76, canvas_height * 0.67,  # Ajusta proporcionalmente
                     text=f"{card.get_hp()}",
                     anchor="nw",
-                    font=("Arial", 14, "bold"),
+                    font=("Arial", int(canvas_height * 0.05), "bold"),  # Fonte proporcional
                     tags="text"
                 )
 
-                # Adiciona texto do dano da carta
                 container.create_text(
-                    21, 210,
+                    canvas_width * 0.205, canvas_height * 0.82,
                     text=f"{card.get_damage()}",
                     anchor="nw",
-                    font=("Arial", 14, "bold"),
+                    font=("Arial", int(canvas_height * 0.05), "bold"),
                     tags="text"
                 )
             else:
@@ -414,7 +416,7 @@ class Controller(DogPlayerInterface):
             page.get_my_deck_data(), 
             lambda card_data, idx: self.remove_card_from_deck_UI(idx, page),
             page.my_deck_containers
-        )
+        ) 
 
 
 
@@ -423,37 +425,36 @@ class Controller(DogPlayerInterface):
             for col in range(4):
                 index = row * 4 + col
                 card_container = self.create_container_grid(container, "", 10, 10, row, col, "")
-                
+
                 if index in card_data_dict:
                     card_data = card_data_dict[index]
-                    # Garantir que o ID está presente
-                  # Adiciona texto do hp da carta
+                    self._update_canvas_image(card_container, card_data["image"])
+                    # Obtém a largura e altura do card_container (Canvas)
+                    canvas_width = card_container.winfo_width()
+                    canvas_height = card_container.winfo_height()
+
+                    print(canvas_height, canvas_width)
+                        
+                    # Define posições relativas à largura e altura do canvas
                     card_container.create_text(
-                        80, 173,
+                        canvas_width * 0.76, canvas_height * 0.67,  # Ajusta proporcionalmente
                         text=f"{card_data['life']}",
                         anchor="nw",
-                        font=("Arial", 14, "bold"),
+                        font=("Arial", int(canvas_height * 0.05), "bold"),  # Fonte proporcional
                         tags="text"
                     )
 
-                    # Adiciona texto do dano da carta
                     card_container.create_text(
-                        21, 210,
+                        canvas_width * 0.205, canvas_height * 0.82,
                         text=f"{card_data['damage']}",
                         anchor="nw",
-                        font=("Arial", 14, "bold"),
+                        font=("Arial", int(canvas_height * 0.05), "bold"),
                         tags="text"
                     )
-                    self._update_canvas_image(card_container, card_data["image"])
+
                 else:
-                    card_container.create_text(
-                        10, 10,
-                        text="Empty",
-                        anchor="nw",
-                        font=SMALL_FONT,
-                        tags="text"
-                    )
                     self._update_canvas_image(card_container, "assets/card.png")
+
 
                 card_container.bind("<Button-1>", lambda e, idx=index: on_click(card_data_dict.get(idx, {}), idx))
                 
@@ -475,23 +476,28 @@ class Controller(DogPlayerInterface):
                 # Atualiza UI
                 container = page.my_deck_containers[row][col]
                 container.delete("all")
+                self._update_canvas_image(container, card_data["image"])
+                
+                # Obtém a largura e altura do card_container (Canvas)
+                canvas_width = container.winfo_width()
+                canvas_height = container.winfo_height()
+
+                # Define posições relativas à largura e altura do canvas
                 container.create_text(
-                    80, 173,
+                    canvas_width * 0.76, canvas_height * 0.67,  # Ajusta proporcionalmente
                     text=f"{card_data['life']}",
                     anchor="nw",
-                    font=("Arial", 14, "bold"),
+                    font=("Arial", int(canvas_height * 0.05), "bold"),  # Fonte proporcional
                     tags="text"
                 )
 
-                # Adiciona texto do dano da carta
                 container.create_text(
-                    21, 210,
+                    canvas_width * 0.205, canvas_height * 0.82,
                     text=f"{card_data['damage']}",
                     anchor="nw",
-                    font=("Arial", 14, "bold"),
+                    font=("Arial", int(canvas_height * 0.05), "bold"),
                     tags="text"
                 )
-                self._update_canvas_image(container, card_data["image"])
                 return
                 
         messagebox.showinfo("Deck cheio", "Seu deck já possui o tamanho máximo")
@@ -616,11 +622,24 @@ class Controller(DogPlayerInterface):
                 # Remove texto antigo e adiciona novo
                 canvas_card.delete("text")
                 if index in hand_dict:
+                    # Obtém a largura e altura do card_container (Canvas)
+                    canvas_width = canvas_card.winfo_width()
+                    canvas_height = canvas_card.winfo_height()
+
+                    # Define posições relativas à largura e altura do canvas
                     canvas_card.create_text(
-                        10, 10,
-                        text=f"{card.get_name()}\nDamage: {card.get_damage()}",
+                        canvas_width * 0.76, canvas_height * 0.67,  # Ajusta proporcionalmente
+                        text=f"{card.get_hp()}",
                         anchor="nw",
-                        font=SMALL_FONT,
+                        font=("Arial", int(canvas_height * 0.05), "bold"),  # Fonte proporcional
+                        tags="text"
+                    )
+
+                    canvas_card.create_text(
+                        canvas_width * 0.205, canvas_height * 0.82,
+                        text=f"{card.get_damage()}",
+                        anchor="nw",
+                        font=("Arial", int(canvas_height * 0.05), "bold"),
                         tags="text"
                     )
 
@@ -732,23 +751,27 @@ class Controller(DogPlayerInterface):
                 # Atualiza com a imagem da carta invocada
                 self._update_canvas_image(container, invoked_card.get_image_path())
                 
-                # Adiciona texto do hp da carta
+                # Obtém a largura e altura do card_container (Canvas)
+                canvas_width = container.winfo_width()
+                canvas_height = container.winfo_height()
+
+                # Define posições relativas à largura e altura do canvas
                 container.create_text(
-                    80, 173,
+                    canvas_width * 0.76, canvas_height * 0.67,  # Ajusta proporcionalmente
                     text=f"{invoked_card.get_hp()}",
                     anchor="nw",
-                    font=("Arial", 14, "bold"),
+                    font=("Arial", int(canvas_height * 0.05), "bold"),  # Fonte proporcional
                     tags="text"
                 )
 
-                # Adiciona texto do dano da carta
                 container.create_text(
-                    21, 210,
+                    canvas_width * 0.205, canvas_height * 0.82,
                     text=f"{invoked_card.get_damage()}",
                     anchor="nw",
-                    font=("Arial", 14, "bold"),
+                    font=("Arial", int(canvas_height * 0.05), "bold"),
                     tags="text"
                 )
+
 
                 # Remove carta da mão
                 if game_page.selected_card:
