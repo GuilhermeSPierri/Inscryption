@@ -419,46 +419,56 @@ class Controller(DogPlayerInterface):
             page.my_deck_containers
         ) 
 
+    def _update_card_text(self, card_container, image_path, life_text, damage_text):
+        """
+        Atualiza o Canvas com uma imagem e textos de vida e dano.
 
+        :param card_container: O widget Canvas onde a imagem e os textos serão desenhados.
+        :param image_path: Caminho da imagem a ser exibida.
+        :param life_text: Texto para exibir a vida.
+        :param damage_text: Texto para exibir o dano.
+        """
+        # Atualiza a imagem do Canvas
+        self._update_canvas_image(card_container, image_path)
+
+        # Obtém as dimensões do Canvas
+        canvas_width = card_container.winfo_width()
+        canvas_height = card_container.winfo_height()
+
+        # Desenha o texto de vida
+        card_container.create_text(
+            canvas_width * 0.76, canvas_height * 0.67,
+            text=life_text,
+            anchor="nw",
+            font=("Arial", int(canvas_height * 0.05), "bold"),
+            tags="text"
+        )
+
+        # Desenha o texto de dano
+        card_container.create_text(
+            canvas_width * 0.205, canvas_height * 0.82,
+            text=damage_text,
+            anchor="nw",
+            font=("Arial", int(canvas_height * 0.05), "bold"),
+            tags="text"
+        )
 
     def populate_card_container(self, container, card_data_dict, on_click, container_list):
         for row in range(5):
             for col in range(4):
                 index = row * 4 + col
                 card_container = self.create_container_grid(container, "", 10, 10, row, col, "")
-
-                if index in card_data_dict:
-                    card_data = card_data_dict[index]
-                    self._update_canvas_image(card_container, card_data["image"])
-                    # Obtém a largura e altura do card_container (Canvas)
-                    canvas_width = card_container.winfo_width()
-                    canvas_height = card_container.winfo_height()
-
-                    print(canvas_height, canvas_width)
-                        
-                    # Define posições relativas à largura e altura do canvas
-                    card_container.create_text(
-                        canvas_width * 0.76, canvas_height * 0.67,  # Ajusta proporcionalmente
-                        text=f"{card_data['life']}",
-                        anchor="nw",
-                        font=("Arial", int(canvas_height * 0.05), "bold"),  # Fonte proporcional
-                        tags="text"
-                    )
-
-                    card_container.create_text(
-                        canvas_width * 0.205, canvas_height * 0.82,
-                        text=f"{card_data['damage']}",
-                        anchor="nw",
-                        font=("Arial", int(canvas_height * 0.05), "bold"),
-                        tags="text"
-                    )
-
+                card_data = card_data_dict.get(index, {})
+                if card_data:
+                    # Agenda a atualização do texto após a renderização, pois os containers foram recém criados
+                    card_container.after(100, lambda c=card_container, img=str(card_data["image"]), life=str(card_data["life"]),
+                    dmg=str(card_data["damage"]): self._update_card_text(c, img, life, dmg))
                 else:
-                    self._update_canvas_image(card_container, "assets/card.png")
-
+                    card_container.after(100, lambda c=card_container, img="assets/card.png", life="",
+                    dmg="": self._update_card_text(c, img, life, dmg))
 
                 card_container.bind("<Button-1>", lambda e, idx=index: on_click(card_data_dict.get(idx, {}), idx))
-                
+
                 if len(container_list) <= row:
                     container_list.append([])
                 container_list[row].append(card_container)
@@ -482,7 +492,6 @@ class Controller(DogPlayerInterface):
                 # Obtém a largura e altura do card_container (Canvas)
                 canvas_width = container.winfo_width()
                 canvas_height = container.winfo_height()
-
                 # Define posições relativas à largura e altura do canvas
                 container.create_text(
                     canvas_width * 0.76, canvas_height * 0.67,  # Ajusta proporcionalmente
@@ -531,6 +540,7 @@ class Controller(DogPlayerInterface):
         deck_data = deck_data_func()
         
         # Conta apenas cartas válidas (não "Empty")
+
         valid_cards = [card for card in deck_data.values() if card.get("name") != "Empty"]
         
         if len(valid_cards) == 20:
@@ -643,6 +653,7 @@ class Controller(DogPlayerInterface):
                         font=("Arial", int(canvas_height * 0.05), "bold"),
                         tags="text"
                     )
+
 
     def update_scale_UI(self, local_points, remote_points, game_page):
         game_page.scale_label.config(text=f"Your scale: {local_points} | Enemy scale: {remote_points}")
