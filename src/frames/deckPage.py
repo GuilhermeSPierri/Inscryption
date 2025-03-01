@@ -15,21 +15,22 @@ class DeckPage(Page):
         super().__init__(*args, **kwargs)
 
     def create_widgets(self):
-        label = tk.Label(self, text="Criador de Deck", font=LARGE_FONT)
+        label = tk.Label(self, text="Criador de Deck", font=LARGE_FONT, bg="#1a1a1a", fg="white")
         label.pack(pady=10, padx=10)
 
 
         save_deck_button = Button(
             self, 
-            "Salvar Deck e Sair", 
-            20, 
-            10, 
+            "Salvar  Deck  e  Sair", 
+            0, 
+            0, 
             "save_deck", 
             self.controller, 
-            (lambda: self.get_my_deck_data(),)
+            (lambda: self.get_my_deck_data(),),
+            self.custom_font_buttons
         )
+        save_deck_button.place(relx=0.46, rely=0.11, relwidth=0.05, relheight=0.05, width=60, height=10)
 
-        save_deck_button.pack()
 
         self.all_cards_containers = [[]]
         self.my_deck_containers = [[]]

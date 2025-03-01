@@ -13,30 +13,29 @@ class GamePage(Page):
         self._hand_data = {}
         self._local_field_data = {}
         self._remote_field_data = {}
-        
 
     def create_widgets(self):
         self.selected_card = None
         self.occupied_slots = [[False for _ in range(4)] for _ in range(3)]
         self.occupied_slots_hand = [[False for _ in range(3)] for _ in range(3)]
-        start_page_button = Button(self, "Desistir da partida", 0, 0, "receive_withdrawal_notification", self.controller, font=self.custom_font_buttons)
+        start_page_button = Button(self, "Desistir  da  partida", 0, 0, "receive_withdrawal_notification", self.controller, font=self.custom_font_buttons)
         start_page_button.place(relx=0.90, rely=0.05, relwidth=0.05, relheight=0.05, width=40, height=10)
 
         buy_card_button = Button(
             self, 
-            "Comprar Carta do Deck", 
+            "Comprar  Carta  do  Deck", 
             0, 
             0, 
             "buy_deck_card", 
             self.controller,
             font=self.custom_font_buttons
         )
-        buy_card_button.place(relx=0.89, rely=0.70, relwidth=0.05, relheight=0.05, width=50, height=10)
+        buy_card_button.place(relx=0.89, rely=0.70, relwidth=0.05, relheight=0.05, width=80, height=10)
 
-        buy_squirrel_button = Button(self, "Comprar Esquilo", 0, 0, "buy_squirrel_card", self.controller, font=self.custom_font_buttons)
+        buy_squirrel_button = Button(self, "Comprar  Esquilo", 0, 0, "buy_squirrel_card", self.controller, font=self.custom_font_buttons)
         buy_squirrel_button.place(relx=0.90, rely=0.80, relwidth=0.05, relheight=0.05, width=40, height=10)
 
-        pass_turn_button = Button(self, "Passar Turno", 0, 0, "pass_turn", self.controller, font=self.custom_font_buttons)
+        pass_turn_button = Button(self, "Passar  Turno", 0, 0, "pass_turn", self.controller, font=self.custom_font_buttons)
         pass_turn_button.place(relx=0.90, rely=0.50, relwidth=0.05, relheight=0.05, width=40, height=10)
 
         container_hand = tk.Frame(self, bg="lightgrey", relief=tk.RAISED, borderwidth=2)

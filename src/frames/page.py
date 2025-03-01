@@ -7,9 +7,9 @@ from widgets.button import Button
 class Page(tk.Frame, ABC):
     
     def __init__(self, parent, controller):
-        super().__init__(parent)
+        super().__init__(parent, bg="#1a1a1a")
         self.controller = controller
-        self.custom_font_buttons = font.Font(family="The Macabre", size=14)
+        self.custom_font_buttons = font.Font(family="The Macabre", size=20)
         self.create_widgets()
         self.buttons = []
         self.labels = []
