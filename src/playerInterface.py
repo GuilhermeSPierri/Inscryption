@@ -5,6 +5,7 @@ from frames.startPage import StartPage
 from frames.gamePage import GamePage
 from frames.deckPage import DeckPage
 from tkinter import messagebox
+from tkinter import font
 
 
 class PlayerInterface(DogPlayerInterface):

@@ -9,6 +9,7 @@ class Page(tk.Frame, ABC):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
+        self.custom_font_buttons = font.Font(family="The Macabre", size=14)
         self.create_widgets()
         self.buttons = []
         self.labels = []

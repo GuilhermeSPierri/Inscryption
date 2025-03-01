@@ -1,5 +1,7 @@
 # fonts/font.py
 import tkinter.font as tkfont
+from tkinter import font
+import os
 
 # Tamanhos pré-definidos
 SMALL_FONT = ("Helvetica", 10)
