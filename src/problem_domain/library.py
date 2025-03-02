@@ -9,8 +9,7 @@ class Library():
     def __init__(self):
         self._cards_model = dict()
         self._pointer_id = 0
-
-        self.add_card(SacrificeCard("Deer", 1, 1, {"name": "Amplifier", "modifier": "life", "value": 1}, 1, "assets/Wolf.png"))
+        
         self.add_card(SacrificeCard("Bear", 5, 3, {"name": "Guardian", "modifier": "damage", "value": 1}, 2, "assets/Bear.png"))
         self.add_card(SquirrelCard("Squirrel", 1, 0, None, 0, "assets/Squirrel.png"))
         self.add_card(SacrificeCard("Wolf", 3, 2, {"name": "'Amplifier", "modifier": "life", "value": 1}, 1, "assets/Wolf.png"))

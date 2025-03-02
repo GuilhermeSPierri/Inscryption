@@ -133,27 +133,8 @@ class Controller(DogPlayerInterface):
                 card = SacrificeCard.from_dict(position_data["card"])
                 # Atualiza a imagem
                 self._update_canvas_image(container, card.get_image_path())
+                self._update_card_text(container, card.get_image_path(), str(card.get_hp()), str(card.get_damage()))
 
-                # Obtém a largura e altura do card_container (Canvas)
-                canvas_width = container.winfo_width()
-                canvas_height = container.winfo_height()
-
-                # Define posições relativas à largura e altura do canvas
-                container.create_text(
-                    canvas_width * 0.76, canvas_height * 0.67,  # Ajusta proporcionalmente
-                    text=f"{card.get_hp()}",
-                    anchor="nw",
-                    font=("Arial", int(canvas_height * 0.05), "bold"),  # Fonte proporcional
-                    tags="text"
-                )
-
-                container.create_text(
-                    canvas_width * 0.205, canvas_height * 0.82,
-                    text=f"{card.get_damage()}",
-                    anchor="nw",
-                    font=("Arial", int(canvas_height * 0.05), "bold"),
-                    tags="text"
-                )
             else:
                 # Reseta para imagem vazia
                 self._update_canvas_image(container, "assets/card.png")
@@ -177,30 +158,15 @@ class Controller(DogPlayerInterface):
                         f"Container {row} {col}",
                         10, 10, row, col, ""
                     )
-                    
-                    # Força a atualização do layout para obter as dimensões corretas
-                    canvas_card.update_idletasks()
-                    
-                    # Define o caminho da imagem
-                    image_path = (
-                        hand_dict[index].get_image_path() 
-                        if index in hand_dict 
-                        else "assets/card.png"
-                    )
-                    
-                    # Atualiza o Canvas com a imagem
+                    image_path = "assets/card.png"
                     self._update_canvas_image(canvas_card, image_path)
+
                     
                     # Adiciona texto (se houver carta)
                     if index in hand_dict:
                         card = hand_dict[index]
-                        canvas_card.create_text(
-                            10, 10,
-                            text=f"{card.get_name()}\nDamage: {card.get_damage()}",
-                            anchor="nw",
-                            font=SMALL_FONT,
-                            tags="text"
-                        )
+                        canvas_card.after(100, lambda c=canvas_card, img=str(card.get_image_path()), life=str(card.get_hp()),
+                        dmg=str(card.get_damage()): self._update_card_text(c, img, life, dmg))
                     
                     # Vincula o clique
                     canvas_card.bind(
@@ -226,9 +192,6 @@ class Controller(DogPlayerInterface):
                     f"Container {row} {col}",
                     10, 10, row, col, ""
                 )
-                
-                # Força a atualização do layout
-                canvas_card.update_idletasks()
                 
                 # Inicializa com imagem vazia
                 self._update_canvas_image(canvas_card, "assets/card.png")
@@ -487,27 +450,7 @@ class Controller(DogPlayerInterface):
                 # Atualiza UI
                 container = page.my_deck_containers[row][col]
                 container.delete("all")
-                self._update_canvas_image(container, card_data["image"])
-                
-                # Obtém a largura e altura do card_container (Canvas)
-                canvas_width = container.winfo_width()
-                canvas_height = container.winfo_height()
-                # Define posições relativas à largura e altura do canvas
-                container.create_text(
-                    canvas_width * 0.76, canvas_height * 0.67,  # Ajusta proporcionalmente
-                    text=f"{card_data['life']}",
-                    anchor="nw",
-                    font=("Arial", int(canvas_height * 0.05), "bold"),  # Fonte proporcional
-                    tags="text"
-                )
-
-                container.create_text(
-                    canvas_width * 0.205, canvas_height * 0.82,
-                    text=f"{card_data['damage']}",
-                    anchor="nw",
-                    font=("Arial", int(canvas_height * 0.05), "bold"),
-                    tags="text"
-                )
+                self._update_card_text(container, card_data['image'], str(card_data['life']), str(card_data['damage']))
                 return
                 
         messagebox.showinfo("Deck cheio", "Seu deck já possui o tamanho máximo")
@@ -633,26 +576,7 @@ class Controller(DogPlayerInterface):
                 # Remove texto antigo e adiciona novo
                 canvas_card.delete("text")
                 if index in hand_dict:
-                    # Obtém a largura e altura do card_container (Canvas)
-                    canvas_width = canvas_card.winfo_width()
-                    canvas_height = canvas_card.winfo_height()
-
-                    # Define posições relativas à largura e altura do canvas
-                    canvas_card.create_text(
-                        canvas_width * 0.76, canvas_height * 0.67,  # Ajusta proporcionalmente
-                        text=f"{card.get_hp()}",
-                        anchor="nw",
-                        font=("Arial", int(canvas_height * 0.05), "bold"),  # Fonte proporcional
-                        tags="text"
-                    )
-
-                    canvas_card.create_text(
-                        canvas_width * 0.205, canvas_height * 0.82,
-                        text=f"{card.get_damage()}",
-                        anchor="nw",
-                        font=("Arial", int(canvas_height * 0.05), "bold"),
-                        tags="text"
-                    )
+                    self._update_card_text(canvas_card, card.get_image_path(), str(card.get_hp()), str(card.get_damage()))
 
 
     def update_scale_UI(self, local_points, remote_points, game_page):
@@ -760,30 +684,7 @@ class Controller(DogPlayerInterface):
                 col = position_in_field
                 container = game_page.cards_field_containers[row][col]
                 
-                # Atualiza com a imagem da carta invocada
-                self._update_canvas_image(container, invoked_card.get_image_path())
-                
-                # Obtém a largura e altura do card_container (Canvas)
-                canvas_width = container.winfo_width()
-                canvas_height = container.winfo_height()
-
-                # Define posições relativas à largura e altura do canvas
-                container.create_text(
-                    canvas_width * 0.76, canvas_height * 0.67,  # Ajusta proporcionalmente
-                    text=f"{invoked_card.get_hp()}",
-                    anchor="nw",
-                    font=("Arial", int(canvas_height * 0.05), "bold"),  # Fonte proporcional
-                    tags="text"
-                )
-
-                container.create_text(
-                    canvas_width * 0.205, canvas_height * 0.82,
-                    text=f"{invoked_card.get_damage()}",
-                    anchor="nw",
-                    font=("Arial", int(canvas_height * 0.05), "bold"),
-                    tags="text"
-                )
-
+                self._update_card_text(container, str(invoked_card.get_image_path()), str(invoked_card.get_hp()), str(invoked_card.get_damage()))
 
                 # Remove carta da mão
                 if game_page.selected_card:
@@ -798,12 +699,7 @@ class Controller(DogPlayerInterface):
                         for c in range(4):
                             try:
                                 target_container = game_page.cards_field_containers[row][c]
-                                text_items = target_container.find_withtag("text")
-                                print("TEXT ITEMS: ", text_items)
-                                # Extrai o ID da carta do texto (primeira linha)
-                                #text_content = target_container.itemcget(text_items[0], "text")
                                 card_id = str(field.get_card_in_position(c))  # Pega a primeira linha
-                                print("CARD ID: ", card_id, "SACRIFICE CARD: ", sacrifice_card)
 
                                 # Compara com o ID da carta sacrificada (últimos 8 caracteres)
                                 if card_id == str(sacrifice_card):

@@ -19,7 +19,7 @@ class GamePage(Page):
         self.occupied_slots = [[False for _ in range(4)] for _ in range(3)]
         self.occupied_slots_hand = [[False for _ in range(3)] for _ in range(3)]
         start_page_button = Button(self, "Desistir  da  partida", 0, 0, "receive_withdrawal_notification", self.controller, font=self.custom_font_buttons)
-        start_page_button.place(relx=0.90, rely=0.05, relwidth=0.05, relheight=0.05, width=40, height=10)
+        start_page_button.place(relx=0.90, rely=0.05, relwidth=0.05, relheight=0.05, width=60, height=10)
 
         buy_card_button = Button(
             self, 
@@ -30,7 +30,7 @@ class GamePage(Page):
             self.controller,
             font=self.custom_font_buttons
         )
-        buy_card_button.place(relx=0.89, rely=0.70, relwidth=0.05, relheight=0.05, width=80, height=10)
+        buy_card_button.place(relx=0.89, rely=0.70, relwidth=0.05, relheight=0.05, width=90, height=10)
 
         buy_squirrel_button = Button(self, "Comprar  Esquilo", 0, 0, "buy_squirrel_card", self.controller, font=self.custom_font_buttons)
         buy_squirrel_button.place(relx=0.90, rely=0.80, relwidth=0.05, relheight=0.05, width=40, height=10)
@@ -41,7 +41,7 @@ class GamePage(Page):
         container_hand = tk.Frame(self, bg="lightgrey", relief=tk.RAISED, borderwidth=2)
         container_hand.place(relx=0.05, rely=0.05, relwidth=0.30, relheight=0.90)
 
-        container_field = tk.Frame(self, bg="red", relief=tk.RAISED, borderwidth=2)
+        container_field = tk.Frame(self, bg="#fcd33f", relief=tk.RAISED, borderwidth=2)
         container_field.place(relx=0.4, rely=0.05, relwidth=0.40, relheight=0.90)
 
         for i in range(3):
@@ -63,9 +63,12 @@ class GamePage(Page):
         self.scale_label.place(relx=0.05, rely=0.95, anchor="w")
 
         bones_image = tk.PhotoImage(file="assets/bones.png").zoom(2, 2)  # Enlarge the image 2x
-        self.bones_label = tk.Label(self, text="Bones: 0", font=LARGE_FONT, image=bones_image, compound="center", anchor="center", padx=10)
+        self.bones_label = tk.Label(self, text="Bones: 0", font=LARGE_FONT, image=bones_image, compound="center")
         self.bones_label.image = bones_image  # Keep a reference to the image
-        self.bones_label.config(width=bones_image.width(), height=bones_image.height())  # Set the label size to the image size
+        self.bones_label.config(width=bones_image.width(), height=bones_image.height(),
+        borderwidth=0, highlightthickness=0, padx=0, pady=0)  # Set the label size to the image size
+
+
         self.bones_label.place(relx=0.95, rely=0.95, anchor="e")
 
     def reset_page(self):
