@@ -158,9 +158,9 @@ class Controller(DogPlayerInterface):
                         f"Container {row} {col}",
                         10, 10, row, col, ""
                     )
-                    image_path = "assets/card.png"
-                    self._update_canvas_image(canvas_card, image_path)
-
+                    
+                    canvas_card.after(100, lambda c=canvas_card, img="assets/card.png": 
+                    self._update_canvas_image(c, img))
                     
                     # Adiciona texto (se houver carta)
                     if index in hand_dict:
@@ -193,8 +193,8 @@ class Controller(DogPlayerInterface):
                     10, 10, row, col, ""
                 )
                 
-                # Inicializa com imagem vazia
-                self._update_canvas_image(canvas_card, "assets/card.png")
+                canvas_card.after(100, lambda c=canvas_card, img="assets/card.png": 
+                self._update_canvas_image(c, img))
                 
                 # Vincula o clique
                 canvas_card.bind(
