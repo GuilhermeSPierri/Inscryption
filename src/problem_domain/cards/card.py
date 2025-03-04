@@ -6,7 +6,7 @@ class Card(ABC):
         self._image = image
         self._damage = damage
         self._hp = hp
-        self._cost = cost
+        self._cost = cost   
         self._glyph = glyph
         self._name = name
         self._type = type

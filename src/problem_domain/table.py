@@ -164,45 +164,41 @@ class Table:
         return winner
 
 
-    def select_card(self, selected_position): 
-        turn_player = self.get_turn_player()
-        selected_card = None
-        if turn_player:
-            selected_card = selected_position.get_card()
+    def select_card(self, turn_player, selected_position): 
+        selected_card = selected_position.get_card()
 
-            if selected_card == None:
-                return
+        if selected_card == None:
+            return
+        else:
+            already_selected = selected_card.get_already_selected()
+            hand = turn_player.get_hand()
+            invocation_card = hand.get_invocation_card()
+
+            field = self.get_player_field()
+
+            if already_selected:
+                origin = selected_position.get_origin()
+
+                if origin == "field":
+                    field.remove_from_sacrifice_cards(selected_card)    
+                    selected_card.clear_already_selected()
+
+                elif origin == "hand":
+                    hand.clear_invocation_card()
+                    selected_card.clear_already_selected()
             else:
-                already_selected = selected_card.get_already_selected()
-                hand = turn_player.get_hand()
-                invocation_card = hand.get_invocation_card()
-
-                if turn_player:
-                    field = self.get_player_field()
-
-                if already_selected:
-                    origin = selected_position.get_origin()
-
-                    if origin == "field":
-                        field.remove_from_sacrifice_cards(selected_card)
-                        selected_card.clear_already_selected()
-
-                    elif origin == "hand":
-                        hand.clear_invocation_card()
-                        selected_card.clear_already_selected()
+                if selected_card in hand.get_card_list() and invocation_card == None:
+                    hand.set_invocation_card(selected_card)
+                    selected_card.set_already_selected()
+                
+                elif selected_card == field.get_card_in_position(selected_position):
+                    selected_card.set_already_selected()
+                
                 else:
-                    if selected_card in hand.get_card_list() and invocation_card == None:
-                        hand.set_invocation_card(selected_card)
-                        selected_card.set_already_selected()
-                    
-                    elif selected_card == field.get_card_in_position(selected_position):
-                        selected_card.set_already_selected()
-                    
-                    else:
-                        field.clear_sacrifice_cards()
-                        hand.clear_invocation_card()
+                    field.clear_sacrifice_cards()
+                    hand.clear_invocation_card()
 
-                return selected_card
+            return selected_card
 
     def check_position(self, selected_position): 
         return selected_position.get_occupied()

@@ -5,7 +5,6 @@ from config.config import *
 from frames.page import Page
 from tkinter import font
 from PIL import Image, ImageTk
-import os
 class StartPage(Page):
 
     def create_widgets(self):

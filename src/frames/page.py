@@ -2,7 +2,6 @@ import tkinter as tk
 from abc import ABC, abstractmethod
 from fonts.font import *
 from widgets.button import Button
-#from PIL import Image, ImageTk
 
 class Page(tk.Frame, ABC):
     

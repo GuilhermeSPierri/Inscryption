@@ -14,7 +14,6 @@ from problem_domain.position import Position
 from problem_domain.cards.sacrificeCard import SacrificeCard
 from problem_domain.cards.boneCard import BoneCard
 from problem_domain.cards.squirrelCard import SquirrelCard
-from tkinter import PhotoImage, Label
 from PIL import Image, ImageTk
 
 class Controller(DogPlayerInterface):
@@ -208,8 +207,8 @@ class Controller(DogPlayerInterface):
                     page.cards_field_containers.append([])
                 page.cards_field_containers[row].append(canvas_card)
         
-    def select_card(self, page, selected_position, position_in_hand, row=None):
-        selected_card = self._table.select_card(selected_position)
+    def select_card(self, page, turn_player, selected_position, position_in_hand, row=None):
+        selected_card = self._table.select_card(turn_player, selected_position)
 
         if not hasattr(page, 'selected_cards'):
             page.selected_cards = []
@@ -311,17 +310,16 @@ class Controller(DogPlayerInterface):
                 selected_position = self._table.get_position_in_hand(position_in_hand)
                 selected_position.set_hand(True)
 
-            if turn_player.get_id() == self._table._local_player.get_id() and selected_position is not None:
-                occupied = self._table.check_position(selected_position)
+            occupied = self._table.check_position(selected_position)
 
-                if occupied:
-                    if position_in_field is not None:
-                        self.select_card(page, selected_position, position_in_field, row)
-                    elif position_in_hand is not None:
-                        self.select_card(page, selected_position, position_in_hand)
+            if occupied:
+                if position_in_field is not None:
+                    self.select_card(page, turn_player, selected_position, position_in_field, row)
+                elif position_in_hand is not None:
+                    self.select_card(page, turn_player, selected_position, position_in_hand)
 
-                if not occupied and selected_position._field:
-                    self.invoke_card(selected_position, position_in_field, turn_player, row)
+            if not occupied and selected_position._field:
+                self.invoke_card(selected_position, position_in_field, turn_player, row)
 
     ################### Logic for the deck page ###################
 
@@ -448,11 +446,10 @@ class Controller(DogPlayerInterface):
                 page.get_my_deck_data()[slot_index] = card_data
                 
                 # Atualiza UI
-                container = page.my_deck_containers[row][col]
+                container = page.my_deck_containers[row][col]   
                 container.delete("all")
                 self._update_card_text(container, card_data['image'], str(card_data['life']), str(card_data['damage']))
                 return
-                
         messagebox.showinfo("Deck cheio", "Seu deck já possui o tamanho máximo")
 
 

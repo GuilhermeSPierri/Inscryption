@@ -1,6 +1,4 @@
 import tkinter as tk
-from tkinter import simpledialog
-from tkinter import messagebox
 from fonts.font import *
 from widgets.button import Button
 from config.config import *
