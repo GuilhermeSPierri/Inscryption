@@ -708,7 +708,6 @@ class Controller(DogPlayerInterface):
                                     field.remove_card_from_field(sacrifice_card)
                                     field.get_position_in_field(c).set_card(None)
                                     field.get_position_in_field(c).set_occupied(False)
-                                    print("SO PRA CONFERIR")
                                     player.increment_bones()
                                         
                             except (IndexError, AttributeError, KeyError) as e:
