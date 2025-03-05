@@ -24,8 +24,8 @@ class Controller(DogPlayerInterface):
         self._table = Table()
         self._players = None
         self.pages = [StartPage, GamePage, DeckPage] # Add a new page here
-        player_name = simpledialog.askstring(title="Player identification", prompt="Qual o seu nome?")
         self.dog_server_interface = DogActor()
+        player_name = simpledialog.askstring(title="Player identification", prompt="Qual o seu nome?")
         message = self.dog_server_interface.initialize(player_name, self)
         messagebox.showinfo(message=message)
         

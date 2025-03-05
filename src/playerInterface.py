@@ -11,9 +11,9 @@ from tkinter import font
 class PlayerInterface(DogPlayerInterface):
 
     def __init__(self):
-        self.controller = Controller()
         self.main_window = tk.Tk()
         self.config_main_window()
+        self.controller = Controller()
         self.controller.fill_pages(self.main_window)
         self.controller.show_frame("StartPage")
         self.main_window.mainloop()
