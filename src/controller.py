@@ -780,5 +780,5 @@ class Controller(DogPlayerInterface):
     def reset_game(self):
         self._table.reset()
         self._table.set_match_status(2)
-        self._table._local_player.reset()
-        self._table._remote_player.reset()
+        self._table.get_local_player().reset()
+        self._table.get_remote_player().reset()

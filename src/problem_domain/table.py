@@ -43,6 +43,9 @@ class Table:
 
     def get_local_player(self):
         return self._local_player
+    
+    def get_remote_player(self):
+        return self._remote_player
 
     def get_local_hand(self) -> object:
         return self._local_player.get_hand()
@@ -91,7 +94,6 @@ class Table:
         self._local_deck = self._local_player.get_deck()
         self._remote_deck = self._remote_player.get_deck()
 
-        
         self._squirrel_deck = SquirrelCard("Squirrel", 1, 0, None, 0, "assets/Squirrel.png")
         self._local_deck = self.shuffle_deck(self._local_deck)
         self._local_player.initial_hand(self._local_deck)
@@ -226,7 +228,6 @@ class Table:
             if isinstance(invocation_card, SquirrelCard) or isinstance(invocation_card, SacrificeCard):
                 if cost_invocation == len(sacrifice_cards):
                     for card in sacrifice_cards:
-                        #field.remove_card_from_field(card)
                         continue
 
                     for card in hand.get_card_list():
