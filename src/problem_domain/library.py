@@ -13,7 +13,7 @@ class Library():
         self.add_card(SacrificeCard("Bear", 5, 3, {"name": "Guardian", "modifier": "damage", "value": 1}, 2, "assets/Bear.png"))
         self.add_card(SquirrelCard("Squirrel", 1, 0, None, 0, "assets/Squirrel.png"))
         self.add_card(SacrificeCard("Wolf", 3, 2, {"name": "'Amplifier", "modifier": "life", "value": 1}, 1, "assets/Wolf.png"))
-        self.add_card(BoneCard("Vulture", 1, 2, None, 1, "assets/Vulture.png"))
+        self.add_card(BoneCard("Vulture", 1, 2, None, 2, "assets/Vulture.png"))
 
 
     def add_card(self, card: Card):
