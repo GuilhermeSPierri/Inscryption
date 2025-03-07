@@ -27,6 +27,7 @@ class Controller(DogPlayerInterface):
         self.dog_server_interface = DogActor()
         player_name = simpledialog.askstring(title="Player identification", prompt="Qual o seu nome?")
         message = self.dog_server_interface.initialize(player_name, self)
+        self._table._local_player.set_name(player_name)
         messagebox.showinfo(message=message)
         
     ######### Logic for general purposes #########

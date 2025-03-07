@@ -14,8 +14,8 @@ class GamePage(Page):
 
     def create_widgets(self):
         self.selected_card = None
-        self.occupied_slots = [[False for _ in range(4)] for _ in range(3)]
-        self.occupied_slots_hand = [[False for _ in range(3)] for _ in range(3)]
+        self.occupied_slots = [[False for j in range(4)] for i in range(3)]
+        self.occupied_slots_hand = [[False for j in range(3)] for i in range(3)]
         withdrawal_button = Button(self, "Desistir  da  partida", 0, 0, "receive_withdrawal_notification", self.controller, font=self.custom_font_buttons)
         withdrawal_button.place(relx=0.90, rely=0.05, relwidth=0.05, relheight=0.05, width=60, height=10)
 
@@ -45,7 +45,6 @@ class GamePage(Page):
         for i in range(3):
             container_hand.grid_columnconfigure(i, weight=1)
             container_hand.grid_rowconfigure(i, weight=1)
-
             container_field.grid_rowconfigure(i, weight=1)
 
         for j in range(4):
@@ -75,8 +74,8 @@ class GamePage(Page):
             widget.destroy()
 
         # Reseta os estados
-        self.occupied_slots = [[False for _ in range(4)] for _ in range(3)]
-        self.occupied_slots_hand = [[False for _ in range(3)] for _ in range(3)]
+        self.occupied_slots = [[False for j in range(4)] for i in range(3)]
+        self.occupied_slots_hand = [[False for j in range(3)] for i in range(3)]
         self.cards_hand_containers = [[]]
         self.cards_field_containers = [[]]
 

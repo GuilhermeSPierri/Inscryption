@@ -13,6 +13,9 @@ class Player:
         self._my_deck.generate_deck()
         self._name = ""  # string
 
+    def set_name(self, name):
+        self._name = name
+        
     def get_bones(self):
         return self._bones
 
