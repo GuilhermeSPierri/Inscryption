@@ -643,7 +643,7 @@ class Controller(DogPlayerInterface):
                     "turn_player_id" : self._table.get_turn_player().get_id(),
                     "local_scale" : self._table._scale._local_player_points,
                     "remote_scale" : self._table._scale._remote_player_points,
-                    "game_status" : "" # just for control the game logic
+                    "game_status" : "" # just to control the game logic
                 }
 
                 if winner != "":
