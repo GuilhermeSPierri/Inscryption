@@ -275,7 +275,8 @@ class Controller(DogPlayerInterface):
                 
                 # Texto de sacrifício
                 canvas.create_text(
-                    canvas.winfo_width()/2, canvas.winfo_height()-20,
+                    canvas.winfo_width()/2,
+                    canvas.winfo_height()-20,
                     text="SACRIFÍCIO", 
                     fill="red", 
                     font=("Arial", 10, "bold"),

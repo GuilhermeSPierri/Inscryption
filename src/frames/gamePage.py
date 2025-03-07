@@ -16,8 +16,8 @@ class GamePage(Page):
         self.selected_card = None
         self.occupied_slots = [[False for _ in range(4)] for _ in range(3)]
         self.occupied_slots_hand = [[False for _ in range(3)] for _ in range(3)]
-        start_page_button = Button(self, "Desistir  da  partida", 0, 0, "receive_withdrawal_notification", self.controller, font=self.custom_font_buttons)
-        start_page_button.place(relx=0.90, rely=0.05, relwidth=0.05, relheight=0.05, width=60, height=10)
+        withdrawal_button = Button(self, "Desistir  da  partida", 0, 0, "receive_withdrawal_notification", self.controller, font=self.custom_font_buttons)
+        withdrawal_button.place(relx=0.90, rely=0.05, relwidth=0.05, relheight=0.05, width=60, height=10)
 
         buy_card_button = Button(
             self, 
