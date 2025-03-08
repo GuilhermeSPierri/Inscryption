@@ -16,6 +16,15 @@ class Position:
     def get_card(self):
         return self._card
     
+    def get_origin(self):
+        if self._hand:
+            return "hand"
+        elif self._field:
+            return "field"
+    
+    def get_occupied(self):
+        return self._occupied
+    
     def get_hand(self):
         return self._hand
     
@@ -31,19 +40,10 @@ class Position:
 
     def set_field(self, boolean):
         self._field = boolean
-
-    def get_occupied(self):
-        return self._occupied
     
     def set_occupied(self, boolean):
         self._occupied = boolean
 
-    def get_origin(self):
-        if self._hand:
-            return "hand"
-        elif self._field:
-            return "field"
-        
     def to_dict(self):
         return {
             "occupied": self._occupied,

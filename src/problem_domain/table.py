@@ -121,6 +121,7 @@ class Table:
             if top_card:
                 self._local_player.get_hand().add_card_to_hand(top_card)
                 self.decrement_buy_tokens()
+                messagebox.showinfo("Inscryption", "Você comprou uma carta do deck")
             else:
                 messagebox.showinfo("Inscryption", "Você já comprou todas as suas cartas do deck!")
         else:

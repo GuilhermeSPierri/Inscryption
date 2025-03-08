@@ -548,9 +548,8 @@ class Controller(DogPlayerInterface):
             self._table.buy_deck_card()
             # Update the UI
             game_page = self.get_frame("GamePage")
-            if game_page and self._table._buy_tokens == 0:
+            if game_page:
                 self.update_hand_UI(game_page)
-                messagebox.showinfo("Inscryption", "Você comprou uma carta do deck")
         else:
             messagebox.showinfo("Inscryption", "Não é o seu turno!")
 
@@ -752,9 +751,9 @@ class Controller(DogPlayerInterface):
         self.dog_server_interface.proxy.get_status()
         messagebox.showinfo(message="Você abandonou a partida")
         self._table.set_match_status(4) # 4 = desistencia
-        move = self.pass_turn(True)
+        move = self.pass_turn(True) # Pass the turn to update the remote player's UI.
         move["match_status"] = "finished" # from the Dog
-        move["game_status"] = "abandoned" # just for control the game logic
+        move["game_status"] = "abandoned" # just to control the game logic
 
         self.dog_server_interface.proxy.send_move(move)
         self.show_frame("StartPage")
