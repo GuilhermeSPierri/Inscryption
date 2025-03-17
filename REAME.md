@@ -1,19 +1,28 @@
-# Creating your game
+🚀 Features
+- Basic card game mechanics inspired by Inscryption
+- Simple graphical interface using Tkinter
+- Network support with Dog Server
 
-## 1. Create and activate a virtual environment (in the folder that contains the folders dog and config);
+📦 Installation & Setup
+* The application can only be run on Windows.
+* First, make sure you are in the \Inscryption-main directory, which contains the src folder, the requirements.txt file, etc.
+* If you are not in the correct directory, run: `cd .\Inscryption-main`
 
-## 2. Execute 'pip install -r requirements.txt' (to install the libraries used by the framework);
+Creating and activating the virtual environment:
+`python -m venv venv`
 
-## 3. Go to folder 'config' and follow the instructions therein;
+To activate the virtual environment on Windows, try the following commands:
+`venv\Scripts\activate`  
+`. .\venv\Scripts\activate`
 
-## 4. DEVELOP YOUR GAME;
+Installing all required dependencies:
+`pip install -r .\requirements.txt`
 
-## 5. Execute 'pip freeze > requirements.txt' (to update requirements.txt with the libraries used by your game);
+Next, navigate to the src directory:
+`cd .\src\`
 
-## 6. To distribute your game:
+Then, run the application:
+`python .\main.py`
 
-	 1. Remove the folder of the virtual environment;
-	 1. Compact and send your game with the following instrucions:
-		1. Create and activate a virtual environment;
-		1. Execute pip 'install -r requirements.txt';
-		1. To run the game:  <name_of_your_game>.py.
+To deactivate the virtual environment:
+`deactivate`
