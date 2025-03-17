@@ -1,17 +1,17 @@
-Inscryption-inspired Card Game 🃏
+# Inscryption-inspired Card Game 🃏
 
-🚀 Features
+### 🚀 Features
 - Basic card game mechanics inspired by Inscryption
 - Simple graphical interface using **Tkinter**
 - Network support with **Dog Server**
 - **Requirements specification** and **UML modeling** included to facilitate understanding and project expansion.
 
-📦 Installation & Setup
+### 📦 Installation & Setup
 
-System Requirements
+#### System Requirements
 * The application can only be run on **Windows**.
 
-Setup Steps
+#### Setup Steps
 * First, make sure you are in the \Inscryption-main directory, which contains the src folder, the requirements.txt file, etc.
 * If you are not in the correct directory, run: `cd .\Inscryption-main`
 
@@ -34,7 +34,7 @@ Then, run the application:
 To deactivate the virtual environment:
 `deactivate`
 
-📄 Documentation and Modeling
+### 📄 Documentation and Modeling
 
 The repository includes:
 
