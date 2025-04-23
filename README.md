@@ -22,6 +22,11 @@ To activate the virtual environment on Windows, try the following commands:
 `venv\Scripts\activate`  
 `. .\venv\Scripts\activate`
 
+If appears any security PowerShell problem, run the follow command:
+`Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force`
+
+Then, repeat the command to activate the virtual environment.
+
 Installing all required dependencies:
 `pip install -r .\requirements.txt`
 
@@ -42,3 +47,14 @@ The repository includes:
 
 * UML Modeling: Class diagrams, use cases, and sequence diagrams to help understand the architecture and flow of the game.
 
+
+## 🎮 Game Screenshots & Features
+
+### 🏠 Main Menu
+![imagem](https://github.com/user-attachments/assets/d9acbbf1-db69-43ee-9d6b-6bb42d82f5c1)
+
+### 🎯 Gameplay (Core Mechanics)
+![imagem](https://github.com/user-attachments/assets/5c5dc700-31e9-4874-9050-686378232874)
+
+### 🛠️ Deck Customization
+![imagem](https://github.com/user-attachments/assets/90a86cbf-7863-4a72-9992-753a2ce4cb02)
